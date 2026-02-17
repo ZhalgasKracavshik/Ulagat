@@ -23,6 +23,15 @@ export default async function EventDetailsPage({ params }: PageProps) {
         .eq('id', id)
         .single();
 
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Fetch current user's role for permission check
+    let userRole = 'student';
+    if (user) {
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+        userRole = profile?.role || 'student';
+    }
+
     if (!event) return notFound();
 
     return (
@@ -39,18 +48,39 @@ export default async function EventDetailsPage({ params }: PageProps) {
                         <Trophy className="w-32 h-32 text-white/20" />
                     </div>
                 )}
-                <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 to-transparent">
-                    <h1 className="text-3xl md:text-5xl font-bold text-white mb-2">{event.title}</h1>
-                    <div className="flex flex-wrap gap-4 text-white/90">
-                        <div className="flex items-center gap-1.5">
-                            <Calendar className="w-4 h-4" />
-                            <span>{format(new Date(event.event_date), 'MMMM d, yyyy @ h:mm a')}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                            <MapPin className="w-4 h-4" />
-                            <span>{event.location}</span>
+                <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black/80 to-transparent flex justify-between items-end">
+                    <div>
+                        <h1 className="text-3xl md:text-5xl font-bold text-white mb-2">{event.title}</h1>
+                        <div className="flex flex-wrap gap-4 text-white/90">
+                            <div className="flex items-center gap-1.5">
+                                <Calendar className="w-4 h-4" />
+                                <span>{format(new Date(event.event_date), 'MMMM d, yyyy @ h:mm a')}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <MapPin className="w-4 h-4" />
+                                <span>{event.location}</span>
+                            </div>
                         </div>
                     </div>
+                    {/* Owner/Admin Controls */}
+                    {(user?.id === event.organizer_id || ['admin', 'moderator'].includes(userRole)) && ( // We need to fetch userRole first
+                        <div className="flex flex-col gap-2 items-end">
+                            {event.expires_at && (
+                                <div className="text-xs text-orange-200 font-medium bg-white/10 px-2 py-1 rounded backdrop-blur-sm">
+                                    Expires: {new Date(event.expires_at).toLocaleDateString()}
+                                </div>
+                            )}
+                            <form action={async () => {
+                                "use server";
+                                const { deleteEvent } = await import("../actions");
+                                await deleteEvent(id);
+                            }}>
+                                <Button variant="destructive" size="sm" className="shadow-lg">
+                                    Delete Event
+                                </Button>
+                            </form>
+                        </div>
+                    )}
                 </div>
             </div>
 

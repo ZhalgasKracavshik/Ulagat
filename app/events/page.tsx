@@ -12,6 +12,13 @@ export const dynamic = 'force-dynamic';
 export default async function EventsPage() {
     const supabase = await createClient();
 
+    const { data: { user } } = await supabase.auth.getUser();
+    let profile = null;
+    if (user) {
+        const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+        profile = data;
+    }
+
     const { data: events } = await supabase
         .from('events')
         .select('*, profiles:organizer_id(*)')
@@ -28,12 +35,15 @@ export default async function EventsPage() {
                         Challenge yourself. Win reputation. Be a legend.
                     </p>
                 </div>
-                <Link href="/events/new">
-                    <Button size="lg" className="rounded-full shadow-lg gap-2 text-md font-bold px-6 bg-blue-600 hover:bg-blue-700">
-                        <Trophy className="w-5 h-5" />
-                        Host Event
-                    </Button>
-                </Link>
+                {/* Only Admins/Moderators can create events */}
+                {['admin', 'moderator'].includes(profile?.role) && (
+                    <Link href="/events/new">
+                        <Button size="lg" className="rounded-full shadow-lg gap-2 text-md font-bold px-6 bg-blue-600 hover:bg-blue-700">
+                            <Trophy className="w-5 h-5" />
+                            Host Event
+                        </Button>
+                    </Link>
+                )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -6,8 +6,41 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
-export default function NewServicePage() {
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { ShieldAlert } from "lucide-react";
+
+export default async function NewServicePage() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) redirect('/login');
+
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+
+    // Allow Teachers, Admins, Moderators
+    const allowedRoles = ['teacher', 'admin', 'moderator'];
+    if (!profile || !allowedRoles.includes(profile.role)) {
+        return (
+            <div className="container py-20 text-center text-destructive">
+                <ShieldAlert className="w-16 h-16 mx-auto mb-4" />
+                <h1 className="text-2xl font-bold">Access Denied</h1>
+                <p>Students cannot post services directly.</p>
+                <div className="mt-4">
+                    <Button variant="outline" asChild><a href="/services">Back to Services</a></Button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="container py-10 max-w-2xl">
             <Card>
@@ -26,21 +59,34 @@ export default function NewServicePage() {
 
                         <div className="space-y-2">
                             <Label htmlFor="category">Category</Label>
-                            <select
-                                id="category"
-                                name="category"
-                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                required
-                            >
-                                <option value="">Select a category</option>
-                                <option value="Math">Math</option>
-                                <option value="English">English</option>
-                                <option value="Physics">Physics</option>
-                                <option value="Music">Music</option>
-                                <option value="Coding">Coding</option>
-                                <option value="Sports">Sports</option>
-                                <option value="Other">Other</option>
-                            </select>
+                            <Select name="category" required>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select functionality" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="tutoring">Tutoring</SelectItem>
+                                    <SelectItem value="cleaning">Cleaning</SelectItem>
+                                    <SelectItem value="tech-support">Tech Support</SelectItem>
+                                    <SelectItem value="delivery">Delivery</SelectItem>
+                                    <SelectItem value="other">Other</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {/* Duration Selection (Visible to everyone, but more options could be added for admins if needed) */}
+                        <div className="space-y-2">
+                            <Label htmlFor="duration">Duration</Label>
+                            <Select name="duration" defaultValue="7">
+                                <SelectTrigger>
+                                    <SelectValue placeholder="How long should this be visible?" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="7">7 Days (Default)</SelectItem>
+                                    <SelectItem value="14">14 Days</SelectItem>
+                                    <SelectItem value="30">30 Days</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">Post will auto-expire after this period.</p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">

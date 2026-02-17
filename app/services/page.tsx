@@ -12,6 +12,13 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
     const categoryFilter = typeof params?.category === 'string' ? params.category : null;
     const { payment_success } = params || {};
 
+    const { data: { user } } = await supabase.auth.getUser();
+    let profile = null;
+    if (user) {
+        const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+        profile = data;
+    }
+
     // Fetch Services
     let query = supabase
         .from('services')
@@ -51,12 +58,15 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
                         Discover peer tutors, music lessons, and creative workshops from the Ulagat community.
                     </p>
                 </div>
-                <Link href="/services/new">
-                    <Button size="lg" className="rounded-full shadow-lg gap-2 text-md font-bold px-6">
-                        <PlusCircle className="w-5 h-5" />
-                        Post Ad (100₸)
-                    </Button>
-                </Link>
+                {/* Only Teachers, Admins, Moderators can post */}
+                {['teacher', 'admin', 'moderator'].includes(profile?.role) && (
+                    <Link href="/services/new">
+                        <Button size="lg" className="rounded-full shadow-lg gap-2 text-md font-bold px-6">
+                            <PlusCircle className="w-5 h-5" />
+                            Post Ad (100₸)
+                        </Button>
+                    </Link>
+                )}
             </div>
 
             {/* Filter Bar */}

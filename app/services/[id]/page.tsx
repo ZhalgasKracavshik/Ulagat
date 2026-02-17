@@ -23,6 +23,13 @@ export default async function ServiceDetailsPage({ params }: PageProps) {
         .eq('id', id)
         .single();
 
+    const { data: { user } } = await supabase.auth.getUser();
+    let profile = null;
+    if (user) {
+        const { data: p } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+        profile = p;
+    }
+
     if (!service) return notFound();
 
     return (
@@ -57,8 +64,33 @@ export default async function ServiceDetailsPage({ params }: PageProps) {
                                     </div>
                                 </div>
                             </div>
-                            <div className="text-2xl font-bold text-primary">
-                                {service.price > 0 ? `${service.price} ₸` : 'Free'}
+                            <div className="flex flex-col items-end gap-2">
+                                <div className="text-2xl font-bold text-primary">
+                                    {service.price > 0 ? `${service.price} ₸` : 'Free'}
+                                </div>
+
+                                {/* Owner Controls */}
+                                {(user?.id === service.owner_id || ['admin', 'moderator'].includes(profile?.role)) && (
+                                    <div className="flex flex-col gap-2 items-end">
+                                        {/* Expiration Info (Owner Only) */}
+                                        {service.expires_at && (
+                                            <div className="text-xs text-orange-600 font-medium bg-orange-50 px-2 py-1 rounded border border-orange-200">
+                                                Expires: {new Date(service.expires_at).toLocaleDateString()}
+                                            </div>
+                                        )}
+
+                                        {/* Delete Button */}
+                                        <form action={async () => {
+                                            "use server";
+                                            const { deleteService } = await import("../actions");
+                                            await deleteService(id);
+                                        }}>
+                                            <Button variant="destructive" size="sm">
+                                                Delete Service
+                                            </Button>
+                                        </form>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

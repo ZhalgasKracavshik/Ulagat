@@ -5,6 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -56,8 +63,27 @@ export default async function NewEventPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label>Event Banner</Label>
-                            <ImageUpload bucketName="event-images" />
+                            <Label htmlFor="image">Cover Image</Label>
+                            <div className="border-2 border-dashed rounded-lg p-4 text-center">
+                                <ImageUpload bucketName="event-images" />
+                            </div>
+                        </div>
+
+                        {/* Duration Selection */}
+                        <div className="space-y-2">
+                            <Label htmlFor="duration">Duration</Label>
+                            <Select name="duration" defaultValue="30">
+                                <SelectTrigger>
+                                    <SelectValue placeholder="How long should this be visible?" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="7">7 Days</SelectItem>
+                                    <SelectItem value="14">14 Days</SelectItem>
+                                    <SelectItem value="30">30 Days (Default)</SelectItem>
+                                    <SelectItem value="60">60 Days</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">Post will auto-expire after this period.</p>
                         </div>
 
                         <div className="space-y-2">
