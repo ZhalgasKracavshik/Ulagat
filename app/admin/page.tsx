@@ -1,11 +1,10 @@
-
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Check, X, ShieldAlert } from "lucide-react";
+import { ShieldAlert, Users, ListFilter } from "lucide-react";
+import { ServiceReviewTable } from "@/components/admin/ServiceReviewTable";
+import { UserManagementTable } from "@/components/admin/UserManagementTable";
 
 export default async function AdminPage() {
     const supabase = await createClient();
@@ -31,6 +30,8 @@ export default async function AdminPage() {
         );
     }
 
+    const isAdmin = profile.role === 'admin';
+
     // Fetch Stats
     const { count: userCount } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
     const { count: serviceCount } = await supabase.from('services').select('*', { count: 'exact', head: true });
@@ -43,31 +44,31 @@ export default async function AdminPage() {
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
 
-    async function approveService(formData: FormData) {
-        "use server";
-        const id = formData.get('id') as string;
-        const supabase = await createClient();
-        await supabase.from('services').update({ status: 'active' }).eq('id', id);
-        redirect('/admin');
-    }
-
-    async function rejectService(formData: FormData) {
-        "use server";
-        const id = formData.get('id') as string;
-        const supabase = await createClient();
-        await supabase.from('services').update({ status: 'archived' }).eq('id', id);
-        redirect('/admin');
-    }
+    // Fetch All Users (Ideally paginated, but for now fetching all)
+    const { data: allUsers } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(100);
 
     return (
         <div className="container mx-auto py-8 space-y-8 px-4 md:px-6">
-            <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+            <div className="flex items-center gap-4">
+                <div className="p-3 bg-primary/10 rounded-full">
+                    <ShieldAlert className="w-8 h-8 text-primary" />
+                </div>
+                <div>
+                    <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+                    <p className="text-muted-foreground">Manage services, users, and platform content.</p>
+                </div>
+            </div>
 
             {/* Stats Cards */}
             <div className="grid gap-4 md:grid-cols-3">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                        <Users className="w-4 h-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{userCount || 0}</div>
@@ -76,6 +77,7 @@ export default async function AdminPage() {
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Active Services</CardTitle>
+                        <ListFilter className="w-4 h-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{serviceCount || 0}</div>
@@ -93,58 +95,32 @@ export default async function AdminPage() {
 
             {/* Management Tabs */}
             <Tabs defaultValue="services" className="w-full">
-                <TabsList>
-                    <TabsTrigger value="services">Pending Services</TabsTrigger>
-                    <TabsTrigger value="users">Users</TabsTrigger>
+                <TabsList className="w-full md:w-auto">
+                    <TabsTrigger value="services" className="flex-1 md:flex-none">Pending Services</TabsTrigger>
+                    <TabsTrigger value="users" className="flex-1 md:flex-none">User Management</TabsTrigger>
                 </TabsList>
+
                 <TabsContent value="services" className="space-y-4">
                     <Card>
-                        <CardHeader><CardTitle>Review Listings</CardTitle></CardHeader>
+                        <CardHeader>
+                            <CardTitle>Review Listings</CardTitle>
+                        </CardHeader>
                         <CardContent>
-                            {pendingServices && pendingServices.length > 0 ? (
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Title</TableHead>
-                                            <TableHead>Owner</TableHead>
-                                            <TableHead>Price</TableHead>
-                                            <TableHead className="text-right">Actions</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {pendingServices.map((service: any) => (
-                                            <TableRow key={service.id}>
-                                                <TableCell className="font-medium">{service.title}</TableCell>
-                                                <TableCell>{service.profiles?.full_name}</TableCell>
-                                                <TableCell>{service.price} ₸</TableCell>
-                                                <TableCell className="text-right flex items-center justify-end gap-2">
-                                                    <form action={approveService}>
-                                                        <input type="hidden" name="id" value={service.id} />
-                                                        <Button size="sm" className="bg-green-600 hover:bg-green-700 h-8">
-                                                            <Check className="w-4 h-4 mr-1" /> Approve
-                                                        </Button>
-                                                    </form>
-                                                    <form action={rejectService}>
-                                                        <input type="hidden" name="id" value={service.id} />
-                                                        <Button size="sm" variant="destructive" className="h-8">
-                                                            <X className="w-4 h-4 mr-1" /> Reject
-                                                        </Button>
-                                                    </form>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            ) : (
-                                <p className="text-muted-foreground text-center py-8">No pending services to review.</p>
-                            )}
+                            <ServiceReviewTable services={pendingServices || []} />
                         </CardContent>
                     </Card>
                 </TabsContent>
+
                 <TabsContent value="users">
                     <Card>
-                        <CardHeader><CardTitle>User Management</CardTitle></CardHeader>
-                        <CardContent><p className="text-muted-foreground">User list feature coming soon...</p></CardContent>
+                        <CardHeader>
+                            <CardTitle>User Database</CardTitle>
+                            {!isAdmin && <p className="text-sm text-yellow-600">Note: Only Admins can change user roles.</p>}
+                        </CardHeader>
+                        <CardContent>
+                            {/* Pass data to client component */}
+                            <UserManagementTable users={allUsers || []} currentUserId={user.id} />
+                        </CardContent>
                     </Card>
                 </TabsContent>
             </Tabs>
