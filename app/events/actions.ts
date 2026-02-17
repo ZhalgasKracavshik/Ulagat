@@ -15,16 +15,17 @@ export async function createEvent(formData: FormData) {
     // Check permissions
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
 
-    // Allow admins, moderators, and teachers to create events
-    const allowedRoles = ['admin', 'moderator', 'teacher'];
+    // Allow admins, moderators ONLY (No teachers)
+    const allowedRoles = ['admin', 'moderator'];
     if (!profile || !allowedRoles.includes(profile.role)) {
-        throw new Error("Unauthorized: Only Teachers, Moderators, and Admins can create events.");
+        throw new Error("Unauthorized: Only Moderators and Admins can create events.");
     }
 
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
     const location = formData.get("location") as string;
     const event_date = formData.get("event_date") as string; // ISO string expected
+    const image_url = formData.get("image_url") as string;
 
     if (!title || !description || !event_date) {
         throw new Error("Missing fields");
@@ -36,7 +37,7 @@ export async function createEvent(formData: FormData) {
         description,
         location,
         event_date,
-        image_url: "" // TODO: Handle image upload
+        image_url: image_url || null
     });
 
     if (error) {

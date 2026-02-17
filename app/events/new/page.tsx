@@ -1,12 +1,33 @@
 
 import { createEvent } from "../actions";
+import { ImageUpload } from "@/components/shared/ImageUpload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { ShieldAlert } from "lucide-react";
 
-export default function NewEventPage() {
+export default async function NewEventPage() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) redirect('/login');
+
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+
+    if (profile?.role !== 'admin' && profile?.role !== 'moderator') {
+        return (
+            <div className="container py-20 text-center text-destructive">
+                <ShieldAlert className="w-16 h-16 mx-auto mb-4" />
+                <h1 className="text-2xl font-bold">Access Denied</h1>
+                <p>Only Admins and Moderators can create events.</p>
+                <Button className="mt-4" variant="outline" asChild><a href="/events">Back to Events</a></Button>
+            </div>
+        );
+    }
     return (
         <div className="container py-10 max-w-2xl">
             <Card className="border-blue-200">
@@ -32,6 +53,11 @@ export default function NewEventPage() {
                                 <Label htmlFor="location">Location</Label>
                                 <Input id="location" name="location" placeholder="e.g. Auditorium" />
                             </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Event Banner</Label>
+                            <ImageUpload bucketName="event-images" />
                         </div>
 
                         <div className="space-y-2">

@@ -1,5 +1,6 @@
 
 import { createService } from "../actions";
+import { ImageUpload } from "@/components/shared/ImageUpload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,7 +48,11 @@ export default function NewServicePage() {
                                 <Label htmlFor="price">Price (₸)</Label>
                                 <Input id="price" name="price" type="number" placeholder="2000" min="0" required />
                             </div>
-                            {/* Image upload placeholder later */}
+                            <div className="space-y-2">
+                                <Label>Cover Image</Label>
+                                <ImageUpload bucketName="service-images" />
+                            </div>
+                            {/* ImageUpload handles the hidden input for 'image_url' */}
                         </div>
 
                         <div className="space-y-2">
@@ -67,6 +72,6 @@ export default function NewServicePage() {
                     </form>
                 </CardContent>
             </Card>
-        </div>
+        </div >
     );
 }

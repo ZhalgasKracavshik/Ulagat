@@ -34,7 +34,6 @@ export default async function EditProfilePage() {
                             */}
                             <AvatarUpload
                                 currentAvatarUrl={profile?.avatar_url}
-                                onUploadComplete={() => { }} // Component manages hidden input
                             />
                         </div>
 

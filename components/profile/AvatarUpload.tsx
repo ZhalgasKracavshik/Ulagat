@@ -9,7 +9,7 @@ import Image from "next/image";
 
 interface AvatarUploadProps {
     currentAvatarUrl?: string | null;
-    onUploadComplete: (url: string) => void;
+    onUploadComplete?: (url: string) => void;
 }
 
 export function AvatarUpload({ currentAvatarUrl, onUploadComplete }: AvatarUploadProps) {
@@ -44,7 +44,7 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete }: AvatarUploa
             const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
 
             setAvatarUrl(data.publicUrl);
-            onUploadComplete(data.publicUrl);
+            if (onUploadComplete) onUploadComplete(data.publicUrl);
 
         } catch (error: any) {
             setError(error.message);
@@ -55,7 +55,7 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete }: AvatarUploa
 
     const handleRemove = () => {
         setAvatarUrl(null);
-        onUploadComplete("");
+        if (onUploadComplete) onUploadComplete("");
     };
 
     return (

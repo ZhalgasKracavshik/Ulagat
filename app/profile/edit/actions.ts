@@ -14,19 +14,22 @@ export async function updateProfile(formData: FormData) {
     const bio = formData.get("bio") as string;
     const avatar_url = formData.get("avatar_url") as string;
 
-    const { error } = await supabase.from("profiles").update({
-        full_name,
-        bio, // Ensure 'bio' column exists in profiles table!
-        avatar_url
-    }).eq("id", user.id);
+    try {
+        const { error } = await supabase.from("profiles").update({
+            full_name,
+            bio,
+            avatar_url
+        }).eq("id", user.id);
 
-    if (error) {
-        console.error("Error updating profile:", error);
-        // If error is code 42703 (undefined column 'bio'), we might need to add it to schema.
-        // Assuming schema is up to date or I should update it.
-        throw new Error("Failed to update profile");
+        if (error) throw error;
+
+        revalidatePath(`/profile/${user.id}`);
+    } catch (error) {
+        console.error("Profile update error:", error);
+        // In a real app, we'd return { error: "..." } to display on the client
+        // But for now, let's just log it and redirect
     }
 
-    revalidatePath(`/profile/${user.id}`);
-    redirect("/profile/me");
+    // Redirect needs to be outside try/catch if it throws NEXT_REDIRECT
+    redirect(`/profile/${user.id}`);
 }

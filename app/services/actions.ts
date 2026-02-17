@@ -13,12 +13,23 @@ export async function createService(formData: FormData) {
         redirect("/login");
     }
 
+    // Check permissions
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+
+    // Allow Teachers, Admins, Moderators
+    // Students CANNOT create services
+    const allowedRoles = ['teacher', 'admin', 'moderator'];
+    if (!profile || !allowedRoles.includes(profile.role)) {
+        throw new Error("Unauthorized: Students cannot post services.");
+    }
+
     // Basic validation
     // In real app, use Zod
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
     const price = parseFloat(formData.get("price") as string);
     const category = formData.get("category") as string;
+    const image_url = formData.get("image_url") as string;
 
     if (!title || !description || !category) {
         throw new Error("Missing fields");
@@ -32,7 +43,7 @@ export async function createService(formData: FormData) {
         price,
         category,
         status: 'pending', // Pending payment
-        image_url: "" // TODO: Handle image upload
+        image_url: image_url || null
     }).select().single();
 
     if (error) {
