@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { redirect } from "next/navigation";
 import { updateProfile } from "./actions";
+import { AvatarUpload } from "@/components/profile/AvatarUpload";
 
 export default async function EditProfilePage() {
     const supabase = await createClient();
@@ -24,6 +25,19 @@ export default async function EditProfilePage() {
                 </CardHeader>
                 <CardContent>
                     <form action={updateProfile} className="space-y-6">
+
+                        <div className="flex justify-center mb-6">
+                            {/* We pass a change handler that updates a hidden input, 
+                                BUT for simplicity, the AvatarUpload component ITSELF renders a hidden input with name="avatar_url"
+                                matching the server action's expectation.
+                                So we just need to pass the initial value.
+                            */}
+                            <AvatarUpload
+                                currentAvatarUrl={profile?.avatar_url}
+                                onUploadComplete={() => { }} // Component manages hidden input
+                            />
+                        </div>
+
                         <div className="space-y-2">
                             <Label htmlFor="full_name">Full Name</Label>
                             <Input id="full_name" name="full_name" defaultValue={profile?.full_name || ''} required />
@@ -38,17 +52,6 @@ export default async function EditProfilePage() {
                                 placeholder="Tell us about yourself..."
                                 className="min-h-[100px]"
                             />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="avatar_url">Avatar URL</Label>
-                            <Input
-                                id="avatar_url"
-                                name="avatar_url"
-                                defaultValue={profile?.avatar_url || ''}
-                                placeholder="https://example.com/my-photo.jpg"
-                            />
-                            <p className="text-xs text-muted-foreground">Paste a direct link to an image.</p>
                         </div>
 
                         <div className="flex gap-4">

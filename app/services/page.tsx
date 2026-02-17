@@ -8,17 +8,28 @@ import Link from "next/link";
 
 export default async function ServicesPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const supabase = await createClient();
+    const params = await searchParams;
+    const categoryFilter = typeof params?.category === 'string' ? params.category : null;
+    const { payment_success } = params || {};
 
-    // Fetch Services with Owner Profile
-    const { data: services, error } = await supabase
+    // Fetch Services
+    let query = supabase
         .from('services')
         .select('*, profiles:owner_id(*)')
         .eq('status', 'active')
         .order('created_at', { ascending: false });
 
-    const CATEGORIES = ["Math", "English", "Music", "Coding", "Arts", "Sports"]; // This should ideally be dynamic or from DB
+    if (categoryFilter && categoryFilter !== 'All') {
+        // Assuming there is a category column in services, checking schema...
+        // If not, we might need to rely on title filtering or add category column.
+        // For now, let's assume 'category' column exists or use description search if not.
+        // Wait, I recall schema.sql had 'category' TEXT NOT NULL.
+        query = query.eq('category', categoryFilter);
+    }
 
-    const { payment_success } = await searchParams || {};
+    const { data: services, error } = await query;
+
+    const CATEGORIES = ["Math", "English", "Music", "Coding", "Arts", "Sports"];
 
     return (
         <div className="container mx-auto py-8 space-y-8 min-h-screen px-4 md:px-6">
@@ -51,9 +62,19 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
             {/* Filter Bar */}
             <div className="sticky top-2 z-30 bg-background/80 backdrop-blur-lg p-2 rounded-xl shadow-sm border flex flex-col md:flex-row gap-4 items-center justify-between">
                 <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 px-2 scrollbar-none">
-                    <Button variant="secondary" size="sm" className="rounded-full bg-slate-900 text-white hover:bg-slate-800">All</Button>
+                    <Link href="/services">
+                        <Button variant={!categoryFilter ? "secondary" : "ghost"} size="sm" className="rounded-full">All</Button>
+                    </Link>
                     {CATEGORIES.map(cat => (
-                        <Button key={cat} variant="ghost" size="sm" className="rounded-full hover:bg-slate-100 text-slate-600">{cat}</Button>
+                        <Link key={cat} href={`/services?category=${cat}`}>
+                            <Button
+                                variant={categoryFilter === cat ? "secondary" : "ghost"}
+                                size="sm"
+                                className="rounded-full text-slate-600"
+                            >
+                                {cat}
+                            </Button>
+                        </Link>
                     ))}
                 </div>
 
@@ -76,7 +97,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
                 ) : (
                     <div className="col-span-full py-20 text-center space-y-4">
                         <div className="text-6xl">🙈</div>
-                        <h3 className="text-xl font-bold">No services found yet</h3>
+                        <h3 className="text-xl font-bold">No services found for {categoryFilter || 'this category'}</h3>
                         <p className="text-muted-foreground">Be the first to offer something cool!</p>
                         <Link href="/services/new">
                             <Button variant="outline" className="mt-4">Create First Listing</Button>

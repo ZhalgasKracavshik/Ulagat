@@ -1,7 +1,11 @@
 import { ArrowRight, BookOpen, Trophy, Users } from "lucide-react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   return (
     <div className="flex flex-col min-h-[calc(100vh-3.5rem)]">
       {/* Hero Section */}
@@ -21,7 +25,7 @@ export default function Home() {
           </p>
           <div className="space-x-4 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200">
             <Link
-              href="/login"
+              href={user ? "/services" : "/register"}
               className="inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-medium h-11 px-8 shadow-lg hover:bg-primary/90 hover:scale-105 transition-all"
             >
               Get Started

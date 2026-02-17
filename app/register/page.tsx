@@ -1,9 +1,9 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { LoginForm } from '@/components/auth/login-form'
+import { RegisterForm } from '@/components/auth/register-form'
 
-export default async function LoginPage() {
+export default async function RegisterPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -11,5 +11,5 @@ export default async function LoginPage() {
         redirect('/services')
     }
 
-    return <LoginForm />
+    return <RegisterForm />
 }
