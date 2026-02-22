@@ -41,16 +41,19 @@ export function RegisterForm() {
                     <div className="space-y-4">
                         <div>
                             <label htmlFor="fullName" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                                Full Name
+                                Full Name (Latin letters only)
                             </label>
                             <input
                                 id="fullName"
                                 name="fullName"
                                 type="text"
                                 required
+                                pattern="[a-zA-Z\s]+"
+                                title="Please use only Latin letters and spaces (A-Z, a-z)"
                                 className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-                                placeholder="John Doe"
+                                placeholder="Zhalgas Danil"
                             />
+                            <p className="mt-1 text-[10px] text-muted-foreground uppercase tracking-tight font-medium">Names must be unique and in English</p>
                         </div>
                         <div>
                             <label htmlFor="role" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">

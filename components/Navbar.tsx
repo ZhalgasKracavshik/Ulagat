@@ -1,7 +1,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Trophy, BookOpen, Crown, LogOut, User, MessageCircle } from "lucide-react";
+import { Trophy, BookOpen, Crown, LogOut, User, MessageCircle, GraduationCap, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -17,11 +17,16 @@ export async function Navbar() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    // Fetch profile if user exists
+    // Fetch profile and pending friend requests if user exists
     let profile = null;
+    let pendingFriendRequests = 0;
     if (user) {
-        const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-        profile = data;
+        const [{ data: profileData }, { count }] = await Promise.all([
+            supabase.from('profiles').select('*').eq('id', user.id).single(),
+            supabase.from('friendships').select('*', { count: 'exact', head: true }).eq('addressee_id', user.id).eq('status', 'pending')
+        ]);
+        profile = profileData;
+        pendingFriendRequests = count || 0;
     }
 
     return (
@@ -47,9 +52,22 @@ export async function Navbar() {
                             Leaderboard
                         </Link>
                         {user && (
+                            <Link href="/friends" className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-1 relative">
+                                <Users className="w-4 h-4" />
+                                Friends
+                                {pendingFriendRequests > 0 && (
+                                    <span className="absolute -top-1 -right-1 flex h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                                )}
+                            </Link>
+                        )}
+                        <Link href="/olympiad" className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-1">
+                            <GraduationCap className="w-4 h-4" />
+                            Prep
+                        </Link>
+                        {user && (
                             <Link href="/messages" className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-1">
                                 <MessageCircle className="w-4 h-4" />
-                                Messages
+                                Chats
                             </Link>
                         )}
                     </nav>

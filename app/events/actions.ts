@@ -36,6 +36,8 @@ export async function createEvent(formData: FormData) {
     const event_date = formData.get("event_date") as string; // ISO string expected
     const image_url = formData.get("image_url") as string;
     const durationDays = parseInt(formData.get("duration") as string) || 30; // Default 30 days for events
+    const max_students_raw = formData.get("max_students") as string;
+    const max_students = max_students_raw ? parseInt(max_students_raw) : null;
 
     if (!title || !description || !event_date) {
         throw new Error("Missing fields");
@@ -52,7 +54,8 @@ export async function createEvent(formData: FormData) {
         location,
         event_date,
         image_url: image_url || null,
-        expires_at: expirationDate.toISOString()
+        expires_at: expirationDate.toISOString(),
+        max_students,
     });
 
     if (error) {

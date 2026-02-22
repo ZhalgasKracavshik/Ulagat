@@ -31,6 +31,17 @@ export async function signup(formData: FormData) {
     const fullName = formData.get('fullName') as string
     const role = formData.get('role') as string
 
+    // Check name uniqueness first
+    const { data: existingName } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('full_name', fullName)
+        .single()
+
+    if (existingName) {
+        return { error: "This name is already taken. Please choose another one." }
+    }
+
     const { error } = await supabase.auth.signUp({
         email,
         password,

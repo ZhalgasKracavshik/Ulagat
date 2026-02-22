@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Crown, Medal, Trophy, ShieldCheck } from "lucide-react";
+import Link from "next/link";
 
 export const dynamic = 'force-dynamic'; // Force refresh
 
@@ -68,32 +69,34 @@ export default async function LeaderboardPage() {
                             ${index > 2 ? 'border-transparent hover:border-border' : ''}
                         `}>
                             <CardContent className="flex items-center p-4 sm:p-6 gap-4 sm:gap-6">
-                                <div className="flex-shrink-0 w-8 text-center font-bold text-xl text-slate-400">
-                                    {index === 0 && <Crown className="w-8 h-8 text-yellow-500 mx-auto animate-bounce" />}
-                                    {index === 1 && <Medal className="w-8 h-8 text-slate-400 mx-auto" />}
-                                    {index === 2 && <Medal className="w-8 h-8 text-orange-500 mx-auto" />}
-                                    {index > 2 && `#${index + 1}`}
+                                <div className="flex-shrink-0 w-10 text-center font-bold text-xl text-slate-400">
+                                    {index === 0 && <Crown className="w-10 h-10 text-yellow-500 mx-auto animate-pulse drop-shadow-md" />}
+                                    {index === 1 && <Medal className="w-9 h-9 text-slate-400 mx-auto drop-shadow-sm" />}
+                                    {index === 2 && <Medal className="w-9 h-9 text-orange-500 mx-auto drop-shadow-sm" />}
+                                    {index > 2 && <span className="text-slate-300">#{index + 1}</span>}
                                 </div>
 
-                                <Avatar className="w-12 h-12 sm:w-16 sm:h-16 border-2 border-white shadow-sm">
-                                    <AvatarImage src={user.avatar_url} />
-                                    <AvatarFallback>{user.full_name?.[0]}</AvatarFallback>
-                                </Avatar>
+                                <Link href={`/profile/${user.id}`} className="flex items-center gap-4 sm:gap-6 flex-grow min-w-0 group/user">
+                                    <Avatar className="w-12 h-12 sm:w-16 sm:h-16 border-2 border-white shadow-sm transition-transform group-hover/user:scale-105">
+                                        <AvatarImage src={user.avatar_url} />
+                                        <AvatarFallback className="bg-slate-100">{user.full_name?.[0]}</AvatarFallback>
+                                    </Avatar>
 
-                                <div className="flex-grow min-w-0">
-                                    <h3 className="font-bold text-lg truncate flex items-center gap-2">
-                                        {user.full_name}
-                                        <ShieldCheck className="w-4 h-4 text-primary" />
-                                    </h3>
-                                    <p className="text-sm text-muted-foreground capitalize">{user.role}</p>
-                                </div>
+                                    <div className="flex-grow min-w-0">
+                                        <h3 className="font-extrabold text-lg sm:text-xl truncate flex items-center gap-2 text-slate-900 group-hover/user:text-primary transition-colors">
+                                            {user.full_name}
+                                            <ShieldCheck className="w-4 h-4 text-primary opacity-80" />
+                                        </h3>
+                                        <p className="text-sm text-muted-foreground capitalize font-medium">{user.role}</p>
+                                    </div>
+                                </Link>
 
-                                <div className="text-right">
-                                    <div className="font-extrabold text-2xl sm:text-3xl text-primary">
+                                <div className="text-right pl-4">
+                                    <div className="font-black text-2xl sm:text-3xl text-primary tabular-nums tracking-tight">
                                         {user.points}
                                     </div>
-                                    <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
-                                        Rep Points
+                                    <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded-full mt-1">
+                                        Points
                                     </div>
                                 </div>
                             </CardContent>

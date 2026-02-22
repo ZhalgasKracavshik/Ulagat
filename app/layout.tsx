@@ -11,6 +11,8 @@ export const metadata: Metadata = {
   description: "Connect, Learn, and Compete with Ulagat.",
 };
 
+import { Toaster } from "sonner";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -25,6 +27,7 @@ export default function RootLayout({
             {children}
           </main>
         </div>
+        <Toaster position="top-center" richColors />
       </body>
     </html>
   );

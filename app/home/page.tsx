@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SmartBadge } from "@/components/reputation/SmartBadge";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { Calendar, PlusCircle, Search, Trophy, ArrowRight, Star, Zap } from "lucide-react";
+import { Calendar, PlusCircle, Search, Trophy, ArrowRight, Star, Zap, GraduationCap, MessageCircle } from "lucide-react";
 
 export default async function HomePage() {
     const supabase = await createClient();
@@ -36,7 +36,7 @@ export default async function HomePage() {
         .select('*')
         .order('event_date', { ascending: true })
         .gte('event_date', new Date().toISOString())
-        .limit(3);
+        .limit(4);
 
     // Fetch New Services
     const { data: services } = await supabase
@@ -71,7 +71,7 @@ export default async function HomePage() {
                                 Hello, {profile?.full_name?.split(' ')[0]}! 👋
                             </h1>
                             <p className="text-indigo-100 text-lg opacity-90 max-w-md">
-                                Ready to expand your knowledge today? You have <span className="font-bold text-white">{totalPoints} points</span> on the blockchain.
+                                Ready to expand your knowledge today? You have <span className="font-bold text-white">{totalPoints} points</span>.
                             </p>
                             <div className="flex gap-2">
                                 <Badge className="bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-md">
@@ -99,29 +99,31 @@ export default async function HomePage() {
             </section>
 
             {/* Quick Actions Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-5">
                 {[
                     { href: "/services", icon: Search, label: "Find Tutors", color: "text-blue-600", bg: "bg-blue-50", border: "hover:border-blue-200", roles: ['student', 'teacher', 'admin', 'moderator'] },
-                    { href: "/events", icon: Calendar, label: "School Events", color: "text-purple-600", bg: "bg-purple-50", border: "hover:border-purple-200", roles: ['student', 'teacher', 'admin', 'moderator'] },
+                    { href: "/events", icon: Calendar, label: "Events", color: "text-purple-600", bg: "bg-purple-50", border: "hover:border-purple-200", roles: ['student', 'teacher', 'admin', 'moderator'] },
+                    { href: "/olympiad", icon: GraduationCap, label: "Olympiad Prep", color: "text-teal-600", bg: "bg-teal-50", border: "hover:border-teal-200", roles: ['student', 'teacher', 'admin', 'moderator'] },
                     { href: "/services/new", icon: PlusCircle, label: "Post Service", color: "text-green-600", bg: "bg-green-50", border: "hover:border-green-200", roles: ['teacher', 'admin', 'moderator'] },
                     { href: "/leaderboard", icon: Trophy, label: "Leaderboard", color: "text-amber-600", bg: "bg-amber-50", border: "hover:border-amber-200", roles: ['student', 'teacher', 'admin', 'moderator'] },
                 ].filter(action => action.roles.includes(profile?.role || 'student')).map((action, idx) => (
                     <Link key={idx} href={action.href}>
                         <Card className={`h-full border border-transparent shadow-sm hover:shadow-md transition-all duration-300 ${action.border}`}>
-                            <CardContent className="flex flex-col items-center justify-center p-6 text-center h-full gap-3">
-                                <div className={`p-4 rounded-full ${action.bg} ${action.color} mb-1`}>
-                                    <action.icon className="w-8 h-8" />
+                            <CardContent className="flex flex-col items-center justify-center p-5 text-center h-full gap-2">
+                                <div className={`p-3 rounded-full ${action.bg} ${action.color}`}>
+                                    <action.icon className="w-6 h-6" />
                                 </div>
-                                <span className="font-bold text-slate-700">{action.label}</span>
+                                <span className="font-bold text-sm text-slate-700">{action.label}</span>
                             </CardContent>
                         </Card>
                     </Link>
                 ))}
             </div>
 
-            <div className="grid lg:grid-cols-3 gap-8">
+            {/* Two-column layout: Events + Services side by side */}
+            <div className="grid lg:grid-cols-2 gap-8">
                 {/* Upcoming Events */}
-                <section className="lg:col-span-1 space-y-6">
+                <section className="space-y-5">
                     <div className="flex items-center justify-between">
                         <h2 className="text-xl font-bold flex items-center gap-2 text-slate-800">
                             <Calendar className="w-5 h-5 text-purple-600" /> Upcoming Events
@@ -131,35 +133,33 @@ export default async function HomePage() {
                         </Link>
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                         {events && events.length > 0 ? (
                             events.map(event => (
                                 <Link key={event.id} href={`/events/${event.id}`}>
-                                    <div className="group bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all p-4 flex gap-4 cursor-pointer">
-                                        <div className="bg-purple-50 text-purple-700 rounded-lg w-16 h-16 flex flex-col items-center justify-center shrink-0">
-                                            <span className="text-xs font-bold uppercase">{new Date(event.event_date).toLocaleString('default', { month: 'short' })}</span>
-                                            <span className="text-2xl font-bold leading-none">{new Date(event.event_date).getDate()}</span>
+                                    <div className="group bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all p-4 flex gap-4 cursor-pointer mb-3">
+                                        <div className="bg-purple-50 text-purple-700 rounded-lg w-14 h-14 flex flex-col items-center justify-center shrink-0">
+                                            <span className="text-[10px] font-bold uppercase">{new Date(event.event_date).toLocaleString('default', { month: 'short' })}</span>
+                                            <span className="text-xl font-bold leading-none">{new Date(event.event_date).getDate()}</span>
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <h3 className="font-bold text-slate-900 truncate group-hover:text-purple-600 transition-colors">{event.title}</h3>
                                             <p className="text-sm text-slate-500 truncate">{event.location || 'Online'}</p>
-                                            <div className="mt-2 flex items-center text-xs text-slate-400 font-medium bg-slate-50 w-fit px-2 py-1 rounded">
-                                                By Ulagat Team
-                                            </div>
                                         </div>
                                     </div>
                                 </Link>
                             ))
                         ) : (
-                            <div className="bg-slate-50 rounded-xl p-8 text-center text-slate-400 border border-dashed">
+                            <div className="bg-slate-50 rounded-xl p-10 text-center text-slate-400 border border-dashed">
+                                <Calendar className="w-8 h-8 mx-auto mb-2 opacity-30" />
                                 No upcoming events found.
                             </div>
                         )}
                     </div>
                 </section>
 
-                {/* New Services Grid */}
-                <section className="lg:col-span-2 space-y-6">
+                {/* Featured Services */}
+                <section className="space-y-5">
                     <div className="flex items-center justify-between">
                         <h2 className="text-xl font-bold flex items-center gap-2 text-slate-800">
                             <PlusCircle className="w-5 h-5 text-blue-600" /> Featured Services
@@ -169,43 +169,42 @@ export default async function HomePage() {
                         </Link>
                     </div>
 
-                    <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="space-y-3">
                         {services && services.length > 0 ? (
                             services.map(service => (
                                 <Link key={service.id} href={`/services/${service.id}`}>
-                                    <div className="group bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-lg transition-all overflow-hidden h-full flex flex-col">
-                                        <div className="h-32 bg-slate-100 relative overflow-hidden">
+                                    <div className="group bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all overflow-hidden flex h-28 cursor-pointer mb-3">
+                                        <div className="w-28 shrink-0 bg-slate-100 relative overflow-hidden">
                                             {service.image_url ? (
                                                 <img src={service.image_url} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={service.title} />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center text-slate-300 bg-slate-50">
-                                                    <span className="text-4xl font-black opacity-10">{service.category[0]}</span>
+                                                    <span className="text-2xl font-black opacity-20">{service.category?.[0]}</span>
                                                 </div>
                                             )}
-                                            <div className="absolute top-2 right-2">
-                                                <Badge className="bg-white/90 text-slate-800 shadow-sm hover:bg-white">{service.category}</Badge>
-                                            </div>
                                         </div>
-                                        <div className="p-4 flex-1 flex flex-col">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <h3 className="font-bold text-slate-900 line-clamp-1 group-hover:text-blue-600 transition-colors">{service.title}</h3>
-                                                <span className="font-bold text-green-600 whitespace-nowrap">{service.price > 0 ? `${service.price} ₸` : 'Free'}</span>
+                                        <div className="p-3 flex-1 flex flex-col justify-between min-w-0">
+                                            <div>
+                                                <div className="flex justify-between items-start gap-2">
+                                                    <h3 className="font-bold text-slate-900 line-clamp-1 text-sm group-hover:text-blue-600 transition-colors">{service.title}</h3>
+                                                    <span className="font-bold text-green-600 text-sm whitespace-nowrap">{service.price > 0 ? `${service.price} ₸` : 'Free'}</span>
+                                                </div>
+                                                <p className="text-xs text-slate-500 line-clamp-2 mt-1">{service.description}</p>
                                             </div>
-                                            <p className="text-sm text-slate-500 line-clamp-2 mb-4 flex-1">{service.description}</p>
-
-                                            <div className="flex items-center gap-2 pt-3 border-t border-slate-50 mt-auto">
-                                                <Avatar className="w-6 h-6">
+                                            <div className="flex items-center gap-2 mt-auto">
+                                                <Avatar className="w-5 h-5">
                                                     <AvatarImage src={service.profiles?.avatar_url} />
-                                                    <AvatarFallback className="text-[10px]">{service.profiles?.full_name?.[0]}</AvatarFallback>
+                                                    <AvatarFallback className="text-[8px]">{service.profiles?.full_name?.[0]}</AvatarFallback>
                                                 </Avatar>
-                                                <span className="text-xs font-medium text-slate-600 truncate">{service.profiles?.full_name}</span>
+                                                <span className="text-[11px] font-medium text-slate-600 truncate">{service.profiles?.full_name}</span>
                                             </div>
                                         </div>
                                     </div>
                                 </Link>
                             ))
                         ) : (
-                            <div className="col-span-2 bg-slate-50 rounded-xl p-12 text-center text-slate-400 border border-dashed">
+                            <div className="bg-slate-50 rounded-xl p-10 text-center text-slate-400 border border-dashed">
+                                <Search className="w-8 h-8 mx-auto mb-2 opacity-30" />
                                 No services found. Be the first to post!
                             </div>
                         )}

@@ -4,10 +4,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, MapPin, Trophy, ArrowLeft, Share2 } from "lucide-react";
+import { Calendar, MapPin, Trophy, ArrowLeft, Share2, Users } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
+import { EventRegistrationButton } from "@/components/events/EventRegistrationButton";
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -17,25 +18,44 @@ export default async function EventDetailsPage({ params }: PageProps) {
     const { id } = await params;
     const supabase = await createClient();
 
-    const { data: event } = await supabase
-        .from('events')
-        .select('*, profiles:organizer_id(*)')
-        .eq('id', id)
-        .single();
-
+    // Fetch user and profile first
     const { data: { user } } = await supabase.auth.getUser();
-
-    // Fetch current user's role for permission check
     let userRole = 'student';
     if (user) {
         const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
         userRole = profile?.role || 'student';
     }
 
+    // Fetch event details
+    const { data: event } = await supabase
+        .from('events')
+        .select('*, profiles:organizer_id(*)')
+        .eq('id', id)
+        .single();
+
     if (!event) return notFound();
 
+    // Fetch registration data
+    let registrationCount = 0;
+    let isRegistered = false;
+
+    const { data: regs } = await supabase
+        .from('event_registrations')
+        .select('user_id')
+        .eq('event_id', id);
+
+    if (regs) {
+        registrationCount = regs.length;
+        if (user) {
+            isRegistered = regs.some(r => r.user_id === user.id);
+        }
+    }
+
+    const isFull = event.max_students ? registrationCount >= event.max_students : false;
+    const isExpired = event.expires_at ? new Date(event.expires_at) < new Date() : false;
+
     return (
-        <div className="container py-8 max-w-4xl">
+        <div className="container py-8 max-w-4xl mx-auto px-4">
             <Link href="/events" className="flex items-center text-sm text-muted-foreground hover:text-blue-600 mb-6 transition-colors">
                 <ArrowLeft className="w-4 h-4 mr-1" /> Back to Events
             </Link>
@@ -58,12 +78,18 @@ export default async function EventDetailsPage({ params }: PageProps) {
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <MapPin className="w-4 h-4" />
-                                <span>{event.location}</span>
+                                <span>{event.location || 'School Hall'}</span>
                             </div>
+                            {event.max_students && (
+                                <div className="flex items-center gap-1.5">
+                                    <Users className="w-4 h-4" />
+                                    <span>{registrationCount} / {event.max_students} Registered</span>
+                                </div>
+                            )}
                         </div>
                     </div>
                     {/* Owner/Admin Controls */}
-                    {(user?.id === event.organizer_id || ['admin', 'moderator'].includes(userRole)) && ( // We need to fetch userRole first
+                    {(user?.id === event.organizer_id || ['admin', 'moderator'].includes(userRole)) && (
                         <div className="flex flex-col gap-2 items-end">
                             {event.expires_at && (
                                 <div className="text-xs text-orange-200 font-medium bg-white/10 px-2 py-1 rounded backdrop-blur-sm">
@@ -109,9 +135,20 @@ export default async function EventDetailsPage({ params }: PageProps) {
                 <div className="space-y-6">
                     <Card>
                         <CardContent className="p-6 space-y-4">
-                            <Button className="w-full text-lg h-12 font-bold bg-blue-600 hover:bg-blue-700 shadow-blue-200 shadow-xl">
-                                Register Now
-                            </Button>
+                            {user ? (
+                                <EventRegistrationButton
+                                    eventId={id}
+                                    isRegistered={isRegistered}
+                                    isFull={isFull}
+                                    isExpired={isExpired}
+                                />
+                            ) : (
+                                <Link href="/login" className="block w-full">
+                                    <Button className="w-full text-lg h-12 font-bold bg-blue-600 hover:bg-blue-700">
+                                        Login to Register
+                                    </Button>
+                                </Link>
+                            )}
                             <Button variant="outline" className="w-full">
                                 <Share2 className="w-4 h-4 mr-2" /> Share Event
                             </Button>
@@ -127,7 +164,7 @@ export default async function EventDetailsPage({ params }: PageProps) {
                             </Avatar>
                             <div>
                                 <p className="font-bold text-slate-900">{event.profiles?.full_name}</p>
-                                <p className="text-xs text-muted-foreground">{event.profiles?.role}</p>
+                                <p className="text-xs text-muted-foreground capitalize">{event.profiles?.role}</p>
                             </div>
                         </Link>
                     </div>

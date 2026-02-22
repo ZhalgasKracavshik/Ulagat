@@ -63,6 +63,12 @@ export default async function NewEventPage() {
                         </div>
 
                         <div className="space-y-2">
+                            <Label htmlFor="max_students">Max Students (optional)</Label>
+                            <Input id="max_students" name="max_students" type="number" min="1" placeholder="e.g. 30 — leave empty for unlimited" />
+                            <p className="text-xs text-muted-foreground">Set a limit on how many students can register.</p>
+                        </div>
+
+                        <div className="space-y-2">
                             <Label htmlFor="image">Cover Image</Label>
                             <div className="border-2 border-dashed rounded-lg p-4 text-center">
                                 <ImageUpload bucketName="event-images" />
