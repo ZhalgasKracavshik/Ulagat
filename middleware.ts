@@ -34,12 +34,10 @@ const PARENT_BLOCKED_ROUTES = [
 // Routes only accessible to admin/moderator
 const ADMIN_ONLY_ROUTES = ['/admin'];
 
-// Routes that parliament role gets (beyond student) — creation routes
-const PARLIAMENT_ALLOWED_NEW_ROUTES = [
-    '/events/new',
-    '/clubs/new',
-    '/lost-found/new',
-];
+// P1-1: PARLIAMENT_ALLOWED_NEW_ROUTES was declared but never referenced in the middleware logic.
+// Parliament is allowed to access /events/new, /clubs/new, /lost-found/new (same as above comment).
+// The parliament block below explicitly lists the routes parliament CANNOT access (/services/new, /olympiad/new)
+// rather than checking against an allowlist, which makes the logic self-contained and easy to audit.
 
 function getRole(profile: { role: string } | null): string {
     return profile?.role ?? 'student';

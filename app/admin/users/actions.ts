@@ -26,7 +26,18 @@ export async function updateUserRole(
     newRole: UserRole
 ): Promise<{ error?: string }> {
     try {
-        const { supabase } = await requireAdmin();
+        const { supabase, user } = await requireAdmin();
+
+        // P0-5: Validate that newRole is one of the allowed values at runtime.
+        const VALID_ROLES: UserRole[] = ['student', 'teacher', 'parent', 'parliament', 'moderator', 'admin'];
+        if (!VALID_ROLES.includes(newRole)) {
+            return { error: 'Invalid role value.' };
+        }
+
+        // P2-3: Prevent an admin from demoting their own account.
+        if (user.id === userId) {
+            return { error: 'Cannot change your own role.' };
+        }
 
         const { error } = await supabase
             .from('profiles')

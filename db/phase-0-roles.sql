@@ -40,19 +40,28 @@ CREATE TABLE IF NOT EXISTS public.family_bonds (
 ALTER TABLE public.parent_invite_tokens ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.family_bonds ENABLE ROW LEVEL SECURITY;
 
--- parent_invite_tokens: student can INSERT their own, anyone can SELECT by token (for registration)
+-- parent_invite_tokens: student can INSERT their own
 CREATE POLICY "student_can_create_invite" ON public.parent_invite_tokens
   FOR INSERT WITH CHECK (auth.uid() = student_id);
 
-CREATE POLICY "anyone_can_read_token" ON public.parent_invite_tokens
-  FOR SELECT USING (true);
+-- P2-4: Restrict SELECT — only the owning student or service role can read tokens.
+-- Anonymous registrants must use the service-role client (createAdminClient) to look up tokens.
+DROP POLICY IF EXISTS "anyone_can_read_token" ON public.parent_invite_tokens;
+CREATE POLICY "limited_token_select" ON public.parent_invite_tokens
+  FOR SELECT USING (
+    auth.uid() = student_id OR
+    (auth.jwt() ->> 'role') = 'service_role'
+  );
 
 CREATE POLICY "student_can_delete_own_invite" ON public.parent_invite_tokens
   FOR DELETE USING (auth.uid() = student_id);
 
--- Allow server (service role) to update tokens (mark as used)
-CREATE POLICY "service_role_update_token" ON public.parent_invite_tokens
-  FOR UPDATE USING (true);
+-- P0-4: Restrict UPDATE to service role only — prevents any authenticated user from marking arbitrary tokens as used.
+DROP POLICY IF EXISTS "service_role_update_token" ON public.parent_invite_tokens;
+CREATE POLICY "service_role_updates_token" ON public.parent_invite_tokens
+  FOR UPDATE USING (
+    (auth.jwt() ->> 'role') = 'service_role'
+  );
 
 -- family_bonds: parent sees own bonds, student sees own bonds, admin/moderator see all
 CREATE POLICY "user_sees_own_bonds" ON public.family_bonds
@@ -62,5 +71,45 @@ CREATE POLICY "user_sees_own_bonds" ON public.family_bonds
     EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('admin', 'moderator'))
   );
 
-CREATE POLICY "system_creates_bonds" ON public.family_bonds
-  FOR INSERT WITH CHECK (true); -- controlled by server-side API only
+-- P0-3: Restrict family_bonds INSERT to service role only — prevents any authenticated user from forging bonds.
+DROP POLICY IF EXISTS "system_creates_bonds" ON public.family_bonds;
+CREATE POLICY "service_role_creates_bonds" ON public.family_bonds
+  FOR INSERT WITH CHECK (
+    (auth.jwt() ->> 'role') = 'service_role'
+  );
+
+-- ============================================================
+-- P0-1: Harden handle_new_user trigger — clamp role to allowed values.
+-- Preserves all existing columns (id, full_name, avatar_url, role) and the
+-- reputation_ledger genesis block insert from the master schema.
+-- The CASE expression prevents any role outside the allowlist from being
+-- stored in profiles, even if the auth metadata was tampered.
+-- ============================================================
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, full_name, avatar_url, role)
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
+    COALESCE(NEW.raw_user_meta_data->>'avatar_url', ''),
+    CASE WHEN NEW.raw_user_meta_data->>'role' IN ('student', 'teacher', 'parent')
+         THEN NEW.raw_user_meta_data->>'role'
+         ELSE 'student'
+    END
+  )
+  ON CONFLICT (id) DO NOTHING;
+
+  INSERT INTO public.reputation_ledger (user_id, action_type, points, previous_hash, current_hash, metadata)
+  VALUES (
+    NEW.id,
+    'genesis',
+    0,
+    '00000000000000000000000000000000',
+    md5(NEW.id::text || 'genesis' || NOW()::text),
+    '{"message": "Welcome to Ulagat Smart Chain"}'
+  );
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;

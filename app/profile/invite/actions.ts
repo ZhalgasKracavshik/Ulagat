@@ -1,6 +1,8 @@
 'use server';
 
+import { randomInt } from 'crypto';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 /**
  * Generate a 6-digit invite code for parent registration.
@@ -29,8 +31,8 @@ export async function generateInviteCode(studentId: string): Promise<{ code: str
         return { error: 'You can only generate invite codes for your own account' };
     }
 
-    // Generate a random 6-digit numeric code
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    // P2-2: Use cryptographically secure random integer instead of Math.random().
+    const code = randomInt(100000, 1000000).toString();
 
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24);
@@ -44,7 +46,8 @@ export async function generateInviteCode(studentId: string): Promise<{ code: str
     if (error) {
         // If there is a uniqueness conflict, retry once
         if (error.code === '23505') {
-            const retryCode = Math.floor(100000 + Math.random() * 900000).toString();
+            // P2-2: Also use cryptographically secure random for retry.
+            const retryCode = randomInt(100000, 1000000).toString();
             const { error: retryError } = await supabase.from('parent_invite_tokens').insert({
                 token: retryCode,
                 student_id: studentId,
@@ -62,11 +65,15 @@ export async function generateInviteCode(studentId: string): Promise<{ code: str
 /**
  * Validate a parent invite token.
  * Returns the student_id if the token is valid, not expired, and not used.
+ * P2-4: Uses service-role client so anonymous registrants can look up tokens
+ * even after the SELECT policy is restricted to student_id or service_role.
  */
 export async function validateInviteToken(token: string): Promise<{ studentId: string } | { error: string }> {
-    const supabase = await createClient();
+    // P2-4: Use admin client — anon users have no student_id, so the restricted SELECT policy
+    // would deny them access. Service role bypasses RLS for this lookup.
+    const adminClient = createAdminClient();
 
-    const { data, error } = await supabase
+    const { data, error } = await adminClient
         .from('parent_invite_tokens')
         .select('student_id, expires_at, used_at')
         .eq('token', token)

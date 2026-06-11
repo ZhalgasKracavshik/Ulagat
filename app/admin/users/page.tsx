@@ -37,7 +37,8 @@ export default async function AdminUsersPage() {
 
     // Fetch auth users (for email) using the service-role client
     const adminClient = createAdminClient();
-    const { data: authData } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
+    // P1-5: Align limit to 500 to match the profiles query limit.
+    const { data: authData } = await adminClient.auth.admin.listUsers({ perPage: 500 });
     const emailMap = new Map<string, string>(
         (authData?.users ?? []).map((u) => [u.id, u.email ?? ''])
     );
