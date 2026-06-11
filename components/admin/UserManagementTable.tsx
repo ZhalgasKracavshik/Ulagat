@@ -76,6 +76,8 @@ export function UserManagementTable({ users, currentUserId }: UserManagementTabl
                                         <SelectContent>
                                             <SelectItem value="student">Student</SelectItem>
                                             <SelectItem value="teacher">Teacher</SelectItem>
+                                            <SelectItem value="parent">Parent</SelectItem>
+                                            <SelectItem value="parliament">Parliament</SelectItem>
                                             <SelectItem value="moderator">Moderator</SelectItem>
                                             <SelectItem value="admin">Admin</SelectItem>
                                         </SelectContent>
