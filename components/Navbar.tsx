@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
     Trophy,
     BookOpen,
+    CalendarDays,
     Crown,
     LogOut,
     User,
@@ -19,6 +20,8 @@ import {
     Star
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import type { User as AuthUser } from "@supabase/supabase-js";
+import type { Profile } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
     DropdownMenu,
@@ -30,8 +33,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function Navbar() {
-    const [user, setUser] = useState<any>(null);
-    const [profile, setProfile] = useState<any>(null);
+    const [user, setUser] = useState<AuthUser | null>(null);
+    const [profile, setProfile] = useState<(Profile & { reputation?: number }) | null>(null);
     const [pendingFriendRequests, setPendingFriendRequests] = useState(0);
     const [pendingModerationCount, setPendingModerationCount] = useState(0);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -79,6 +82,16 @@ export function Navbar() {
 
     const NavItems = (isMobile = false) => (
         <>
+            {user && (
+                <Link
+                    href="/schedule"
+                    onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                    className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-2 md:gap-1"
+                >
+                    <CalendarDays className="w-5 h-5 md:w-4 md:h-4 text-sky-500 md:text-inherit" />
+                    <span>Schedule</span>
+                </Link>
+            )}
             <Link
                 href="/services"
                 onClick={() => isMobile && setIsMobileMenuOpen(false)}
@@ -192,7 +205,7 @@ export function Navbar() {
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                                         <Avatar className="h-8 w-8">
-                                            <AvatarImage src={profile?.avatar_url} />
+                                            <AvatarImage src={profile?.avatar_url ?? undefined} />
                                             <AvatarFallback>{profile?.full_name?.[0] || 'U'}</AvatarFallback>
                                         </Avatar>
                                     </Button>

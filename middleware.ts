@@ -34,6 +34,10 @@ const PARENT_BLOCKED_ROUTES = [
 // Routes only accessible to admin/moderator
 const ADMIN_ONLY_ROUTES = ['/admin'];
 
+// Schedule management routes — moderator (завуч) and admin only.
+// /schedule itself stays available to every authenticated user.
+const STAFF_ONLY_ROUTES = ['/schedule/manage', '/schedule/substitutions'];
+
 // P1-1: PARLIAMENT_ALLOWED_NEW_ROUTES was declared but never referenced in the middleware logic.
 // Parliament is allowed to access /events/new, /clubs/new, /lost-found/new (same as above comment).
 // The parliament block below explicitly lists the routes parliament CANNOT access (/services/new, /olympiad/new)
@@ -102,6 +106,14 @@ export async function middleware(request: NextRequest) {
     if (ADMIN_ONLY_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'))) {
         if (role !== 'admin' && role !== 'moderator') {
             return NextResponse.redirect(new URL('/home', request.url));
+        }
+        return sessionResponse;
+    }
+
+    // Staff-only schedule routes (manage timetable / enter substitutions)
+    if (STAFF_ONLY_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'))) {
+        if (role !== 'admin' && role !== 'moderator') {
+            return NextResponse.redirect(new URL('/schedule', request.url));
         }
         return sessionResponse;
     }

@@ -1,4 +1,5 @@
 
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,6 +58,36 @@ export default async function EditProfilePage() {
                                 />
                             </div>
 
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="grade">Grade</Label>
+                                    <Input
+                                        id="grade"
+                                        name="grade"
+                                        type="number"
+                                        min={1}
+                                        max={11}
+                                        defaultValue={profile?.grade ?? ''}
+                                        placeholder="e.g. 7"
+                                        className="h-11"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="class_letter">Class letter</Label>
+                                    <Input
+                                        id="class_letter"
+                                        name="class_letter"
+                                        maxLength={3}
+                                        defaultValue={profile?.class_letter ?? ''}
+                                        placeholder="e.g. А"
+                                        className="h-11"
+                                    />
+                                </div>
+                                <p className="col-span-2 text-xs text-muted-foreground -mt-2">
+                                    Your grade and class letter are used to show your class schedule.
+                                </p>
+                            </div>
+
                             <div className="space-y-2">
                                 <Label htmlFor="bio">Bio</Label>
                                 <Textarea
@@ -83,9 +114,9 @@ export default async function EditProfilePage() {
 
                     {/* Action Buttons */}
                     <div className="flex gap-4 pt-4">
-                        <a href="/profile/me" className="w-full">
+                        <Link href="/profile/me" className="w-full">
                             <Button variant="outline" className="w-full h-12 text-base" type="button">Cancel</Button>
-                        </a>
+                        </Link>
                         <Button type="submit" className="w-full h-12 text-base font-bold">Save Changes</Button>
                     </div>
                 </form>

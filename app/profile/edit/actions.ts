@@ -15,12 +15,21 @@ export async function updateProfile(formData: FormData) {
     const avatar_url = formData.get("avatar_url") as string;
     const social_links_raw = formData.get("social_links") as string;
 
+    // Grade / class letter (used by the schedule page)
+    const gradeRaw = (formData.get("grade") as string | null)?.trim() ?? "";
+    const gradeNumber = Number(gradeRaw);
+    const grade = gradeRaw && Number.isInteger(gradeNumber) && gradeNumber >= 1 && gradeNumber <= 11
+        ? gradeNumber
+        : null;
+    const classLetterRaw = (formData.get("class_letter") as string | null)?.trim() ?? "";
+    const class_letter = classLetterRaw ? classLetterRaw.slice(0, 3) : null;
+
     // Parse social links JSON
-    let social_links = [];
+    let social_links: { network?: string; url?: string }[] = [];
     try {
         social_links = JSON.parse(social_links_raw || "[]");
         // Filter out empty URLs
-        social_links = social_links.filter((link: any) => link.url && link.url.trim() !== "");
+        social_links = social_links.filter((link) => link.url && link.url.trim() !== "");
     } catch {
         social_links = [];
     }
@@ -31,6 +40,8 @@ export async function updateProfile(formData: FormData) {
             bio,
             avatar_url,
             social_links,
+            grade,
+            class_letter,
         }).eq("id", user.id);
 
         if (error) throw error;
