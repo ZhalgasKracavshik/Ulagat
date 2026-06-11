@@ -86,6 +86,7 @@ export function UsersManagementTable({ users, currentUserId }: UsersManagementTa
                 <TableHeader>
                     <TableRow>
                         <TableHead>User</TableHead>
+                        <TableHead>Email</TableHead>
                         <TableHead>Role</TableHead>
                         <TableHead>Grade / Class</TableHead>
                         <TableHead>Joined</TableHead>
@@ -119,6 +120,9 @@ export function UsersManagementTable({ users, currentUserId }: UsersManagementTa
                                             <p className="text-xs text-muted-foreground">{user.id.slice(0, 8)}…</p>
                                         </div>
                                     </div>
+                                </TableCell>
+                                <TableCell className="text-sm text-muted-foreground">
+                                    {user.email || '—'}
                                 </TableCell>
                                 <TableCell>
                                     <Badge variant="outline" className={roleBadgeClass(user.role)}>

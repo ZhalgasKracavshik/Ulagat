@@ -119,9 +119,16 @@ export async function middleware(request: NextRequest) {
         return sessionResponse;
     }
 
-    // Parliament role: same as student but can also access creation routes
+    // Parliament role: same as student EXCEPT parliament-allowed creation routes are unblocked
     if (role === 'parliament') {
-        // Parliament can access all student routes AND parliament-specific ones
+        // Block the teacher/admin-only routes that parliament cannot access
+        const teacherOnlyRoutes = ['/services/new', '/olympiad/new'];
+        const isBlocked = teacherOnlyRoutes.some(
+            (r) => pathname === r || pathname.startsWith(r + '/')
+        );
+        if (isBlocked) {
+            return NextResponse.redirect(new URL('/home', request.url));
+        }
         return sessionResponse;
     }
 

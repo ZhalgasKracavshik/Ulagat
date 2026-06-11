@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import { ShieldAlert, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,15 +28,24 @@ export default async function AdminUsersPage() {
         );
     }
 
-    const { data: allUsers } = await supabase
+    // Fetch profiles data
+    const { data: allProfiles } = await supabase
         .from('profiles')
         .select('id, full_name, avatar_url, role, grade, class_letter, created_at, external_skud_id')
         .order('created_at', { ascending: false })
         .limit(500);
 
-    const users: AdminUserRow[] = (allUsers ?? []).map((u) => ({
+    // Fetch auth users (for email) using the service-role client
+    const adminClient = createAdminClient();
+    const { data: authData } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
+    const emailMap = new Map<string, string>(
+        (authData?.users ?? []).map((u) => [u.id, u.email ?? ''])
+    );
+
+    const users: AdminUserRow[] = (allProfiles ?? []).map((u) => ({
         id: u.id,
         full_name: u.full_name ?? '',
+        email: emailMap.get(u.id) ?? '',
         avatar_url: u.avatar_url ?? null,
         role: u.role ?? 'student',
         grade: u.grade ?? null,

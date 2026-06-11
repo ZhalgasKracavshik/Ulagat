@@ -82,6 +82,7 @@ export type FamilyBond = {
 export type AdminUserRow = {
     id: string;
     full_name: string;
+    email: string;
     avatar_url: string | null;
     role: UserRole;
     grade: number | null;
