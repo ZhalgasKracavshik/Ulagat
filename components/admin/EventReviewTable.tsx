@@ -5,15 +5,18 @@ import { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Check, X, Eye, FileText } from "lucide-react";
-import { approveService, rejectService } from "@/app/admin/actions";
+import { Check, X, Eye, Calendar, MapPin, FileText } from "lucide-react";
+import { approveEvent, rejectEvent } from "@/app/admin/actions";
 import Image from "next/image";
+import { format } from "date-fns";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-interface ServiceReviewTableProps {
-    services: any[];
+interface EventReviewTableProps {
+    events: any[];
 }
 
-export function ServiceReviewTable({ services }: ServiceReviewTableProps) {
+export function EventReviewTable({ events }: EventReviewTableProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [rejectionReason, setRejectionReason] = useState("");
     const [showRejectDialog, setShowRejectDialog] = useState(false);
@@ -21,22 +24,22 @@ export function ServiceReviewTable({ services }: ServiceReviewTableProps) {
 
     async function handleApprove(id: string) {
         setIsLoading(true);
-        await approveService(id);
+        await approveEvent(id);
         setIsLoading(false);
     }
 
     async function handleReject() {
         if (!selectedId || !rejectionReason.trim()) return;
         setIsLoading(true);
-        await rejectService(selectedId, rejectionReason);
+        await rejectEvent(selectedId, rejectionReason);
         setIsLoading(false);
         setShowRejectDialog(false);
         setRejectionReason("");
         setSelectedId(null);
     }
 
-    if (!services || services.length === 0) {
-        return <div className="text-center py-12 text-muted-foreground">No pending services to review. 🎉</div>;
+    if (!events || events.length === 0) {
+        return <div className="text-center py-12 text-muted-foreground">No pending events to review. 🏆</div>;
     }
 
     return (
@@ -44,55 +47,63 @@ export function ServiceReviewTable({ services }: ServiceReviewTableProps) {
             <TableHeader>
                 <TableRow>
                     <TableHead>Title</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Owner</TableHead>
-                    <TableHead>Price</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Organizer</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {services.map((service) => (
-                    <TableRow key={service.id}>
-                        <TableCell className="font-medium">{service.title}</TableCell>
-                        <TableCell>{service.category || 'N/A'}</TableCell>
-                        <TableCell>{service.profiles?.full_name}</TableCell>
-                        <TableCell>{service.price} ₸</TableCell>
+                {events.map((event) => (
+                    <TableRow key={event.id}>
+                        <TableCell className="font-medium">{event.title}</TableCell>
+                        <TableCell className="whitespace-nowrap">
+                            {format(new Date(event.event_date), 'MMM d, h:mm a')}
+                        </TableCell>
+                        <TableCell>{event.location || 'School Hall'}</TableCell>
+                        <TableCell>{event.profiles?.full_name}</TableCell>
                         <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-2">
                                 <Dialog>
                                     <DialogTrigger asChild>
-                                        <Button variant="ghost" size="sm" onClick={() => setSelectedId(service.id)}>
+                                        <Button variant="ghost" size="sm">
                                             <Eye className="w-4 h-4 mr-2" />
                                             View
                                         </Button>
                                     </DialogTrigger>
                                     <DialogContent className="max-w-2xl">
                                         <DialogHeader>
-                                            <DialogTitle>{service.title}</DialogTitle>
+                                            <DialogTitle>{event.title}</DialogTitle>
                                             <DialogDescription>
-                                                Posted by {service.profiles?.full_name} • {new Date(service.created_at).toLocaleDateString()}
+                                                Organized by {event.profiles?.full_name}
                                             </DialogDescription>
                                         </DialogHeader>
 
                                         <div className="grid gap-4 py-4">
-                                            {service.image_url && (
+                                            {event.image_url && (
                                                 <div className="relative h-64 w-full rounded-lg overflow-hidden bg-slate-100">
-                                                    <Image src={service.image_url} alt={service.title} fill className="object-cover" />
+                                                    <Image src={event.image_url} alt={event.title} fill className="object-cover" />
                                                 </div>
                                             )}
+
+                                            <div className="flex flex-col gap-2">
+                                                <div className="flex items-center gap-2 text-sm text-slate-600">
+                                                    <Calendar className="w-4 h-4 text-blue-500" />
+                                                    <strong>{format(new Date(event.event_date), 'EEEE, MMMM do yyyy @ h:mm a')}</strong>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-sm text-slate-600">
+                                                    <MapPin className="w-4 h-4 text-red-500" />
+                                                    <span>{event.location || 'School Hall'}</span>
+                                                </div>
+                                            </div>
 
                                             <div className="space-y-2">
                                                 <h4 className="font-medium flex items-center gap-2">
                                                     <FileText className="w-4 h-4" /> Description
                                                 </h4>
-                                                <p className="text-sm text-slate-600 dark:text-slate-300 whitespace-pre-wrap bg-slate-50 p-4 rounded-md">
-                                                    {service.description}
-                                                </p>
-                                            </div>
-
-                                            <div className="flex gap-4 text-sm">
-                                                <div className="bg-slate-100 px-3 py-1 rounded">Price: <strong>{service.price} ₸</strong></div>
-                                                <div className="bg-slate-100 px-3 py-1 rounded">Category: <strong>{service.category}</strong></div>
+                                                <div className="text-sm text-slate-600 dark:text-slate-300 whitespace-pre-wrap bg-slate-50 p-4 rounded-md max-h-40 overflow-y-auto border border-dashed">
+                                                    {event.description}
+                                                </div>
                                             </div>
                                         </div>
 
@@ -100,7 +111,7 @@ export function ServiceReviewTable({ services }: ServiceReviewTableProps) {
                                             <Button
                                                 variant="outline"
                                                 onClick={() => {
-                                                    setSelectedId(service.id);
+                                                    setSelectedId(event.id);
                                                     setShowRejectDialog(true);
                                                 }}
                                                 disabled={isLoading}
@@ -108,7 +119,7 @@ export function ServiceReviewTable({ services }: ServiceReviewTableProps) {
                                                 <X className="w-4 h-4 mr-2" />
                                                 Reject
                                             </Button>
-                                            <Button onClick={() => handleApprove(service.id)} disabled={isLoading} className="bg-green-600 hover:bg-green-700">
+                                            <Button onClick={() => handleApprove(event.id)} disabled={isLoading} className="bg-green-600 hover:bg-green-700">
                                                 <Check className="w-4 h-4 mr-2" />
                                                 Approve
                                             </Button>
@@ -127,16 +138,17 @@ export function ServiceReviewTable({ services }: ServiceReviewTableProps) {
                     <DialogHeader>
                         <DialogTitle>Reason for Rejection</DialogTitle>
                         <DialogDescription>
-                            Please provide a brief reason why this service is being rejected. The teacher will see this feedback.
+                            Please provide a brief reason why this event is being rejected. The organizer will see this feedback.
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="py-4 space-y-2">
-                        <label htmlFor="reason" className="text-sm font-medium">Rejection Reason</label>
+                    <div className="py-4">
+                        <Label htmlFor="reason">Rejection Reason</Label>
                         <Input
                             id="reason"
-                            placeholder="e.g. Inappropriate content, misleading price, etc."
+                            placeholder="e.g. Inappropriate content, duplicant event, etc."
                             value={rejectionReason}
                             onChange={(e) => setRejectionReason(e.target.value)}
+                            className="mt-2"
                         />
                     </div>
                     <DialogFooter>
@@ -150,5 +162,3 @@ export function ServiceReviewTable({ services }: ServiceReviewTableProps) {
         </Table>
     );
 }
-
-import { Input } from "@/components/ui/input";

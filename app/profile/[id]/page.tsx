@@ -11,6 +11,7 @@ import { FriendButton } from "@/components/shared/FriendButton";
 import { AchievementsSection } from "@/components/profile/AchievementsSection";
 import { ContactTutorButton } from "@/components/shared/ContactTutorButton";
 import { InviteParentSection } from "@/components/profile/InviteParentSection";
+import { verifyChain } from "@/lib/reputation";
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -78,6 +79,7 @@ export default async function ProfilePage({ params }: PageProps) {
 
     const totalPoints = repBlocks?.reduce((sum: number, b: any) => sum + (b.points || 0), 0) || 0;
     const totalActions = repBlocks?.filter((b: any) => b.action_type !== 'genesis').length || 0;
+    const isChainValid = await verifyChain(id);
 
     // Fetch Friends
     const { data: friendships } = await supabase
@@ -161,10 +163,17 @@ export default async function ProfilePage({ params }: PageProps) {
                                     <Badge variant="secondary" className="capitalize px-3 py-1">
                                         {profile.role}
                                     </Badge>
-                                    <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-green-200 gap-1">
-                                        <ShieldCheck className="w-3 h-3" />
-                                        Verified
-                                    </Badge>
+                                    {isChainValid ? (
+                                        <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-green-200 gap-1">
+                                            <ShieldCheck className="w-3 h-3" />
+                                            Verified
+                                        </Badge>
+                                    ) : (
+                                        <Badge className="bg-red-100 text-red-700 hover:bg-red-100 border-red-200 gap-1" title="Reputation ledger has been tampered with">
+                                            <ShieldCheck className="w-3 h-3" />
+                                            Invalid Ledger
+                                        </Badge>
+                                    )}
                                 </div>
                             </div>
 

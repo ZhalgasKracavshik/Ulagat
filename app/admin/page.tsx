@@ -4,6 +4,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShieldAlert, Users, ListFilter, BookOpen } from "lucide-react";
 import { ServiceReviewTable } from "@/components/admin/ServiceReviewTable";
+import { EventReviewTable } from "@/components/admin/EventReviewTable";
+import { MaterialReviewTable } from "@/components/admin/MaterialReviewTable";
 import { UserManagementTable } from "@/components/admin/UserManagementTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,11 +42,11 @@ export default async function AdminPage() {
     const { count: eventCount } = await supabase.from('events').select('*', { count: 'exact', head: true });
 
     // Fetch Pending Content
-    const { data: pendingServices } = await supabase
-        .from('services')
-        .select('*, profiles:owner_id(full_name)')
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false });
+    const [{ data: pendingServices }, { data: pendingEvents }, { data: pendingMaterials }] = await Promise.all([
+        supabase.from('services').select('*, profiles:owner_id(full_name)').eq('status', 'pending').order('created_at', { ascending: false }),
+        supabase.from('events').select('*, profiles:organizer_id(full_name)').eq('status', 'pending').order('created_at', { ascending: false }),
+        supabase.from('study_materials').select('*, profiles:uploaded_by(full_name)').eq('status', 'pending').order('created_at', { ascending: false })
+    ]);
 
     // Fetch ALL Services (for moderation tab)
     const { data: allServices } = await supabase
@@ -104,18 +106,48 @@ export default async function AdminPage() {
             {/* Management Tabs */}
             <Tabs defaultValue="services" className="w-full">
                 <TabsList className="w-full md:w-auto">
-                    <TabsTrigger value="services" className="flex-1 md:flex-none">Pending Services</TabsTrigger>
+                    <TabsTrigger value="services" className="flex-1 md:flex-none">
+                        Services {pendingServices && pendingServices.length > 0 && <Badge className="ml-2 bg-red-500">{pendingServices.length}</Badge>}
+                    </TabsTrigger>
+                    <TabsTrigger value="events" className="flex-1 md:flex-none">
+                        Events {pendingEvents && pendingEvents.length > 0 && <Badge className="ml-2 bg-red-500">{pendingEvents.length}</Badge>}
+                    </TabsTrigger>
+                    <TabsTrigger value="materials" className="flex-1 md:flex-none">
+                        Materials {pendingMaterials && pendingMaterials.length > 0 && <Badge className="ml-2 bg-red-500">{pendingMaterials.length}</Badge>}
+                    </TabsTrigger>
                     <TabsTrigger value="all-services" className="flex-1 md:flex-none">All Services</TabsTrigger>
-                    <TabsTrigger value="users" className="flex-1 md:flex-none">User Management</TabsTrigger>
+                    <TabsTrigger value="users" className="flex-1 md:flex-none">Users</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="services" className="space-y-4">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Review Listings</CardTitle>
+                            <CardTitle>Review Service Listings</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <ServiceReviewTable services={pendingServices || []} />
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="events" className="space-y-4">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Review Events & Olympiads</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <EventReviewTable events={pendingEvents || []} />
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="materials" className="space-y-4">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Review Study Materials</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <MaterialReviewTable materials={pendingMaterials || []} />
                         </CardContent>
                     </Card>
                 </TabsContent>

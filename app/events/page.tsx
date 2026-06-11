@@ -22,6 +22,7 @@ export default async function EventsPage() {
     const { data: events } = await supabase
         .from('events')
         .select('*, profiles:organizer_id(*)')
+        .eq('status', 'active')
         .order('event_date', { ascending: true });
 
     // Get registration counts for all events

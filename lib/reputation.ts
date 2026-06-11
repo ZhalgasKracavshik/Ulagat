@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import crypto from 'crypto';
 
+const REPUTATION_SECRET = process.env.REPUTATION_SECRET || 'default-ulagat-secret-salt-2026';
+
 /**
  * Calculates the SHA-256 hash of a block's content.
  */
@@ -12,7 +14,7 @@ export function calculateHash(
   timestamp: string,
   metadata: any
 ): string {
-  const data = `${userId}${action}${points}${previousHash}${timestamp}${JSON.stringify(metadata)}`;
+  const data = `${userId}${action}${points}${previousHash}${timestamp}${JSON.stringify(metadata)}${REPUTATION_SECRET}`;
   return crypto.createHash('sha256').update(data).digest('hex');
 }
 

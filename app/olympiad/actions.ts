@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 export async function addStudyMaterial(formData: FormData) {
     const supabase = await createClient();
@@ -12,7 +13,7 @@ export async function addStudyMaterial(formData: FormData) {
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
 
     if (!profile || !['admin', 'moderator'].includes(profile.role)) {
-        throw new Error("Unauthorized");
+        throw new Error("Unauthorized: Only admins and moderators can add materials.");
     }
 
     const title = formData.get("title") as string;
@@ -36,8 +37,9 @@ export async function addStudyMaterial(formData: FormData) {
 
     if (error) {
         console.error("Error adding study material:", error);
-        throw new Error("Failed to add material");
+        throw new Error("Failed to add material. Please check if the study_materials table exists.");
     }
 
+    revalidatePath("/olympiad");
     redirect("/olympiad");
 }

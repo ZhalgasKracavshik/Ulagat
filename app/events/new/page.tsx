@@ -27,88 +27,102 @@ export default async function NewEventPage() {
 
     if (profile?.role !== 'admin' && profile?.role !== 'moderator') {
         return (
-            <div className="container py-20 text-center text-destructive">
-                <ShieldAlert className="w-16 h-16 mx-auto mb-4" />
-                <h1 className="text-2xl font-bold">Access Denied</h1>
-                <p>Only Admins and Moderators can create events.</p>
-                <Button className="mt-4" variant="outline" asChild><a href="/events">Back to Events</a></Button>
+            <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50/50">
+                <Card className="max-w-md w-full border-0 shadow-2xl text-center p-8 space-y-4">
+                    <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                        <ShieldAlert className="w-10 h-10 text-red-600" />
+                    </div>
+                    <CardTitle className="text-2xl font-bold text-slate-900">Access Denied</CardTitle>
+                    <p className="text-slate-600">Only Admins and Moderators can create events/olympiads.</p>
+                    <Button variant="outline" className="w-full mt-4" asChild>
+                        <a href="/events">Back to Events</a>
+                    </Button>
+                </Card>
             </div>
         );
     }
+
     return (
-        <div className="container py-10 max-w-2xl">
-            <Card className="border-blue-200">
-                <CardHeader>
-                    <CardTitle className="text-blue-900">Host an Event / Olympiad</CardTitle>
-                    <CardDescription>
-                        Organize a competition or workshop for the school.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <form action={createEvent} className="space-y-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="title">Event Title</Label>
-                            <Input id="title" name="title" placeholder="e.g. Math Olympiad Spring 2026" required />
-                        </div>
+        <div className="min-h-screen bg-slate-50/50 py-12 px-4">
+            <div className="max-w-2xl mx-auto space-y-8">
+                <div className="text-center space-y-2">
+                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Host an Event / Olympiad</h1>
+                    <p className="text-slate-500">Organize a competition or workshop for the school community.</p>
+                </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                <Card className="border-0 shadow-xl shadow-blue-100/50 overflow-hidden">
+                    <div className="h-2 bg-gradient-to-r from-blue-500 via-cyan-500 to-indigo-500" />
+                    <CardHeader className="pb-4">
+                        <CardTitle className="text-xl">Event Details</CardTitle>
+                        <CardDescription>
+                            Fill in the details to announce your event.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <form action={createEvent} className="space-y-6">
                             <div className="space-y-2">
-                                <Label htmlFor="event_date">Date & Time</Label>
-                                <Input id="event_date" name="event_date" type="datetime-local" required />
+                                <Label htmlFor="title" className="text-sm font-semibold text-slate-700">Event Title</Label>
+                                <Input id="title" name="title" placeholder="e.g. Math Olympiad Spring 2026" required className="h-11 border-slate-200 focus:ring-blue-500 rounded-lg shadow-sm" />
                             </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="event_date" className="text-sm font-semibold text-slate-700">Date & Time</Label>
+                                    <Input id="event_date" name="event_date" type="datetime-local" required className="h-11 border-slate-200 focus:ring-blue-500 rounded-lg shadow-sm" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="location" className="text-sm font-semibold text-slate-700">Location</Label>
+                                    <Input id="location" name="location" placeholder="e.g. Auditorium" className="h-11 border-slate-200 focus:ring-blue-500 rounded-lg shadow-sm" />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+                                <div className="space-y-2">
+                                    <Label htmlFor="max_students" className="text-sm font-semibold text-slate-700">Max Students (optional)</Label>
+                                    <Input id="max_students" name="max_students" type="number" min="1" placeholder="e.g. 30" className="h-11 border-slate-200 focus:ring-blue-500 rounded-lg shadow-sm" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-semibold text-slate-700 text-center block">Cover Image</Label>
+                                    <div className="border border-dashed border-slate-300 rounded-lg p-2 bg-slate-50/50">
+                                        <ImageUpload bucketName="event-images" />
+                                    </div>
+                                </div>
+                            </div>
+
                             <div className="space-y-2">
-                                <Label htmlFor="location">Location</Label>
-                                <Input id="location" name="location" placeholder="e.g. Auditorium" />
+                                <Label htmlFor="duration" className="text-sm font-semibold text-slate-700">Visibility Duration</Label>
+                                <Select name="duration" defaultValue="30">
+                                    <SelectTrigger className="h-11 border-slate-200 rounded-lg shadow-sm">
+                                        <SelectValue placeholder="How long should this be visible?" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="7">7 Days</SelectItem>
+                                        <SelectItem value="14">14 Days</SelectItem>
+                                        <SelectItem value="30">30 Days (Default)</SelectItem>
+                                        <SelectItem value="60">60 Days</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <p className="text-[11px] text-muted-foreground italic">Post will auto-expire and be archived after this period.</p>
                             </div>
-                        </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="max_students">Max Students (optional)</Label>
-                            <Input id="max_students" name="max_students" type="number" min="1" placeholder="e.g. 30 — leave empty for unlimited" />
-                            <p className="text-xs text-muted-foreground">Set a limit on how many students can register.</p>
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="image">Cover Image</Label>
-                            <div className="border-2 border-dashed rounded-lg p-4 text-center">
-                                <ImageUpload bucketName="event-images" />
+                            <div className="space-y-2">
+                                <Label htmlFor="description" className="text-sm font-semibold text-slate-700">Description & Rules</Label>
+                                <Textarea
+                                    id="description"
+                                    name="description"
+                                    placeholder="Describe the event, rules, and prizes..."
+                                    className="min-h-[120px] border-slate-200 focus:ring-blue-500 resize-none rounded-lg shadow-sm"
+                                    required
+                                />
                             </div>
-                        </div>
 
-                        {/* Duration Selection */}
-                        <div className="space-y-2">
-                            <Label htmlFor="duration">Duration</Label>
-                            <Select name="duration" defaultValue="30">
-                                <SelectTrigger>
-                                    <SelectValue placeholder="How long should this be visible?" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="7">7 Days</SelectItem>
-                                    <SelectItem value="14">14 Days</SelectItem>
-                                    <SelectItem value="30">30 Days (Default)</SelectItem>
-                                    <SelectItem value="60">60 Days</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <p className="text-xs text-muted-foreground">Post will auto-expire after this period.</p>
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="description">Description & Rules</Label>
-                            <Textarea
-                                id="description"
-                                name="description"
-                                placeholder="Describe the event, rules, and prizes..."
-                                className="min-h-[120px]"
-                                required
-                            />
-                        </div>
-
-                        <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 font-bold text-lg h-12">
-                            Publish Event
-                        </Button>
-                    </form>
-                </CardContent>
-            </Card>
+                            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg h-14 rounded-xl shadow-lg transition-all active:scale-[0.98] mt-4">
+                                Publish Event
+                            </Button>
+                        </form>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     );
 }

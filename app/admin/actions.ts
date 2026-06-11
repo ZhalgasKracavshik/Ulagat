@@ -25,19 +25,40 @@ async function checkPermission() {
 
 export async function approveService(serviceId: string) {
     const { supabase } = await checkPermission();
-    await supabase.from('services').update({ status: 'active' }).eq('id', serviceId);
-
-    // Evaluate if we should award reputation points here
-    // const { data: service } = await supabase.from('services').select('owner_id').eq('id', serviceId).single();
-    // if(service) await mineBlock(service.owner_id, 'service_approved', 10);
-
+    await supabase.from('services').update({ status: 'active', rejection_reason: null }).eq('id', serviceId);
     revalidatePath('/admin');
     revalidatePath('/services');
 }
 
-export async function rejectService(serviceId: string) {
+export async function rejectService(serviceId: string, reason: string) {
     const { supabase } = await checkPermission();
-    await supabase.from('services').update({ status: 'archived' }).eq('id', serviceId);
+    await supabase.from('services').update({ status: 'rejected', rejection_reason: reason }).eq('id', serviceId);
+    revalidatePath('/admin');
+}
+
+export async function approveEvent(eventId: string) {
+    const { supabase } = await checkPermission();
+    await supabase.from('events').update({ status: 'active', rejection_reason: null }).eq('id', eventId);
+    revalidatePath('/admin');
+    revalidatePath('/events');
+}
+
+export async function rejectEvent(eventId: string, reason: string) {
+    const { supabase } = await checkPermission();
+    await supabase.from('events').update({ status: 'rejected', rejection_reason: reason }).eq('id', eventId);
+    revalidatePath('/admin');
+}
+
+export async function approveMaterial(materialId: string) {
+    const { supabase } = await checkPermission();
+    await supabase.from('study_materials').update({ status: 'active', rejection_reason: null }).eq('id', materialId);
+    revalidatePath('/admin');
+    revalidatePath('/olympiad');
+}
+
+export async function rejectMaterial(materialId: string, reason: string) {
+    const { supabase } = await checkPermission();
+    await supabase.from('study_materials').update({ status: 'rejected', rejection_reason: reason }).eq('id', materialId);
     revalidatePath('/admin');
 }
 

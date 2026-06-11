@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Crown, Medal, Trophy, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
-export const dynamic = 'force-dynamic'; // Force refresh
+export const revalidate = 60; // Cache for 60 seconds (ISR) to prevent database overload
 
 export default async function LeaderboardPage() {
     const supabase = await createClient();

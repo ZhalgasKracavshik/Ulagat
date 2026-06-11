@@ -4,10 +4,20 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { z } from 'zod'
 
-// P0-1: Only these roles may be self-registered via the public signup form.
-const SELF_REGISTERABLE_ROLES = ['student', 'teacher', 'parent'] as const;
-type SelfRegisterableRole = typeof SELF_REGISTERABLE_ROLES[number];
+// P0-1: The role enum below is the self-registration allowlist —
+// admin/moderator/parliament can NOT be self-registered via the public form.
+const signupSchema = z.object({
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    fullName: z.string()
+        .min(2, "Name must be at least 2 characters")
+        .regex(/^[a-zA-Z\s]+$/, "Please use only Latin letters and spaces"),
+    role: z.enum(["student", "teacher", "parent"], {
+        message: "Invalid role selected",
+    }),
+})
 
 export async function login(formData: FormData) {
     const supabase = await createClient()
@@ -31,16 +41,21 @@ export async function login(formData: FormData) {
 export async function signup(formData: FormData) {
     const supabase = await createClient()
 
-    const email = formData.get('email') as string
-    const password = formData.get('password') as string
-    const fullName = formData.get('fullName') as string
-    const role = formData.get('role') as string
-    const inviteCode = formData.get('inviteCode') as string | null
-
-    // P0-1: Reject any role that is not on the allowlist (prevents admin/moderator/parliament self-registration).
-    if (!SELF_REGISTERABLE_ROLES.includes(role as SelfRegisterableRole)) {
-        return { error: 'Invalid role.' }
+    const rawData = {
+        email: formData.get('email'),
+        password: formData.get('password'),
+        fullName: formData.get('fullName'),
+        role: formData.get('role'),
     }
+
+    const validatedFields = signupSchema.safeParse(rawData)
+
+    if (!validatedFields.success) {
+        return { error: validatedFields.error.issues[0].message }
+    }
+
+    const { email, password, fullName, role } = validatedFields.data
+    const inviteCode = formData.get('inviteCode') as string | null
 
     // If role is parent, validate invite code first (P1-4: save student_id here, reuse later)
     let validatedStudentId: string | null = null

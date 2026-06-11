@@ -1,5 +1,6 @@
 "use client";
 
+import { useFormStatus } from "react-dom";
 import { useState } from "react";
 import { Button, ButtonProps } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -7,26 +8,31 @@ import { cn } from "@/lib/utils";
 
 interface InteractiveButtonProps extends ButtonProps {
     loadingText?: string;
-    shouldShowLoader?: boolean;
+    isLoading?: boolean; // Support external control
 }
 
 export function InteractiveButton({
     children,
     className,
     loadingText,
-    shouldShowLoader = true,
+    isLoading: externalLoading,
     onClick,
     ...props
 }: InteractiveButtonProps) {
-    const [isLoading, setIsLoading] = useState(false);
+    const { pending } = useFormStatus();
+    const [internalLoading, setInternalLoading] = useState(false);
+
+    const isPending = pending || externalLoading || internalLoading;
 
     async function handleClick(e: React.MouseEvent<HTMLButtonElement>) {
-        if (shouldShowLoader) {
-            setIsLoading(true);
-            // Most actions here are links or form submissions, 
-            // but we can simulate/show loader until navigation happens
+        if (onClick) {
+            setInternalLoading(true);
+            try {
+                await onClick(e);
+            } finally {
+                setInternalLoading(false);
+            }
         }
-        if (onClick) await onClick(e);
     }
 
     return (
@@ -38,10 +44,10 @@ export function InteractiveButton({
                 className
             )}
             onClick={handleClick}
-            disabled={isLoading || props.disabled}
+            disabled={isPending || props.disabled}
             {...props}
         >
-            {isLoading && shouldShowLoader ? (
+            {isPending ? (
                 <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     {loadingText || children}
