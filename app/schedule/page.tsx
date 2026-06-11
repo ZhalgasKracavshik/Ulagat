@@ -34,6 +34,8 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sch
 
     const role: string = profile?.role ?? 'student';
     const isStaff = role === 'admin' || role === 'moderator';
+    // Teachers and parliament members also need to view other classes' schedules
+    const canPickClass = isStaff || role === 'teacher' || role === 'parliament';
 
     // ---- Resolve which class to show ----
     let targetGrade: number | null = null;
@@ -65,9 +67,9 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sch
         targetLetter = profile?.class_letter ?? null;
     }
 
-    // Staff can override via the class selector
+    // Staff, teachers and parliament can override via the class selector
     const classOptions: ClassOption[] = [];
-    if (isStaff) {
+    if (canPickClass) {
         const params = await searchParams;
         const paramGrade = parseGrade(params.grade);
         const paramLetter = params.letter?.trim() || null;
@@ -113,7 +115,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sch
                 </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-                {isStaff && classOptions.length > 0 && (
+                {canPickClass && classOptions.length > 0 && (
                     <ClassSelector
                         classes={classOptions}
                         selectedGrade={targetGrade}
