@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FriendButton } from "@/components/shared/FriendButton";
 import { AchievementsSection } from "@/components/profile/AchievementsSection";
 import { ContactTutorButton } from "@/components/shared/ContactTutorButton";
+import { InviteParentSection } from "@/components/profile/InviteParentSection";
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -106,6 +107,20 @@ export default async function ProfilePage({ params }: PageProps) {
                 friendStatus = 'pending_received';
             }
         }
+    }
+
+    // Fetch existing unused invite tokens (only for the profile owner)
+    let existingInviteTokens: { token: string; expires_at: string; used_at: string | null }[] = [];
+    if (isOwner && (profile.role === 'student' || profile.role === 'parliament')) {
+        const { data: tokens } = await supabase
+            .from('parent_invite_tokens')
+            .select('token, expires_at, used_at')
+            .eq('student_id', id)
+            .is('used_at', null)
+            .gt('expires_at', new Date().toISOString())
+            .order('created_at', { ascending: false })
+            .limit(5);
+        existingInviteTokens = tokens || [];
     }
 
     // Build friends list for display
@@ -212,6 +227,14 @@ export default async function ProfilePage({ params }: PageProps) {
                                         Edit Profile
                                     </button>
                                 </Link>
+                            )}
+                            {isOwner && (profile.role === 'student' || profile.role === 'parliament') && (
+                                <div className="w-full max-w-xs">
+                                    <InviteParentSection
+                                        studentId={id}
+                                        existingTokens={existingInviteTokens}
+                                    />
+                                </div>
                             )}
                         </div>
                     </div>

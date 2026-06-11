@@ -41,7 +41,7 @@ export async function rejectService(serviceId: string) {
     revalidatePath('/admin');
 }
 
-export async function updateUserRole(targetUserId: string, newRole: 'student' | 'teacher' | 'moderator' | 'admin') {
+export async function updateUserRole(targetUserId: string, newRole: 'student' | 'teacher' | 'moderator' | 'admin' | 'parent' | 'parliament') {
     const { supabase, role: currentUserRole } = await checkPermission();
 
     // Only Admins can change roles. Moderators cannot.

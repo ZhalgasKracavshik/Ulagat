@@ -6,9 +6,17 @@ import { SubmitButton } from '@/components/auth/submit-button'
 import Link from 'next/link'
 import { useState } from 'react'
 
-export function RegisterForm() {
+interface RegisterFormProps {
+    initialInviteCode?: string
+}
+
+export function RegisterForm({ initialInviteCode }: RegisterFormProps) {
     const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
+    const [role, setRole] = useState<string>(initialInviteCode ? 'parent' : 'student')
+    const [inviteCode, setInviteCode] = useState<string>(initialInviteCode || '')
+
+    const isParent = role === 'parent'
 
     async function handleSubmit(formData: FormData) {
         setIsLoading(true)
@@ -62,12 +70,40 @@ export function RegisterForm() {
                             <select
                                 id="role"
                                 name="role"
+                                value={role}
+                                onChange={(e) => setRole(e.target.value)}
                                 className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             >
                                 <option value="student">Student</option>
                                 <option value="teacher">Teacher</option>
+                                <option value="parent">Parent / Guardian</option>
                             </select>
                         </div>
+
+                        {isParent && (
+                            <div>
+                                <label htmlFor="inviteCode" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
+                                    Invite Code (from your child)
+                                </label>
+                                <input
+                                    id="inviteCode"
+                                    name="inviteCode"
+                                    type="text"
+                                    required={isParent}
+                                    maxLength={6}
+                                    minLength={6}
+                                    pattern="\d{6}"
+                                    title="Enter the 6-digit invite code from your child"
+                                    value={inviteCode}
+                                    onChange={(e) => setInviteCode(e.target.value)}
+                                    className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 tracking-widest text-center text-lg font-mono"
+                                    placeholder="123456"
+                                />
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    Ask your child to generate an invite code from their profile page.
+                                </p>
+                            </div>
+                        )}
 
                         <div>
                             <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-900 dark:text-white">

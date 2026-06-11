@@ -3,7 +3,11 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { RegisterForm } from '@/components/auth/register-form'
 
-export default async function RegisterPage() {
+interface RegisterPageProps {
+    searchParams: Promise<{ invite?: string }>
+}
+
+export default async function RegisterPage({ searchParams }: RegisterPageProps) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -11,5 +15,7 @@ export default async function RegisterPage() {
         redirect('/home')
     }
 
-    return <RegisterForm />
+    const { invite } = await searchParams
+
+    return <RegisterForm initialInviteCode={invite} />
 }
