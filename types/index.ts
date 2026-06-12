@@ -131,6 +131,58 @@ export type Announcement = {
     expires_at: string | null;
 };
 
+export type ClubCategory =
+    | 'debates'
+    | 'it'
+    | 'chess'
+    | 'sport'
+    | 'science'
+    | 'art'
+    | 'music'
+    | 'volunteering'
+    | 'other';
+
+export type ClubStatus = 'active' | 'archived';
+
+export type Club = {
+    id: string;
+    name: string;
+    description: string | null;
+    category: ClubCategory;
+    logo_url: string | null;
+    leader_id: string;
+    status: ClubStatus;
+    points: number;
+    created_at: string;
+};
+
+export type ClubMember = {
+    id: string;
+    club_id: string;
+    user_id: string;
+    joined_at: string;
+    total_attendance: number;
+};
+
+export type ClubMeeting = {
+    id: string;
+    club_id: string;
+    date: string; // ISO date
+    notes: string | null;
+    attendees: string[];
+    created_by: string;
+    created_at: string;
+};
+
+export type ClubAnnouncement = {
+    id: string;
+    club_id: string;
+    title: string;
+    body: string;
+    created_by: string;
+    created_at: string;
+};
+
 /** Subset of Profile used in the admin users management table */
 export type AdminUserRow = {
     id: string;

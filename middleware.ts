@@ -48,6 +48,13 @@ const ANNOUNCEMENT_STAFF_ROUTES = ['/announcements/new'];
 const ACHIEVEMENT_REVIEW_ROUTES = ['/achievements/review'];
 const ACHIEVEMENT_REVIEWER_ROLES = ['parliament', 'moderator', 'admin'];
 
+// Club creation (Phase 7) — parliament, moderator and admin only (teachers
+// don't create clubs). /clubs and /clubs/[id] stay available to every
+// authenticated user; /clubs/[id]/manage is guarded server-side in the page
+// (dynamic route — keep middleware simple).
+const CLUB_CREATE_ROUTES = ['/clubs/new'];
+const CLUB_CREATOR_ROLES = ['parliament', 'moderator', 'admin'];
+
 // Parliament (Phases 3-5): allowed to access every creation route —
 // /events/new, /services/new, /olympiad/new, /clubs/new, /lost-found/new.
 // Server actions + RLS policies enforce the same role rules defensively.
@@ -139,6 +146,14 @@ export async function middleware(request: NextRequest) {
     if (ACHIEVEMENT_REVIEW_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'))) {
         if (!ACHIEVEMENT_REVIEWER_ROLES.includes(role)) {
             return NextResponse.redirect(new URL('/home', request.url));
+        }
+        return sessionResponse;
+    }
+
+    // Club creation (parliament / moderator / admin)
+    if (CLUB_CREATE_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'))) {
+        if (!CLUB_CREATOR_ROLES.includes(role)) {
+            return NextResponse.redirect(new URL('/clubs', request.url));
         }
         return sessionResponse;
     }
