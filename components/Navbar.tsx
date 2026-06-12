@@ -17,7 +17,8 @@ import {
     Menu,
     X,
     ShieldCheck,
-    Star
+    Star,
+    Megaphone
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { User as AuthUser } from "@supabase/supabase-js";
@@ -82,6 +83,16 @@ export function Navbar() {
 
     const NavItems = (isMobile = false) => (
         <>
+            {user && (
+                <Link
+                    href="/announcements"
+                    onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                    className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-2 md:gap-1"
+                >
+                    <Megaphone className="w-5 h-5 md:w-4 md:h-4 text-indigo-500 md:text-inherit" />
+                    <span>Announcements</span>
+                </Link>
+            )}
             {user && (
                 <Link
                     href="/schedule"

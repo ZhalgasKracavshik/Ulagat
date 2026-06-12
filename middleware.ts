@@ -38,6 +38,10 @@ const ADMIN_ONLY_ROUTES = ['/admin'];
 // /schedule itself stays available to every authenticated user.
 const STAFF_ONLY_ROUTES = ['/schedule/manage', '/schedule/substitutions'];
 
+// Announcement creation — moderator and admin only.
+// /announcements itself stays available to every authenticated user.
+const ANNOUNCEMENT_STAFF_ROUTES = ['/announcements/new'];
+
 // P1-1: PARLIAMENT_ALLOWED_NEW_ROUTES was declared but never referenced in the middleware logic.
 // Parliament is allowed to access /events/new, /clubs/new, /lost-found/new (same as above comment).
 // The parliament block below explicitly lists the routes parliament CANNOT access (/services/new, /olympiad/new)
@@ -114,6 +118,14 @@ export async function middleware(request: NextRequest) {
     if (STAFF_ONLY_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'))) {
         if (role !== 'admin' && role !== 'moderator') {
             return NextResponse.redirect(new URL('/schedule', request.url));
+        }
+        return sessionResponse;
+    }
+
+    // Staff-only announcement routes (publish official announcements)
+    if (ANNOUNCEMENT_STAFF_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'))) {
+        if (role !== 'admin' && role !== 'moderator') {
+            return NextResponse.redirect(new URL('/announcements', request.url));
         }
         return sessionResponse;
     }

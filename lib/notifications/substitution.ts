@@ -1,6 +1,6 @@
-import { Resend } from 'resend';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getPeriodTime } from '@/lib/schedule/bells';
+import { escapeHtml, resolveEmails, sendBatchEmails, type NotifyResult } from '@/lib/notifications/shared';
 import type { ScheduleEntry, Substitution } from '@/types';
 
 const TYPE_LABELS: Record<Substitution['type'], string> = {
@@ -9,14 +9,7 @@ const TYPE_LABELS: Record<Substitution['type'], string> = {
     room_change: 'Смена кабинета',
 };
 
-export type NotifyResult = {
-    /** Number of emails handed to Resend. */
-    sent: number;
-    /** True when RESEND_API_KEY is not configured and sending was skipped. */
-    skipped: boolean;
-    /** True when recipient lookup or email delivery (partially) failed — distinct from "no recipients". */
-    failed: boolean;
-};
+export type { NotifyResult };
 
 function formatDateRu(isoDate: string): string {
     const months = [
@@ -25,14 +18,6 @@ function formatDateRu(isoDate: string): string {
     ];
     const d = new Date(isoDate + 'T00:00:00');
     return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
-}
-
-function escapeHtml(value: string): string {
-    return value
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
 }
 
 function buildEmailHtml(substitution: Substitution, lesson: ScheduleEntry | null): string {
@@ -79,14 +64,6 @@ function buildEmailHtml(substitution: Substitution, lesson: ScheduleEntry | null
             Это автоматическое уведомление платформы Ulagat (школа BINOM).
         </p>
     </div>`;
-}
-
-function chunked<T>(items: T[], size: number): T[][] {
-    const out: T[][] = [];
-    for (let i = 0; i < items.length; i += size) {
-        out.push(items.slice(i, i + size));
-    }
-    return out;
 }
 
 /**
@@ -170,34 +147,10 @@ export async function notifySubstitution(substitutionId: string): Promise<Notify
     }
 
     // 5. Resolve emails via the auth admin API (profiles don't store emails).
-    //    The recipient set is small (one class + parents), so look users up
-    //    individually in parallel instead of paging through all auth users.
-    const lookups = await Promise.all(
-        Array.from(recipientIds).map(async (id) => {
-            try {
-                const { data, error } = await admin.auth.admin.getUserById(id);
-                if (error) return { id, email: null, failed: true };
-                return { id, email: data.user?.email ?? null, failed: false };
-            } catch (error) {
-                console.error('[notify-substitution] getUserById threw for', id, error);
-                return { id, email: null, failed: true };
-            }
-        })
-    );
+    const resolved = await resolveEmails(admin, recipientIds, '[notify-substitution]');
+    failed = failed || resolved.failed;
 
-    const failedLookups = lookups.filter((l) => l.failed);
-    if (failedLookups.length > 0) {
-        console.error(
-            `[notify-substitution] failed to resolve ${failedLookups.length} recipient(s):`,
-            failedLookups.map((l) => l.id)
-        );
-        failed = true;
-    }
-
-    const uniqueEmails = Array.from(
-        new Set(lookups.map((l) => l.email).filter((e): e is string => Boolean(e)))
-    );
-    if (uniqueEmails.length === 0) {
+    if (resolved.emails.length === 0) {
         console.log('[notify-substitution] recipients found but none has an email address');
         return { sent: 0, skipped: false, failed };
     }
@@ -205,32 +158,6 @@ export async function notifySubstitution(substitutionId: string): Promise<Notify
     const subject = `Изменение в расписании — ${formatDateRu(substitution.date)}`;
     const html = buildEmailHtml(substitution, lesson);
 
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) {
-        console.warn(
-            `[notify-substitution] RESEND_API_KEY not set — skipping email send. ` +
-            `Would have notified ${uniqueEmails.length} recipient(s): "${subject}"`
-        );
-        return { sent: 0, skipped: true, failed };
-    }
-
-    const resend = new Resend(apiKey);
-    const from = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
-
-    let sent = 0;
-    // Resend batch API accepts up to 100 emails per call
-    for (const batch of chunked(uniqueEmails, 100)) {
-        const { error } = await resend.batch.send(
-            batch.map((to) => ({ from, to: [to], subject, html }))
-        );
-        if (error) {
-            console.error('[notify-substitution] Resend batch error:', error);
-            failed = true;
-        } else {
-            sent += batch.length;
-        }
-    }
-
-    console.log(`[notify-substitution] sent ${sent}/${uniqueEmails.length} emails for "${subject}"`);
-    return { sent, skipped: false, failed };
+    const sendResult = await sendBatchEmails(resolved.emails, subject, html, '[notify-substitution]');
+    return { ...sendResult, failed: failed || sendResult.failed };
 }

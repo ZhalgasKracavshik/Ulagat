@@ -7,7 +7,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SmartBadge } from "@/components/reputation/SmartBadge";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { Calendar, PlusCircle, Search, Trophy, ArrowRight, Star, Zap, GraduationCap, MessageCircle } from "lucide-react";
+import { Calendar, PlusCircle, Search, Trophy, ArrowRight, Star, Zap, GraduationCap, MessageCircle, Megaphone, Pin } from "lucide-react";
+import { CategoryBadge } from "@/components/announcements/CategoryBadge";
+import { getViewerGrades, announcementGradeFilter } from "@/lib/announcements/visibility";
+import type { Announcement } from "@/types";
 
 export default async function HomePage() {
     const supabase = await createClient();
@@ -45,6 +48,24 @@ export default async function HomePage() {
         .eq('status', 'active')
         .order('created_at', { ascending: false })
         .limit(4);
+
+    // Fetch latest official announcements (expires_at is an absolute instant
+    // set at creation — end of day Asia/Almaty — so compare with absolute now).
+    // Same grade targeting as /announcements: students/parents only see
+    // school-wide announcements plus those targeting their grades.
+    const viewerGrades = await getViewerGrades(supabase, user.id);
+    let announcementQuery = supabase
+        .from('announcements')
+        .select('*')
+        .or(`expires_at.is.null,expires_at.gte.${new Date().toISOString()}`)
+        .order('created_at', { ascending: false })
+        .limit(3);
+    const gradeFilter = announcementGradeFilter(viewerGrades);
+    if (gradeFilter) {
+        announcementQuery = announcementQuery.or(gradeFilter);
+    }
+    const { data: announcementRows } = await announcementQuery;
+    const announcements = (announcementRows ?? []) as Announcement[];
 
     return (
         <div className="container mx-auto py-8 space-y-10 px-4 md:px-6">
@@ -119,6 +140,44 @@ export default async function HomePage() {
                     </Link>
                 ))}
             </div>
+
+            {/* Official Announcements */}
+            <section className="space-y-5">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-bold flex items-center gap-2 text-slate-800">
+                        <Megaphone className="w-5 h-5 text-indigo-600" /> Announcements
+                    </h2>
+                    <Link href="/announcements" className="text-sm font-medium text-indigo-600 hover:text-indigo-700 flex items-center">
+                        View all <ArrowRight className="w-4 h-4 ml-1" />
+                    </Link>
+                </div>
+
+                {announcements.length > 0 ? (
+                    <div className="grid md:grid-cols-3 gap-3">
+                        {announcements.map(announcement => (
+                            <Link key={announcement.id} href="/announcements">
+                                <div className="group bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all p-4 space-y-2 cursor-pointer h-full">
+                                    <div className="flex items-center gap-2">
+                                        {announcement.pinned && <Pin className="w-3.5 h-3.5 text-indigo-500" />}
+                                        <CategoryBadge category={announcement.category} />
+                                    </div>
+                                    <h3 className="font-bold text-slate-900 line-clamp-2 text-sm group-hover:text-indigo-600 transition-colors">
+                                        {announcement.title}
+                                    </h3>
+                                    <p className="text-xs text-slate-400">
+                                        {new Date(announcement.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                    </p>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="bg-slate-50 rounded-xl p-10 text-center text-slate-400 border border-dashed">
+                        <Megaphone className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                        No announcements yet.
+                    </div>
+                )}
+            </section>
 
             {/* Two-column layout: Events + Services side by side */}
             <div className="grid lg:grid-cols-2 gap-8">
