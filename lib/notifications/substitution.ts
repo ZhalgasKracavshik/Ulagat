@@ -14,6 +14,8 @@ export type NotifyResult = {
     sent: number;
     /** True when RESEND_API_KEY is not configured and sending was skipped. */
     skipped: boolean;
+    /** True when recipient lookup or email delivery (partially) failed — distinct from "no recipients". */
+    failed: boolean;
 };
 
 function formatDateRu(isoDate: string): string {
@@ -34,14 +36,14 @@ function escapeHtml(value: string): string {
 }
 
 function buildEmailHtml(substitution: Substitution, lesson: ScheduleEntry | null): string {
-    const { start, end } = getPeriodTime(substitution.period);
-    const timeRange = `${start}–${end}`;
+    const time = getPeriodTime(substitution.period);
+    const timeRange = time ? ` (${time.start}–${time.end})` : '';
     const className = `${substitution.grade}${substitution.class_letter}`;
 
     const rows: string[] = [];
     rows.push(`<tr><td><strong>Дата</strong></td><td>${formatDateRu(substitution.date)}</td></tr>`);
     rows.push(`<tr><td><strong>Класс</strong></td><td>${escapeHtml(className)}</td></tr>`);
-    rows.push(`<tr><td><strong>Урок</strong></td><td>${substitution.period} урок (${timeRange})</td></tr>`);
+    rows.push(`<tr><td><strong>Урок</strong></td><td>${substitution.period} урок${timeRange}</td></tr>`);
 
     if (lesson) {
         const teacher = lesson.teacher_name ? `, ${escapeHtml(lesson.teacher_name)}` : '';
@@ -104,7 +106,7 @@ export async function notifySubstitution(substitutionId: string): Promise<Notify
 
     if (subError || !subRow) {
         console.error('[notify-substitution] substitution not found:', substitutionId, subError);
-        return { sent: 0, skipped: false };
+        return { sent: 0, skipped: false, failed: true };
     }
     const substitution = subRow as Substitution;
 
@@ -134,8 +136,11 @@ export async function notifySubstitution(substitutionId: string): Promise<Notify
 
     if (studentsError) {
         console.error('[notify-substitution] failed to load students:', studentsError);
-        return { sent: 0, skipped: false };
+        return { sent: 0, skipped: false, failed: true };
     }
+
+    // Tracks partial failures (recipient lookup / delivery) so callers can warn the moderator.
+    let failed = false;
 
     const studentIds = (students ?? []).map((s) => s.id as string);
 
@@ -149,6 +154,7 @@ export async function notifySubstitution(substitutionId: string): Promise<Notify
 
         if (bondsError) {
             console.error('[notify-substitution] failed to load family bonds:', bondsError);
+            failed = true; // parents would silently miss the notification
         } else {
             parentIds = (bonds ?? []).map((b) => b.parent_id as string);
         }
@@ -160,31 +166,40 @@ export async function notifySubstitution(substitutionId: string): Promise<Notify
         console.log(
             `[notify-substitution] no recipients for ${substitution.grade}${substitution.class_letter} on ${substitution.date}`
         );
-        return { sent: 0, skipped: false };
+        return { sent: 0, skipped: false, failed };
     }
 
     // 5. Resolve emails via the auth admin API (profiles don't store emails).
-    //    listUsers is paginated — walk pages and filter by the collected profile IDs.
-    const emails: string[] = [];
-    const perPage = 1000;
-    for (let page = 1; page <= 50; page++) {
-        const { data, error } = await admin.auth.admin.listUsers({ page, perPage });
-        if (error) {
-            console.error('[notify-substitution] listUsers error:', error);
-            break;
-        }
-        for (const authUser of data.users) {
-            if (authUser.email && recipientIds.has(authUser.id)) {
-                emails.push(authUser.email);
+    //    The recipient set is small (one class + parents), so look users up
+    //    individually in parallel instead of paging through all auth users.
+    const lookups = await Promise.all(
+        Array.from(recipientIds).map(async (id) => {
+            try {
+                const { data, error } = await admin.auth.admin.getUserById(id);
+                if (error) return { id, email: null, failed: true };
+                return { id, email: data.user?.email ?? null, failed: false };
+            } catch (error) {
+                console.error('[notify-substitution] getUserById threw for', id, error);
+                return { id, email: null, failed: true };
             }
-        }
-        if (data.users.length < perPage) break; // last page
+        })
+    );
+
+    const failedLookups = lookups.filter((l) => l.failed);
+    if (failedLookups.length > 0) {
+        console.error(
+            `[notify-substitution] failed to resolve ${failedLookups.length} recipient(s):`,
+            failedLookups.map((l) => l.id)
+        );
+        failed = true;
     }
 
-    const uniqueEmails = Array.from(new Set(emails));
+    const uniqueEmails = Array.from(
+        new Set(lookups.map((l) => l.email).filter((e): e is string => Boolean(e)))
+    );
     if (uniqueEmails.length === 0) {
         console.log('[notify-substitution] recipients found but none has an email address');
-        return { sent: 0, skipped: false };
+        return { sent: 0, skipped: false, failed };
     }
 
     const subject = `Изменение в расписании — ${formatDateRu(substitution.date)}`;
@@ -196,7 +211,7 @@ export async function notifySubstitution(substitutionId: string): Promise<Notify
             `[notify-substitution] RESEND_API_KEY not set — skipping email send. ` +
             `Would have notified ${uniqueEmails.length} recipient(s): "${subject}"`
         );
-        return { sent: 0, skipped: true };
+        return { sent: 0, skipped: true, failed };
     }
 
     const resend = new Resend(apiKey);
@@ -210,11 +225,12 @@ export async function notifySubstitution(substitutionId: string): Promise<Notify
         );
         if (error) {
             console.error('[notify-substitution] Resend batch error:', error);
+            failed = true;
         } else {
             sent += batch.length;
         }
     }
 
     console.log(`[notify-substitution] sent ${sent}/${uniqueEmails.length} emails for "${subject}"`);
-    return { sent, skipped: false };
+    return { sent, skipped: false, failed };
 }

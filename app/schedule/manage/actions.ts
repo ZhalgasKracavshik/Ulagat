@@ -77,6 +77,32 @@ export async function upsertScheduleCell(input: UpsertScheduleCellInput): Promis
     }
 
     const supabase = await createClient();
+
+    // Guard against overlapping validity windows: a second row for the same slot
+    // with a different valid_from but an overlapping date range would silently
+    // shadow this one in week views. Make the moderator resolve it explicitly.
+    const { data: overlapping, error: overlapError } = await supabase
+        .from('schedule')
+        .select('id, valid_from, valid_until')
+        .eq('grade', input.grade)
+        .eq('class_letter', classLetter)
+        .eq('day_of_week', input.day_of_week)
+        .eq('period', input.period)
+        .neq('valid_from', input.valid_from)
+        .lte('valid_from', input.valid_until) // existing starts before new ends
+        .gte('valid_until', input.valid_from); // existing ends after new starts
+
+    if (overlapError) {
+        console.error("upsertScheduleCell overlap check error:", overlapError);
+        return { success: false, error: "Failed to validate the lesson dates. Please try again." };
+    }
+    if (overlapping && overlapping.length > 0) {
+        return {
+            success: false,
+            error: `This slot already has a version valid ${overlapping[0].valid_from} — ${overlapping[0].valid_until}. Delete it first or adjust its dates.`,
+        };
+    }
+
     const { error } = await supabase
         .from('schedule')
         .upsert(

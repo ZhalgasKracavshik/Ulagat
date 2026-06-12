@@ -57,13 +57,46 @@ DROP POLICY IF EXISTS "authenticated_read_substitutions" ON public.substitutions
 CREATE POLICY "authenticated_read_substitutions" ON public.substitutions
   FOR SELECT TO authenticated USING (true);
 
--- Only moderator/admin can write
+-- Only moderator/admin can write.
+-- Split per command so INSERT can additionally pin created_by to the caller
+-- (prevents staff from attributing rows to someone else).
 DROP POLICY IF EXISTS "staff_write_schedule" ON public.schedule;
-CREATE POLICY "staff_write_schedule" ON public.schedule FOR ALL
-  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('moderator', 'admin')))
-  WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('moderator', 'admin')));
+DROP POLICY IF EXISTS "staff_insert_schedule" ON public.schedule;
+CREATE POLICY "staff_insert_schedule" ON public.schedule FOR INSERT TO authenticated
+  WITH CHECK (
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('moderator', 'admin'))
+    AND created_by = auth.uid()
+  );
+
+-- Note: upsert also runs UPDATE on conflict, so the UPDATE policy must not pin
+-- created_by — otherwise one moderator could not adjust a cell created by another.
+DROP POLICY IF EXISTS "staff_update_schedule" ON public.schedule;
+CREATE POLICY "staff_update_schedule" ON public.schedule FOR UPDATE TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('moderator', 'admin')));
+
+DROP POLICY IF EXISTS "staff_delete_schedule" ON public.schedule;
+CREATE POLICY "staff_delete_schedule" ON public.schedule FOR DELETE TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('moderator', 'admin')));
 
 DROP POLICY IF EXISTS "staff_write_substitutions" ON public.substitutions;
-CREATE POLICY "staff_write_substitutions" ON public.substitutions FOR ALL
-  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('moderator', 'admin')))
-  WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('moderator', 'admin')));
+DROP POLICY IF EXISTS "staff_insert_substitutions" ON public.substitutions;
+CREATE POLICY "staff_insert_substitutions" ON public.substitutions FOR INSERT TO authenticated
+  WITH CHECK (
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('moderator', 'admin'))
+    AND created_by = auth.uid()
+  );
+
+DROP POLICY IF EXISTS "staff_update_substitutions" ON public.substitutions;
+CREATE POLICY "staff_update_substitutions" ON public.substitutions FOR UPDATE TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('moderator', 'admin')));
+
+DROP POLICY IF EXISTS "staff_delete_substitutions" ON public.substitutions;
+CREATE POLICY "staff_delete_substitutions" ON public.substitutions FOR DELETE TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('moderator', 'admin')));
+
+-- Distinct classes that have a published timetable (for the class selector).
+-- security_invoker makes the view run with the caller's permissions, so it
+-- inherits the schedule table's RLS instead of the view owner's rights.
+CREATE OR REPLACE VIEW public.schedule_classes
+  WITH (security_invoker = true) AS
+  SELECT DISTINCT grade, class_letter FROM public.schedule;

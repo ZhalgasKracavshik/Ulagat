@@ -1,11 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { addDays, format, startOfWeek } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { CalendarDays, ClipboardEdit, Repeat, UserCog } from "lucide-react";
 import { WeekGrid } from "@/components/schedule/WeekGrid";
+import { addDaysIso, almatyTodayIso, almatyWeekMondayIso } from "@/lib/schedule/almaty-time";
 import { ClassSelector, type ClassOption } from "@/components/schedule/ClassSelector";
 import type { DayCell, DayColumn } from "@/components/schedule/types";
 import type { ScheduleEntry, Substitution } from "@/types";
@@ -78,18 +78,12 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sch
             targetLetter = paramLetter;
         }
 
-        // Distinct classes that have a published timetable
+        // Distinct classes that have a published timetable (deduplicated in SQL)
         const { data: classRows } = await supabase
-            .from('schedule')
-            .select('grade, class_letter')
-            .limit(2000);
-        const seen = new Set<string>();
+            .from('schedule_classes')
+            .select('grade, class_letter');
         for (const row of classRows ?? []) {
-            const key = `${row.grade}|${row.class_letter}`;
-            if (!seen.has(key)) {
-                seen.add(key);
-                classOptions.push({ grade: row.grade as number, letter: row.class_letter as string });
-            }
+            classOptions.push({ grade: row.grade as number, letter: row.class_letter as string });
         }
         classOptions.sort((a, b) => a.grade - b.grade || a.letter.localeCompare(b.letter));
 
@@ -185,12 +179,11 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sch
     }
 
     // ---- Load the current week's data ----
-    const now = new Date();
-    const monday = startOfWeek(now, { weekStartsOn: 1 });
-    const weekDates = Array.from({ length: 6 }, (_, i) => format(addDays(monday, i), 'yyyy-MM-dd'));
-    const mondayIso = weekDates[0];
+    // School wall-clock time (Asia/Almaty) — the server may run in UTC.
+    const mondayIso = almatyWeekMondayIso();
+    const weekDates = Array.from({ length: 6 }, (_, i) => addDaysIso(mondayIso, i));
     const saturdayIso = weekDates[5];
-    const todayIso = format(now, 'yyyy-MM-dd');
+    const todayIso = almatyTodayIso();
 
     const [{ data: lessonRows }, { data: subRows }] = await Promise.all([
         supabase

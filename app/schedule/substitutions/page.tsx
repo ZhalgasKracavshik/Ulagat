@@ -12,10 +12,11 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { MailCheck, ShieldAlert, Trash2 } from "lucide-react";
+import { MailCheck, ShieldAlert } from "lucide-react";
 import { SubstitutionForm } from "@/components/schedule/SubstitutionForm";
 import { SubstitutionBadge } from "@/components/schedule/SubstitutionBadge";
-import { deleteSubstitution } from "./actions";
+import { DeleteSubstitutionButton } from "@/components/schedule/DeleteSubstitutionButton";
+import { almatyTodayIso } from "@/lib/schedule/almaty-time";
 import type { Substitution } from "@/types";
 
 export const dynamic = 'force-dynamic';
@@ -58,7 +59,8 @@ export default async function SubstitutionsPage() {
         );
     }
 
-    const todayIso = format(new Date(), 'yyyy-MM-dd');
+    // "Today" in school wall-clock time (Asia/Almaty) — the server may run in UTC.
+    const todayIso = almatyTodayIso();
     const { data: subRows } = await supabase
         .from('substitutions')
         .select('*')
@@ -135,18 +137,7 @@ export default async function SubstitutionsPage() {
                                                 )}
                                             </TableCell>
                                             <TableCell className="text-right">
-                                                <form action={deleteSubstitution} className="inline">
-                                                    <input type="hidden" name="id" value={sub.id} />
-                                                    <Button
-                                                        type="submit"
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                                                        aria-label="Delete substitution"
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </Button>
-                                                </form>
+                                                <DeleteSubstitutionButton id={sub.id} />
                                             </TableCell>
                                         </TableRow>
                                     ))}

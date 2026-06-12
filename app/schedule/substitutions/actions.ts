@@ -22,7 +22,16 @@ export type CreateSubstitutionResult = {
     error?: string;
     emailsSent?: number;
     emailsSkipped?: boolean;
+    /** True when the substitution was saved but email notification (partially) failed. */
+    emailsFailed?: boolean;
 };
+
+export type DeleteSubstitutionResult = { error: string } | { success: true };
+
+/** Defensive trim: returns '' for anything that is not a string. */
+function safeTrim(value: unknown): string {
+    return typeof value === 'string' ? value.trim() : '';
+}
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const SUB_TYPES: SubstitutionType[] = ['substitution', 'cancellation', 'room_change'];
@@ -61,14 +70,14 @@ export async function createSubstitution(input: CreateSubstitutionInput): Promis
     const auth = await requireStaff();
     if (!auth.ok) return { success: false, error: auth.error };
 
-    // ---- Validation ----
-    if (!ISO_DATE.test(input.date)) {
+    // ---- Validation (defensive: malformed input returns an error, never throws) ----
+    if (typeof input.date !== 'string' || !ISO_DATE.test(input.date)) {
         return { success: false, error: "Date is required (yyyy-mm-dd)." };
     }
     if (!Number.isInteger(input.grade) || input.grade < 1 || input.grade > 11) {
         return { success: false, error: "Grade must be between 1 and 11." };
     }
-    const classLetter = input.class_letter?.trim();
+    const classLetter = safeTrim(input.class_letter);
     if (!classLetter || classLetter.length > 3) {
         return { success: false, error: "Class letter is required (max 3 characters)." };
     }
@@ -81,10 +90,14 @@ export async function createSubstitution(input: CreateSubstitutionInput): Promis
     if (isoDayOfWeek(input.date) === 7) {
         return { success: false, error: "Sunday is not a school day." };
     }
-    if (input.type === 'room_change' && !input.room.trim()) {
+    const subject = safeTrim(input.subject);
+    const substituteTeacherName = safeTrim(input.substitute_teacher_name);
+    const room = safeTrim(input.room);
+    const note = safeTrim(input.note);
+    if (input.type === 'room_change' && !room) {
         return { success: false, error: "New room is required for a room change." };
     }
-    if (input.type === 'substitution' && !input.subject.trim() && !input.substitute_teacher_name.trim()) {
+    if (input.type === 'substitution' && !subject && !substituteTeacherName) {
         return { success: false, error: "Enter the new subject and/or teacher for the substitution." };
     }
 
@@ -99,10 +112,10 @@ export async function createSubstitution(input: CreateSubstitutionInput): Promis
             class_letter: classLetter,
             period: input.period,
             type: input.type,
-            subject: input.subject.trim() || null,
-            substitute_teacher_name: input.substitute_teacher_name.trim() || null,
-            room: input.room.trim() || null,
-            note: input.note.trim() || null,
+            subject: subject || null,
+            substitute_teacher_name: substituteTeacherName || null,
+            room: room || null,
+            note: note || null,
             created_by: auth.userId,
         })
         .select('id')
@@ -122,10 +135,12 @@ export async function createSubstitution(input: CreateSubstitutionInput): Promis
     // ---- Notify students + parents, stamp notified_at ----
     let emailsSent = 0;
     let emailsSkipped = false;
+    let emailsFailed = false;
     try {
         const result = await notifySubstitution(inserted.id as string);
         emailsSent = result.sent;
         emailsSkipped = result.skipped;
+        emailsFailed = result.failed;
 
         if (result.sent > 0) {
             await supabase
@@ -136,32 +151,33 @@ export async function createSubstitution(input: CreateSubstitutionInput): Promis
     } catch (error) {
         // Substitution is saved even if email delivery fails — the schedule page still shows it.
         console.error("createSubstitution notification error:", error);
+        emailsFailed = true;
     }
 
     revalidatePath('/schedule');
     revalidatePath('/schedule/substitutions');
-    return { success: true, emailsSent, emailsSkipped };
+    return { success: true, emailsSent, emailsSkipped, emailsFailed };
 }
 
 /** Deletes a substitution (e.g. entered by mistake). Moderator/admin only. */
-export async function deleteSubstitution(formData: FormData): Promise<void> {
+export async function deleteSubstitution(id: string): Promise<DeleteSubstitutionResult> {
     const auth = await requireStaff();
     if (!auth.ok) {
-        throw new Error(auth.error);
+        return { error: auth.error };
     }
 
-    const id = formData.get('id');
-    if (typeof id !== 'string' || !id) {
-        throw new Error("Substitution id is required.");
+    if (typeof id !== 'string' || !id.trim()) {
+        return { error: "Substitution id is required." };
     }
 
     const supabase = await createClient();
     const { error } = await supabase.from('substitutions').delete().eq('id', id);
     if (error) {
         console.error("deleteSubstitution error:", error);
-        throw new Error("Failed to delete the substitution.");
+        return { error: "Failed to delete the substitution." };
     }
 
     revalidatePath('/schedule');
     revalidatePath('/schedule/substitutions');
+    return { success: true };
 }

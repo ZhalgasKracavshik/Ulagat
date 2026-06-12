@@ -4,6 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
+function failWith(message: string): never {
+    redirect(`/profile/edit?error=${encodeURIComponent(message)}`);
+}
+
 export async function updateProfile(formData: FormData) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -17,10 +21,14 @@ export async function updateProfile(formData: FormData) {
 
     // Grade / class letter (used by the schedule page)
     const gradeRaw = (formData.get("grade") as string | null)?.trim() ?? "";
-    const gradeNumber = Number(gradeRaw);
-    const grade = gradeRaw && Number.isInteger(gradeNumber) && gradeNumber >= 1 && gradeNumber <= 11
-        ? gradeNumber
-        : null;
+    let grade: number | null = null;
+    if (gradeRaw) {
+        const gradeNumber = Number(gradeRaw);
+        if (!Number.isInteger(gradeNumber) || gradeNumber < 1 || gradeNumber > 11) {
+            failWith("Grade must be between 1 and 11");
+        }
+        grade = gradeNumber;
+    }
     const classLetterRaw = (formData.get("class_letter") as string | null)?.trim() ?? "";
     const class_letter = classLetterRaw ? classLetterRaw.slice(0, 3) : null;
 
@@ -34,22 +42,20 @@ export async function updateProfile(formData: FormData) {
         social_links = [];
     }
 
-    try {
-        const { error } = await supabase.from("profiles").update({
-            full_name,
-            bio,
-            avatar_url,
-            social_links,
-            grade,
-            class_letter,
-        }).eq("id", user.id);
+    const { error } = await supabase.from("profiles").update({
+        full_name,
+        bio,
+        avatar_url,
+        social_links,
+        grade,
+        class_letter,
+    }).eq("id", user.id);
 
-        if (error) throw error;
-
-        revalidatePath(`/profile/${user.id}`);
-    } catch (error) {
+    if (error) {
         console.error("Profile update error:", error);
+        failWith("Failed to save your profile. Please try again.");
     }
 
+    revalidatePath(`/profile/${user.id}`);
     redirect(`/profile/${user.id}`);
 }

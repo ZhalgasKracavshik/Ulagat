@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Clock, Coffee, DoorOpen, MapPin, Moon, Sunrise, User } from "lucide-react";
 import { getCurrentPeriod, getPeriodTime, type CurrentPeriodInfo } from "@/lib/schedule/bells";
+import { almatyNow } from "@/lib/schedule/almaty-time";
 import { SubstitutionBadge } from "./SubstitutionBadge";
 import { effectiveLesson, type DayCell } from "./types";
 
@@ -55,7 +56,8 @@ export function CurrentLessonWidget({ todayCells }: CurrentLessonWidgetProps) {
     const [info, setInfo] = useState<CurrentPeriodInfo | null>(null);
 
     useEffect(() => {
-        const update = () => setInfo(getCurrentPeriod(new Date()));
+        // Bell times are school wall-clock time (Asia/Almaty) — don't trust the device timezone.
+        const update = () => setInfo(getCurrentPeriod(almatyNow()));
         update();
         const timer = setInterval(update, 30_000);
         return () => clearInterval(timer);
@@ -87,22 +89,24 @@ export function CurrentLessonWidget({ todayCells }: CurrentLessonWidgetProps) {
         );
     } else if (info.status === 'before') {
         const firstCell = findCell(todayCells, info.period);
+        const time = getPeriodTime(info.period);
         body = (
             <div className="space-y-1">
                 <div className="flex items-center gap-2 text-sm font-semibold text-amber-600">
                     <Sunrise className="w-4 h-4" />
-                    School starts in {info.minutesLeft} min ({getPeriodTime(info.period).start})
+                    School starts in {info.minutesLeft} min{time && <> ({time.start})</>}
                 </div>
                 {firstCell && <LessonLine cell={firstCell} />}
             </div>
         );
     } else if (info.status === 'break') {
         const nextCell = findCell(todayCells, info.period);
+        const time = getPeriodTime(info.period);
         body = (
             <div className="space-y-1">
                 <div className="flex items-center gap-2 text-sm font-semibold text-emerald-600">
                     <Coffee className="w-4 h-4" />
-                    Break — next lesson in {info.minutesLeft} min ({getPeriodTime(info.period).start})
+                    Break — next lesson in {info.minutesLeft} min{time && <> ({time.start})</>}
                 </div>
                 {nextCell && <LessonLine cell={nextCell} />}
             </div>
@@ -114,7 +118,7 @@ export function CurrentLessonWidget({ todayCells }: CurrentLessonWidgetProps) {
             <div className="space-y-1">
                 <div className="flex items-center gap-2 text-sm font-semibold text-blue-600">
                     <Clock className="w-4 h-4" />
-                    Lesson {info.period} ({time.start}–{time.end}) — bell in {info.minutesLeft} min
+                    Lesson {info.period}{time && <> ({time.start}–{time.end})</>} — bell in {info.minutesLeft} min
                 </div>
                 {cell ? <LessonLine cell={cell} /> : <span className="text-lg font-bold text-slate-700">Free period</span>}
             </div>

@@ -110,7 +110,9 @@ export function SubstitutionForm() {
                 return;
             }
 
-            if (result.emailsSkipped) {
+            if (result.emailsFailed) {
+                toast.warning("Substitution saved, but email notification failed — notify the class manually.");
+            } else if (result.emailsSkipped) {
                 toast.success("Substitution saved. Email sending is not configured (dev mode) — notification was logged instead.");
             } else if ((result.emailsSent ?? 0) > 0) {
                 toast.success(`Substitution saved. ${result.emailsSent} student(s) and parent(s) notified by email.`);

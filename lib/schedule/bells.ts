@@ -32,16 +32,21 @@ function toMinutes(hhmm: string): number {
 }
 
 function nowMinutes(now: Date): number {
-    return now.getHours() * 60 + now.getMinutes();
+    // UTC accessors on purpose: callers pass `almatyNow()` (a shifted-epoch
+    // Date whose UTC fields hold Almaty wall-clock time). See almaty-time.ts.
+    return now.getUTCHours() * 60 + now.getUTCMinutes();
 }
 
-/** Start/end times (HH:mm) for a period number (1-8). */
-export function getPeriodTime(period: number): { start: string; end: string } {
-    const bell = BELL_SCHEDULE.find((b) => b.period === period) ?? BELL_SCHEDULE[0];
-    return { start: bell.start, end: bell.end };
+/** Start/end times (HH:mm) for a period number (1-8), or undefined for unknown periods. */
+export function getPeriodTime(period: number): { start: string; end: string } | undefined {
+    const bell = BELL_SCHEDULE.find((b) => b.period === period);
+    return bell ? { start: bell.start, end: bell.end } : undefined;
 }
 
-/** Where we are inside the school day right now. */
+/**
+ * Where we are inside the school day right now.
+ * `now` must be an `almatyNow()` shifted-epoch Date (UTC fields = Almaty wall clock).
+ */
 export function getCurrentPeriod(now: Date): CurrentPeriodInfo {
     const minutes = nowMinutes(now);
 
