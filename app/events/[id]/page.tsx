@@ -9,6 +9,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { EventRegistrationButton } from "@/components/events/EventRegistrationButton";
+import { almatyTodayIso } from "@/lib/schedule/almaty-time";
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -35,6 +36,15 @@ export default async function EventDetailsPage({ params }: PageProps) {
 
     if (!event) return notFound();
 
+    // P1-4: pending/rejected/archived events are only visible to their
+    // organizer and staff — everyone else gets a 404, so unmoderated content
+    // is not reachable (or registerable) by direct link.
+    const isOrganizer = user?.id === event.organizer_id;
+    const isStaff = ['admin', 'moderator'].includes(userRole);
+    if (event.status !== 'active' && !isOrganizer && !isStaff) {
+        return notFound();
+    }
+
     // Fetch registration data (with profile info for the delegation list)
     let registrationCount = 0;
     let isRegistered = false;
@@ -58,6 +68,10 @@ export default async function EventDetailsPage({ params }: PageProps) {
 
     const isFull = event.max_students ? registrationCount >= event.max_students : false;
     const isExpired = event.expires_at ? new Date(event.expires_at) < new Date() : false;
+    // P2-2: registration closes at the end of the deadline day (Almaty time).
+    const deadlinePassed = event.registration_deadline
+        ? almatyTodayIso() > event.registration_deadline
+        : false;
 
     return (
         <div className="container py-8 max-w-4xl mx-auto px-4">
@@ -178,6 +192,7 @@ export default async function EventDetailsPage({ params }: PageProps) {
                                     isRegistered={isRegistered}
                                     isFull={isFull}
                                     isExpired={isExpired}
+                                    deadlinePassed={deadlinePassed}
                                 />
                             ) : (
                                 <Link href="/login" className="block w-full">

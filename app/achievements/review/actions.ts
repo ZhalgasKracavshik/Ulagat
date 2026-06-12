@@ -28,6 +28,25 @@ function revalidateReviewPaths() {
 }
 
 /**
+ * Defense in depth (the DB guard trigger also enforces this): reviewers
+ * cannot verify or reject their own achievements.
+ */
+async function assertNotSelfReview(supabase: Awaited<ReturnType<typeof createClient>>, reviewerId: string, achievementId: string) {
+    const { data: achievement, error } = await supabase
+        .from('achievements')
+        .select('user_id')
+        .eq('id', achievementId)
+        .single();
+
+    if (error || !achievement) {
+        throw new Error("Achievement not found.");
+    }
+    if (achievement.user_id === reviewerId) {
+        throw new Error("You cannot review your own achievement — ask another reviewer.");
+    }
+}
+
+/**
  * Approves a pending achievement. The pending → verified transition fires the
  * DB trigger that awards tier-based reputation points (school 10 / city 50 /
  * national 150).
@@ -36,6 +55,7 @@ export async function verifyAchievement(formData: FormData) {
     const { supabase, user } = await checkReviewer();
     const id = formData.get('id') as string;
     if (!id) throw new Error("Achievement id is required");
+    await assertNotSelfReview(supabase, user.id, id);
 
     const { error } = await supabase
         .from('achievements')
@@ -55,6 +75,7 @@ export async function rejectAchievement(formData: FormData) {
     const { supabase, user } = await checkReviewer();
     const id = formData.get('id') as string;
     if (!id) throw new Error("Achievement id is required");
+    await assertNotSelfReview(supabase, user.id, id);
     const reason = ((formData.get('reason') as string) || '').trim();
 
     const { error } = await supabase

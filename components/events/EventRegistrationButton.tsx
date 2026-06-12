@@ -11,13 +11,16 @@ interface EventRegistrationButtonProps {
     isRegistered: boolean;
     isFull: boolean;
     isExpired: boolean;
+    /** True when the registration deadline (Almaty date) has passed. */
+    deadlinePassed?: boolean;
 }
 
 export function EventRegistrationButton({
     eventId,
     isRegistered: initialIsRegistered,
     isFull,
-    isExpired
+    isExpired,
+    deadlinePassed = false
 }: EventRegistrationButtonProps) {
     const [loading, setLoading] = useState(false);
     const [isRegistered, setIsRegistered] = useState(initialIsRegistered);
@@ -54,6 +57,14 @@ export function EventRegistrationButton({
         return (
             <Button disabled className="w-full text-lg h-12 font-bold mb-2">
                 Event Expired
+            </Button>
+        );
+    }
+
+    if (deadlinePassed && !isRegistered) {
+        return (
+            <Button disabled variant="secondary" className="w-full text-lg h-12 font-bold mb-2">
+                Registration Closed
             </Button>
         );
     }

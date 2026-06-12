@@ -55,9 +55,18 @@ export async function createEvent(formData: FormData) {
         throw new Error("Missing fields");
     }
 
-    // Calculate expiration date
+    // Calculate expiration date. P2-3: an event must never expire before it
+    // happens — keep it at least until the day after event_date, even when the
+    // chosen listing duration ends earlier.
     const expirationDate = new Date();
     expirationDate.setDate(expirationDate.getDate() + durationDays);
+    const parsedEventDate = new Date(event_date);
+    if (!Number.isNaN(parsedEventDate.getTime())) {
+        const dayAfterEvent = new Date(parsedEventDate.getTime() + 24 * 60 * 60 * 1000);
+        if (dayAfterEvent > expirationDate) {
+            expirationDate.setTime(dayAfterEvent.getTime());
+        }
+    }
 
     const { error } = await supabase.from("events").insert({
         organizer_id: user.id,

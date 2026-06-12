@@ -51,8 +51,7 @@ CREATE POLICY "Staff and parliament can create events."
 ALTER TABLE public.study_materials ADD COLUMN IF NOT EXISTS year INTEGER;
 ALTER TABLE public.study_materials ADD COLUMN IF NOT EXISTS file_url TEXT;
 
--- 4.2 Storage bucket for olympiad PDFs — public read, authenticated upload
---     (same pattern as db/fix_storage_buckets.sql).
+-- 4.2 Storage bucket for olympiad PDFs — public read.
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('study-materials', 'study-materials', true)
 ON CONFLICT (id) DO NOTHING;
@@ -61,9 +60,8 @@ DROP POLICY IF EXISTS "Public Access Study Materials" ON storage.objects;
 CREATE POLICY "Public Access Study Materials" ON storage.objects
   FOR SELECT USING (bucket_id = 'study-materials');
 
-DROP POLICY IF EXISTS "Auth Upload Study Materials" ON storage.objects;
-CREATE POLICY "Auth Upload Study Materials" ON storage.objects
-  FOR INSERT WITH CHECK (bucket_id = 'study-materials' AND auth.role() = 'authenticated');
+-- Upload policy is role-restricted — see "SECURITY HARDENING" / P1-2 at the
+-- bottom of this file (uploads limited to admin/moderator/parliament).
 
 -- 4.3 Parliament (in addition to admin/moderator, as currently configured)
 --     can upload study materials. New rows keep the DEFAULT 'pending' status,
@@ -147,24 +145,26 @@ BEGIN
   -- (see tr_achievement_verification_points).
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 -- 6.4 Guard: only reviewers (parliament/moderator/admin) may set or change
---     the status. Owners keep their UPDATE/INSERT RLS policies for editing
---     content, but cannot self-verify (which would mint points).
+--     the status, and never on their OWN achievements (no self-verification,
+--     even for reviewers — that would mint points for yourself). Owners keep
+--     their UPDATE/INSERT RLS policies for editing content.
 --     auth.uid() IS NULL (SQL editor / service role) is allowed through.
 CREATE OR REPLACE FUNCTION public.tr_achievement_guard_status()
 RETURNS TRIGGER AS $$
 DECLARE
+  caller UUID := (SELECT auth.uid());
   is_reviewer BOOLEAN;
 BEGIN
-  IF auth.uid() IS NULL THEN
+  IF caller IS NULL THEN
     RETURN NEW;
   END IF;
 
   SELECT EXISTS (
     SELECT 1 FROM public.profiles
-    WHERE id = auth.uid()
+    WHERE id = caller
       AND role IN ('parliament', 'moderator', 'admin')
   ) INTO is_reviewer;
 
@@ -176,12 +176,18 @@ BEGIN
     RETURN NEW;
   END IF;
 
-  IF NEW.status IS DISTINCT FROM OLD.status AND NOT is_reviewer THEN
-    RAISE EXCEPTION 'Only parliament, moderators and admins can change achievement status';
+  IF NEW.status IS DISTINCT FROM OLD.status THEN
+    IF NOT is_reviewer THEN
+      RAISE EXCEPTION 'Only parliament, moderators and admins can change achievement status';
+    END IF;
+    -- P1-1: reviewers cannot review (verify/reject) their own achievements.
+    IF NEW.user_id = caller THEN
+      RAISE EXCEPTION 'Cannot review your own achievement';
+    END IF;
   END IF;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 DROP TRIGGER IF EXISTS on_achievement_guard_status ON public.achievements;
 CREATE TRIGGER on_achievement_guard_status
@@ -198,6 +204,17 @@ DECLARE
   tier_points INTEGER;
 BEGIN
   IF NEW.status = 'verified' AND OLD.status = 'pending' THEN
+    -- P1-1: award at most once per achievement — a reviewer flipping the
+    -- status back and forth (verified → pending → verified …) must not
+    -- re-mint points on every cycle.
+    IF EXISTS (
+      SELECT 1 FROM public.reputation_ledger
+      WHERE action_type = 'Achievement Verified'
+        AND metadata->>'achievement_id' = NEW.id::text
+    ) THEN
+      RETURN NEW;
+    END IF;
+
     tier_points := CASE NEW.tier
       WHEN 'school' THEN 10
       WHEN 'city' THEN 50
@@ -212,7 +229,7 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 DROP TRIGGER IF EXISTS on_achievement_verified ON public.achievements;
 CREATE TRIGGER on_achievement_verified
@@ -236,5 +253,94 @@ CREATE POLICY "Reviewers can verify achievements"
       SELECT 1 FROM public.profiles
       WHERE id = auth.uid()
         AND role IN ('parliament', 'moderator', 'admin')
+    )
+  );
+
+
+-- ============================================================
+-- SECURITY HARDENING (post-review of Phases 3-6)
+-- Idempotent — safe to run on databases that already applied the
+-- sections above. Note: the achievement guard (6.4) and the
+-- verification points trigger (6.5) were also hardened in place
+-- (no self-review; points awarded at most once per achievement),
+-- so re-run this file in full.
+-- ============================================================
+
+-- ------------------------------------------------------------
+-- P0-1: Anyone could mint arbitrary reputation points.
+-- The legacy policy from db/master_schema.sql allowed ANY user to
+-- INSERT rows into reputation_ledger directly. All legitimate writes
+-- go through award_reputation_points(), which is SECURITY DEFINER and
+-- bypasses RLS — so no replacement policy is needed.
+-- ------------------------------------------------------------
+DROP POLICY IF EXISTS "Users can insert reputation" ON public.reputation_ledger;
+
+-- ------------------------------------------------------------
+-- P0-2: Creators could self-approve their own pending content.
+-- The owner UPDATE policies on events/services ("Organizers can update
+-- own events." / "Owners can update own services.") let owners update
+-- ANY column — including status. Setting pending → active both skips
+-- moderation and mints points (tr_content_approval_points).
+--
+-- Guard trigger (mirrors tr_achievement_guard_status): only
+-- admin/moderator may change status; inserts by anyone else are forced
+-- to 'pending'. auth.uid() IS NULL (SQL editor / service-role admin
+-- client / SECURITY DEFINER paths) is allowed through.
+-- ------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.tr_content_guard_status()
+RETURNS TRIGGER AS $$
+DECLARE
+  caller UUID := (SELECT auth.uid());
+  is_moderator BOOLEAN;
+BEGIN
+  IF caller IS NULL THEN
+    RETURN NEW;
+  END IF;
+
+  SELECT EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE id = caller
+      AND role IN ('admin', 'moderator')
+  ) INTO is_moderator;
+
+  IF TG_OP = 'INSERT' THEN
+    IF NOT is_moderator THEN
+      NEW.status := 'pending';
+    END IF;
+    RETURN NEW;
+  END IF;
+
+  IF NEW.status IS DISTINCT FROM OLD.status AND NOT is_moderator THEN
+    RAISE EXCEPTION 'Only moderators can change status';
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
+
+DROP TRIGGER IF EXISTS on_event_guard_status ON public.events;
+CREATE TRIGGER on_event_guard_status
+  BEFORE INSERT OR UPDATE ON public.events
+  FOR EACH ROW EXECUTE PROCEDURE public.tr_content_guard_status();
+
+DROP TRIGGER IF EXISTS on_service_guard_status ON public.services;
+CREATE TRIGGER on_service_guard_status
+  BEFORE INSERT OR UPDATE ON public.services
+  FOR EACH ROW EXECUTE PROCEDURE public.tr_content_guard_status();
+
+-- ------------------------------------------------------------
+-- P1-2: study-materials bucket allowed ANY authenticated user to
+-- upload. Only the roles that can create study_materials rows
+-- (admin/moderator/parliament — see 4.3) may upload files.
+-- ------------------------------------------------------------
+DROP POLICY IF EXISTS "Auth Upload Study Materials" ON storage.objects;
+DROP POLICY IF EXISTS "Role Upload Study Materials" ON storage.objects;
+CREATE POLICY "Role Upload Study Materials" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'study-materials'
+    AND auth.role() = 'authenticated'
+    AND EXISTS (
+      SELECT 1 FROM public.profiles
+      WHERE id = auth.uid()
+        AND role IN ('admin', 'moderator', 'parliament')
     )
   );

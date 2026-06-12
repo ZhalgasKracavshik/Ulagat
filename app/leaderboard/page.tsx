@@ -123,7 +123,8 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
                                     </h3>
                                     <p className="text-sm text-muted-foreground capitalize font-medium">
                                         {user.role}
-                                        {user.grade ? ` · Grade ${user.grade}` : ''}
+                                        {/* P2-4: grade narrows down who an anonymous entry is — show it only for named entries */}
+                                        {!isAnonymous && user.grade ? ` · Grade ${user.grade}` : ''}
                                     </p>
                                 </div>
                             </>

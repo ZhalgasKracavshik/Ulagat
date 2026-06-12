@@ -82,7 +82,7 @@ export default async function NewEventPage() {
                                 <div className="space-y-2">
                                     <Label htmlFor="registration_deadline" className="text-sm font-semibold text-slate-700">Registration Deadline (optional)</Label>
                                     <Input id="registration_deadline" name="registration_deadline" type="date" className="h-11 border-slate-200 focus:ring-blue-500 rounded-lg shadow-sm" />
-                                    <p className="text-[11px] text-muted-foreground italic">Participants get an email reminder the day before this deadline.</p>
+                                    <p className="text-[11px] text-muted-foreground italic">Participants get an email reminder the day before the event.</p>
                                 </div>
                                 <div className="space-y-2">
                                     <Label className="text-sm font-semibold text-slate-700">Tags</Label>
