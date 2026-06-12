@@ -78,6 +78,40 @@ export type FamilyBond = {
     created_at: string;
 };
 
+export type ScheduleEntry = {
+    id: string;
+    grade: number;
+    class_letter: string;
+    day_of_week: number; // 1 = Monday … 6 = Saturday
+    period: number; // 1-8
+    subject: string;
+    teacher_name: string | null;
+    teacher_id: string | null;
+    room: string;
+    valid_from: string; // ISO date
+    valid_until: string; // ISO date
+    created_by: string | null;
+    created_at: string;
+};
+
+export type SubstitutionType = 'substitution' | 'cancellation' | 'room_change';
+
+export type Substitution = {
+    id: string;
+    date: string; // ISO date
+    grade: number;
+    class_letter: string;
+    period: number; // 1-8
+    type: SubstitutionType;
+    subject: string | null;
+    substitute_teacher_name: string | null;
+    room: string | null;
+    note: string | null;
+    notified_at: string | null;
+    created_by: string;
+    created_at: string;
+};
+
 /** Subset of Profile used in the admin users management table */
 export type AdminUserRow = {
     id: string;
