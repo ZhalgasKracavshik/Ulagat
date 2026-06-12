@@ -28,42 +28,60 @@ export function chunked<T>(items: T[], size: number): T[][] {
 
 /**
  * Resolves email addresses for a set of profile ids via the auth admin API
- * (profiles don't store emails). Lookups run in parallel within chunks of 50
- * so large recipient sets don't hammer the auth admin API all at once.
+ * (profiles don't store emails). Pages through `listUsers` (1000 users per
+ * call, ~10x cheaper than per-id `getUserById` lookups) and collects the
+ * users whose id is in the recipient set — 1-2 API calls for a whole school
+ * instead of thousands. Stops early once every recipient is found.
  */
 export async function resolveEmails(
     admin: SupabaseClient,
     recipientIds: Iterable<string>,
     logPrefix: string
 ): Promise<{ emails: string[]; failed: boolean }> {
-    const ids = Array.from(new Set(recipientIds));
+    const wanted = new Set(recipientIds);
+    if (wanted.size === 0) return { emails: [], failed: false };
+
     const emails = new Set<string>();
-    const failedIds: string[] = [];
+    const found = new Set<string>();
+    let failed = false;
 
-    for (const batch of chunked(ids, 50)) {
-        const lookups = await Promise.all(
-            batch.map(async (id) => {
-                try {
-                    const { data, error } = await admin.auth.admin.getUserById(id);
-                    if (error) return { id, email: null, failed: true };
-                    return { id, email: data.user?.email ?? null, failed: false };
-                } catch (error) {
-                    console.error(`${logPrefix} getUserById threw for`, id, error);
-                    return { id, email: null, failed: true };
-                }
-            })
-        );
-        for (const lookup of lookups) {
-            if (lookup.failed) failedIds.push(lookup.id);
-            if (lookup.email) emails.add(lookup.email);
+    const PER_PAGE = 1000;
+    const MAX_PAGES = 10; // safety cap: 10k users is far beyond one school
+
+    for (let page = 1; page <= MAX_PAGES; page++) {
+        let users;
+        try {
+            const { data, error } = await admin.auth.admin.listUsers({ page, perPage: PER_PAGE });
+            if (error) {
+                console.error(`${logPrefix} listUsers error on page ${page}:`, error);
+                failed = true;
+                break;
+            }
+            users = data.users;
+        } catch (error) {
+            console.error(`${logPrefix} listUsers threw on page ${page}:`, error);
+            failed = true;
+            break;
         }
+
+        for (const user of users) {
+            if (wanted.has(user.id)) {
+                found.add(user.id);
+                if (user.email) emails.add(user.email);
+            }
+        }
+
+        if (found.size === wanted.size) break; // all recipients resolved — stop early
+        if (users.length < PER_PAGE) break; // last page
     }
 
-    if (failedIds.length > 0) {
-        console.error(`${logPrefix} failed to resolve ${failedIds.length} recipient(s):`, failedIds);
+    if (!failed && found.size < wanted.size) {
+        const missing = Array.from(wanted).filter((id) => !found.has(id));
+        console.error(`${logPrefix} failed to resolve ${missing.length} recipient(s):`, missing);
+        failed = true;
     }
 
-    return { emails: Array.from(emails), failed: failedIds.length > 0 };
+    return { emails: Array.from(emails), failed };
 }
 
 /**

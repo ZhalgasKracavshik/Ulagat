@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Calendar, PlusCircle, Search, Trophy, ArrowRight, Star, Zap, GraduationCap, MessageCircle, Megaphone, Pin } from "lucide-react";
 import { CategoryBadge } from "@/components/announcements/CategoryBadge";
+import { getViewerGrades, announcementGradeFilter } from "@/lib/announcements/visibility";
 import type { Announcement } from "@/types";
 
 export default async function HomePage() {
@@ -50,12 +51,20 @@ export default async function HomePage() {
 
     // Fetch latest official announcements (expires_at is an absolute instant
     // set at creation — end of day Asia/Almaty — so compare with absolute now).
-    const { data: announcementRows } = await supabase
+    // Same grade targeting as /announcements: students/parents only see
+    // school-wide announcements plus those targeting their grades.
+    const viewerGrades = await getViewerGrades(supabase, user.id);
+    let announcementQuery = supabase
         .from('announcements')
         .select('*')
         .or(`expires_at.is.null,expires_at.gte.${new Date().toISOString()}`)
         .order('created_at', { ascending: false })
         .limit(3);
+    const gradeFilter = announcementGradeFilter(viewerGrades);
+    if (gradeFilter) {
+        announcementQuery = announcementQuery.or(gradeFilter);
+    }
+    const { data: announcementRows } = await announcementQuery;
     const announcements = (announcementRows ?? []) as Announcement[];
 
     return (

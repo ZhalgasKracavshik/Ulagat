@@ -136,10 +136,14 @@ export async function createAnnouncement(input: CreateAnnouncementInput): Promis
         emailsFailed = result.failed;
 
         if (result.sent > 0) {
-            await supabase
+            const { error: notifiedAtError } = await supabase
                 .from('announcements')
                 .update({ notified_at: new Date().toISOString() })
                 .eq('id', inserted.id as string);
+            if (notifiedAtError) {
+                // Non-fatal: emails went out, only the timestamp is missing.
+                console.error("createAnnouncement notified_at update error:", notifiedAtError);
+            }
         }
     } catch (error) {
         // The announcement is saved even if email delivery fails — the feed still shows it.

@@ -28,6 +28,8 @@ CREATE POLICY "staff_insert_announcements" ON public.announcements FOR INSERT TO
     AND created_by = auth.uid()
   );
 CREATE POLICY "staff_update_announcements" ON public.announcements FOR UPDATE TO authenticated
-  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('moderator', 'admin')));
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('moderator', 'admin')))
+  -- Defense in depth: the updated row must still be written by a staff member.
+  WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('moderator', 'admin')));
 CREATE POLICY "staff_delete_announcements" ON public.announcements FOR DELETE TO authenticated
   USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('moderator', 'admin')));

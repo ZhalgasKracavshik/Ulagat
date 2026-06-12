@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Megaphone, Pin, PlusCircle, Users } from "lucide-react";
 import { CategoryBadge } from "@/components/announcements/CategoryBadge";
 import { DeleteAnnouncementButton } from "@/components/announcements/DeleteAnnouncementButton";
+import { getViewerGrades, announcementGradeFilter } from "@/lib/announcements/visibility";
 import type { Announcement } from "@/types";
 
 export const dynamic = 'force-dynamic';
@@ -32,27 +33,9 @@ export default async function AnnouncementsPage() {
     const isStaff = role === 'admin' || role === 'moderator';
 
     // Grades relevant to this viewer: own grade for students, children's grades
-    // for parents. Staff / teachers / parliament see everything (null = no filter).
-    let viewerGrades: number[] | null = null;
-    if (role === 'student' && typeof profile?.grade === 'number') {
-        viewerGrades = [profile.grade];
-    } else if (role === 'parent') {
-        const { data: bonds } = await supabase
-            .from('family_bonds')
-            .select('student_id')
-            .eq('parent_id', user.id);
-        const childIds = (bonds ?? []).map((b) => b.student_id as string);
-        if (childIds.length > 0) {
-            const { data: children } = await supabase
-                .from('profiles')
-                .select('grade')
-                .in('id', childIds);
-            const grades = Array.from(
-                new Set((children ?? []).map((c) => c.grade).filter((g): g is number => typeof g === 'number'))
-            );
-            if (grades.length > 0) viewerGrades = grades;
-        }
-    }
+    // for parents; [] = no grade resolved (only school-wide announcements);
+    // null = staff / teachers / parliament see everything (no filter).
+    const viewerGrades = await getViewerGrades(supabase, user.id);
 
     // expires_at is an absolute instant (end of the chosen day in Asia/Almaty,
     // converted at creation time in createAnnouncement), so the current absolute
@@ -66,9 +49,11 @@ export default async function AnnouncementsPage() {
         .order('pinned', { ascending: false })
         .order('created_at', { ascending: false });
 
-    if (viewerGrades && viewerGrades.length > 0) {
-        // Show school-wide announcements plus those targeting any relevant grade.
-        query = query.or(`target_grades.is.null,target_grades.ov.{${viewerGrades.join(',')}}`);
+    // Show school-wide announcements plus those targeting any relevant grade
+    // (no filter for staff / teachers / parliament).
+    const gradeFilter = announcementGradeFilter(viewerGrades);
+    if (gradeFilter) {
+        query = query.or(gradeFilter);
     }
 
     const { data: rows } = await query;
