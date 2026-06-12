@@ -112,6 +112,23 @@ export type Substitution = {
     created_at: string;
 };
 
+export type AnnouncementCategory = 'medical' | 'assembly' | 'important' | 'general';
+
+export type Announcement = {
+    id: string;
+    title: string;
+    body: string;
+    category: AnnouncementCategory;
+    /** NULL = all grades */
+    target_grades: number[] | null;
+    pinned: boolean;
+    notified_at: string | null;
+    created_by: string;
+    created_at: string;
+    /** NULL = never expires */
+    expires_at: string | null;
+};
+
 /** Subset of Profile used in the admin users management table */
 export type AdminUserRow = {
     id: string;
