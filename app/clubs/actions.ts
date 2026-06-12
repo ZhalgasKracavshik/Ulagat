@@ -89,6 +89,15 @@ export async function createClub(formData: FormData) {
     if (name.length > 120) throw new Error("Club name is too long (max 120 characters).");
     if (!isClubCategory(category)) throw new Error("Invalid club category.");
 
+    // P1-3: the logo must live in our public club-logos bucket — no
+    // arbitrary external URLs (tracking pixels, deceptive content, …).
+    if (logoUrl) {
+        const allowedPrefix = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/club-logos/`;
+        if (!logoUrl.startsWith(allowedPrefix)) {
+            throw new Error("Invalid logo URL: logos must be uploaded to the club logo storage.");
+        }
+    }
+
     // Parliament creators always lead their own club; moderators/admins may
     // delegate leadership to a parliament or student user.
     let leaderId = userId;
@@ -124,6 +133,15 @@ export async function createClub(formData: FormData) {
     if (error || !club) {
         console.error("[createClub] insert failed:", error);
         throw new Error("Failed to create the club.");
+    }
+
+    // The leader is automatically the first member (best-effort — the
+    // club itself is already created). 23505 = already a member.
+    const { error: memberError } = await supabase
+        .from('club_members')
+        .insert({ club_id: club.id, user_id: leaderId });
+    if (memberError && memberError.code !== '23505') {
+        console.warn("[createClub] failed to add leader as member:", memberError);
     }
 
     revalidateClubPaths(club.id);
@@ -235,6 +253,10 @@ export async function recordMeeting(formData: FormData) {
         });
 
     if (error) {
+        // 23505 = unique_violation on (club_id, date).
+        if (error.code === '23505') {
+            throw new Error("A meeting for this date is already recorded.");
+        }
         console.error("[recordMeeting] insert failed:", error);
         throw new Error("Failed to record the meeting.");
     }

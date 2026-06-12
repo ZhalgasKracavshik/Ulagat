@@ -95,8 +95,10 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
         !isMember &&
         (CLUB_JOINER_ROLES as readonly string[]).includes(role);
 
+    // Meetings are recorded after they happen — dates are never in the
+    // future, so the split is today vs. past.
     const todayIso = almatyTodayIso();
-    const upcomingMeetings = meetings.filter((m) => m.date >= todayIso);
+    const todayMeetings = meetings.filter((m) => m.date >= todayIso);
     const pastMeetings = meetings.filter((m) => m.date < todayIso);
 
     const CategoryIcon = CLUB_CATEGORY_ICONS[club.category];
@@ -175,7 +177,7 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
                                     </Button>
                                 </form>
                             )}
-                            {isMember && (
+                            {isMember && !isLeader && (
                                 <form action={leaveClub}>
                                     <input type="hidden" name="club_id" value={club.id} />
                                     <Button type="submit" variant="outline" className="w-full gap-2 border-red-200 text-red-600 hover:bg-red-50 font-bold">
@@ -268,10 +270,10 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
                 <CardContent className="space-y-3">
                     {meetings.length > 0 ? (
                         <>
-                            {upcomingMeetings.length > 0 && (
-                                <p className="text-xs font-bold uppercase tracking-wider text-violet-500">Today / Upcoming</p>
+                            {todayMeetings.length > 0 && (
+                                <p className="text-xs font-bold uppercase tracking-wider text-violet-500">Today</p>
                             )}
-                            {upcomingMeetings.map((meeting) => (
+                            {todayMeetings.map((meeting) => (
                                 <MeetingRow key={meeting.id} meeting={meeting} highlight />
                             ))}
                             {pastMeetings.length > 0 && (
