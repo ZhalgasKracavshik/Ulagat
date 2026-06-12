@@ -20,7 +20,13 @@ export function calculateHash(
 
 /**
  * Mines a new reputation block.
- * This should be called from a Server Action.
+ *
+ * @deprecated Currently unused. Direct INSERTs into reputation_ledger are
+ * blocked by RLS since the "Users can insert reputation" policy was dropped
+ * (security hardening, db/phase-3-6-enhancements.sql P0-1). All point awards
+ * must go through the SECURITY DEFINER award_reputation_points() DB function
+ * (fired by triggers) instead. If chain mining is ever revived, do it inside
+ * a SECURITY DEFINER RPC or with the service-role admin client.
  */
 export async function mineBlock(
   userId: string,

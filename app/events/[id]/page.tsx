@@ -9,6 +9,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { EventRegistrationButton } from "@/components/events/EventRegistrationButton";
+import { almatyTodayIso } from "@/lib/schedule/almaty-time";
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -35,24 +36,42 @@ export default async function EventDetailsPage({ params }: PageProps) {
 
     if (!event) return notFound();
 
-    // Fetch registration data
+    // P1-4: pending/rejected/archived events are only visible to their
+    // organizer and staff — everyone else gets a 404, so unmoderated content
+    // is not reachable (or registerable) by direct link.
+    const isOrganizer = user?.id === event.organizer_id;
+    const isStaff = ['admin', 'moderator'].includes(userRole);
+    if (event.status !== 'active' && !isOrganizer && !isStaff) {
+        return notFound();
+    }
+
+    // Fetch registration data (with profile info for the delegation list)
     let registrationCount = 0;
     let isRegistered = false;
 
-    const { data: regs } = await supabase
-        .from('event_registrations')
-        .select('user_id')
-        .eq('event_id', id);
+    type RegistrationRow = {
+        user_id: string;
+        profiles: { id: string; full_name: string | null; avatar_url: string | null } | null;
+    };
 
-    if (regs) {
-        registrationCount = regs.length;
-        if (user) {
-            isRegistered = regs.some(r => r.user_id === user.id);
-        }
+    const { data: regsRaw } = await supabase
+        .from('event_registrations')
+        .select('user_id, profiles:user_id(id, full_name, avatar_url)')
+        .eq('event_id', id)
+        .order('registered_at', { ascending: true });
+
+    const regs = (regsRaw ?? []) as unknown as RegistrationRow[];
+    registrationCount = regs.length;
+    if (user) {
+        isRegistered = regs.some(r => r.user_id === user.id);
     }
 
     const isFull = event.max_students ? registrationCount >= event.max_students : false;
     const isExpired = event.expires_at ? new Date(event.expires_at) < new Date() : false;
+    // P2-2: registration closes at the end of the deadline day (Almaty time).
+    const deadlinePassed = event.registration_deadline
+        ? almatyTodayIso() > event.registration_deadline
+        : false;
 
     return (
         <div className="container py-8 max-w-4xl mx-auto px-4">
@@ -130,6 +149,38 @@ export default async function EventDetailsPage({ params }: PageProps) {
                             </div>
                         </CardContent>
                     </Card>
+
+                    {/* Delegation / participants list */}
+                    <div className="space-y-4">
+                        <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                            <Users className="w-6 h-6 text-blue-600" />
+                            Participants
+                            <span className="text-base font-semibold text-slate-400">({registrationCount})</span>
+                        </h2>
+                        {regs.length > 0 ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {regs.map((reg) => (
+                                    <Link
+                                        key={reg.user_id}
+                                        href={`/profile/${reg.user_id}`}
+                                        className="flex items-center gap-3 p-3 rounded-xl border bg-white hover:bg-blue-50/50 hover:border-blue-200 transition-colors"
+                                    >
+                                        <Avatar className="w-10 h-10">
+                                            <AvatarImage src={reg.profiles?.avatar_url ?? undefined} />
+                                            <AvatarFallback>{reg.profiles?.full_name?.[0] || 'U'}</AvatarFallback>
+                                        </Avatar>
+                                        <span className="font-semibold text-slate-800 truncate">
+                                            {reg.profiles?.full_name || 'Unknown user'}
+                                        </span>
+                                    </Link>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-sm text-muted-foreground border border-dashed rounded-xl p-6 text-center">
+                                No participants yet — be the first to register!
+                            </p>
+                        )}
+                    </div>
                 </div>
 
                 <div className="space-y-6">
@@ -141,6 +192,7 @@ export default async function EventDetailsPage({ params }: PageProps) {
                                     isRegistered={isRegistered}
                                     isFull={isFull}
                                     isExpired={isExpired}
+                                    deadlinePassed={deadlinePassed}
                                 />
                             ) : (
                                 <Link href="/login" className="block w-full">

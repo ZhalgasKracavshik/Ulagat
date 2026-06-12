@@ -51,6 +51,19 @@ export default async function ProfilePage({ params }: PageProps) {
 
     const isOwner = currentUser?.id === profile.id;
 
+    // P1-3: pending/rejected achievements (and rejection reasons) are private —
+    // only the profile owner and admins/moderators may see them.
+    let viewerRole: string | null = null;
+    if (currentUser && !isOwner) {
+        const { data: viewerProfile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', currentUser.id)
+            .single();
+        viewerRole = viewerProfile?.role ?? null;
+    }
+    const canSeeAllAchievements = isOwner || (!!viewerRole && ['admin', 'moderator'].includes(viewerRole));
+
     // Fetch Services
     const { data: services } = await supabase
         .from('services')
@@ -64,12 +77,16 @@ export default async function ProfilePage({ params }: PageProps) {
         .select('*')
         .eq('organizer_id', id);
 
-    // Fetch Achievements
-    const { data: achievements } = await supabase
+    // Fetch Achievements (visitors only see verified ones — see P1-3 above)
+    let achievementsQuery = supabase
         .from('achievements')
         .select('*')
         .eq('user_id', id)
         .order('achievement_date', { ascending: false });
+    if (!canSeeAllAchievements) {
+        achievementsQuery = achievementsQuery.eq('status', 'verified');
+    }
+    const { data: achievements } = await achievementsQuery;
 
     // Fetch Reputation Stats
     const { data: repBlocks } = await supabase

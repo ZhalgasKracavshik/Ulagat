@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShieldAlert, Users, ListFilter, BookOpen } from "lucide-react";
+import { ShieldAlert, Users, ListFilter, Award } from "lucide-react";
 import { ServiceReviewTable } from "@/components/admin/ServiceReviewTable";
 import { EventReviewTable } from "@/components/admin/EventReviewTable";
 import { MaterialReviewTable } from "@/components/admin/MaterialReviewTable";
@@ -42,10 +42,11 @@ export default async function AdminPage() {
     const { count: eventCount } = await supabase.from('events').select('*', { count: 'exact', head: true });
 
     // Fetch Pending Content
-    const [{ data: pendingServices }, { data: pendingEvents }, { data: pendingMaterials }] = await Promise.all([
+    const [{ data: pendingServices }, { data: pendingEvents }, { data: pendingMaterials }, { count: pendingAchievements }] = await Promise.all([
         supabase.from('services').select('*, profiles:owner_id(full_name)').eq('status', 'pending').order('created_at', { ascending: false }),
         supabase.from('events').select('*, profiles:organizer_id(full_name)').eq('status', 'pending').order('created_at', { ascending: false }),
-        supabase.from('study_materials').select('*, profiles:uploaded_by(full_name)').eq('status', 'pending').order('created_at', { ascending: false })
+        supabase.from('study_materials').select('*, profiles:uploaded_by(full_name)').eq('status', 'pending').order('created_at', { ascending: false }),
+        supabase.from('achievements').select('*', { count: 'exact', head: true }).eq('status', 'pending')
     ]);
 
     // Fetch ALL Services (for moderation tab)
@@ -63,14 +64,24 @@ export default async function AdminPage() {
 
     return (
         <div className="container mx-auto py-8 space-y-8 px-4 md:px-6">
-            <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary/10 rounded-full">
-                    <ShieldAlert className="w-8 h-8 text-primary" />
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    <div className="p-3 bg-primary/10 rounded-full">
+                        <ShieldAlert className="w-8 h-8 text-primary" />
+                    </div>
+                    <div>
+                        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+                        <p className="text-muted-foreground">Manage services, users, and platform content.</p>
+                    </div>
                 </div>
-                <div>
-                    <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-                    <p className="text-muted-foreground">Manage services, users, and platform content.</p>
-                </div>
+                {/* Achievement verification lives at /achievements/review (also accessible to parliament) */}
+                <Link href="/achievements/review">
+                    <Button variant="outline" className="gap-2 font-bold">
+                        <Award className="w-4 h-4 text-amber-500" />
+                        Review Achievements
+                        {(pendingAchievements ?? 0) > 0 && <Badge className="bg-red-500">{pendingAchievements}</Badge>}
+                    </Button>
+                </Link>
             </div>
 
             {/* Stats Cards */}

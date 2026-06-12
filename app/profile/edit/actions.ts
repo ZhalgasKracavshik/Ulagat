@@ -32,6 +32,9 @@ export async function updateProfile(formData: FormData) {
     const classLetterRaw = (formData.get("class_letter") as string | null)?.trim() ?? "";
     const class_letter = classLetterRaw ? classLetterRaw.slice(0, 3) : null;
 
+    // Leaderboard privacy pseudonym toggle (Phase 6)
+    const leaderboard_anonymous = formData.get("leaderboard_anonymous") === "on";
+
     // Parse social links JSON
     let social_links: { network?: string; url?: string }[] = [];
     try {
@@ -49,6 +52,7 @@ export async function updateProfile(formData: FormData) {
         social_links,
         grade,
         class_letter,
+        leaderboard_anonymous,
     }).eq("id", user.id);
 
     if (error) {

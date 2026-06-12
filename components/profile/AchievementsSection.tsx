@@ -5,9 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Award, Plus, Trash2, X, Image as ImageIcon } from "lucide-react";
+import { Award, Plus, Trash2, X, Image as ImageIcon, Clock, BadgeCheck, Ban } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { ACHIEVEMENT_TIERS, TIER_POINTS, type AchievementTier } from "@/lib/leaderboard";
 
 interface Achievement {
     id: string;
@@ -15,6 +17,37 @@ interface Achievement {
     description: string | null;
     achievement_date: string | null;
     image_url: string | null;
+    tier: AchievementTier | null;
+    status: 'pending' | 'verified' | 'rejected' | null;
+    rejection_reason: string | null;
+}
+
+const TIER_LABELS: Record<AchievementTier, string> = {
+    school: 'School',
+    city: 'City',
+    national: 'National',
+};
+
+function StatusBadge({ status }: { status: Achievement['status'] }) {
+    if (status === 'verified') {
+        return (
+            <Badge className="gap-1 bg-green-100 text-green-700 border border-green-200 shadow-none hover:bg-green-100">
+                <BadgeCheck className="w-3 h-3" /> Verified
+            </Badge>
+        );
+    }
+    if (status === 'rejected') {
+        return (
+            <Badge className="gap-1 bg-red-100 text-red-700 border border-red-200 shadow-none hover:bg-red-100">
+                <Ban className="w-3 h-3" /> Rejected
+            </Badge>
+        );
+    }
+    return (
+        <Badge className="gap-1 bg-amber-100 text-amber-700 border border-amber-200 shadow-none hover:bg-amber-100">
+            <Clock className="w-3 h-3" /> Pending
+        </Badge>
+    );
 }
 
 interface AchievementsProps {
@@ -106,6 +139,25 @@ export function AchievementsSection({ achievements, isOwner }: AchievementsProps
                             <Textarea name="description" placeholder="Description (optional)" className="min-h-[60px]" />
                             <Input name="achievement_date" type="date" />
 
+                            {/* Tier (Phase 6) — determines points awarded after verification */}
+                            <div className="space-y-1">
+                                <Label className="text-xs text-slate-600">Level</Label>
+                                <select
+                                    name="tier"
+                                    defaultValue="school"
+                                    className="w-full h-9 rounded-md border border-input bg-white px-3 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                >
+                                    {ACHIEVEMENT_TIERS.map((tier) => (
+                                        <option key={tier} value={tier}>
+                                            {TIER_LABELS[tier]} (+{TIER_POINTS[tier]} pts)
+                                        </option>
+                                    ))}
+                                </select>
+                                <p className="text-[11px] text-muted-foreground">
+                                    Points are awarded after a parliament member or moderator verifies the achievement.
+                                </p>
+                            </div>
+
                             {/* Image Upload */}
                             <div className="space-y-2">
                                 <Label className="text-xs text-slate-600 flex items-center gap-1">
@@ -158,9 +210,20 @@ export function AchievementsSection({ achievements, isOwner }: AchievementsProps
                             <CardContent className="p-4">
                                 <div className="flex items-start justify-between gap-2">
                                     <div>
-                                        <h4 className="font-bold text-slate-900">{a.title}</h4>
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <h4 className="font-bold text-slate-900">{a.title}</h4>
+                                            <StatusBadge status={a.status} />
+                                            {a.tier && (
+                                                <Badge variant="outline" className="text-[10px] uppercase tracking-wide bg-slate-50">
+                                                    {TIER_LABELS[a.tier]}
+                                                </Badge>
+                                            )}
+                                        </div>
                                         {a.description && (
                                             <p className="text-sm text-slate-600 mt-1">{a.description}</p>
+                                        )}
+                                        {a.status === 'rejected' && a.rejection_reason && (
+                                            <p className="text-xs text-red-600 mt-1">Reason: {a.rejection_reason}</p>
                                         )}
                                         {a.achievement_date && (
                                             <span className="text-xs text-muted-foreground mt-2 block">
