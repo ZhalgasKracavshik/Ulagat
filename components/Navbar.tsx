@@ -14,6 +14,7 @@ import {
     MessageCircle,
     GraduationCap,
     Users,
+    Users2,
     Menu,
     X,
     ShieldCheck,
@@ -119,6 +120,16 @@ export function Navbar() {
                 <Trophy className="w-5 h-5 md:w-4 md:h-4 text-amber-500 md:text-inherit" />
                 <span>Events</span>
             </Link>
+            {user && (
+                <Link
+                    href="/clubs"
+                    onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                    className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-2 md:gap-1"
+                >
+                    <Users2 className="w-5 h-5 md:w-4 md:h-4 text-violet-500 md:text-inherit" />
+                    <span>Clubs</span>
+                </Link>
+            )}
             <Link
                 href="/leaderboard"
                 onClick={() => isMobile && setIsMobileMenuOpen(false)}
