@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageCircle, Star } from "lucide-react";
 import { StartChatButton } from "../messages/StartChatButton";
+import { serviceCategoryLabel } from "@/lib/services";
 
 interface ServiceCardProps {
     service: any;
@@ -36,7 +37,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
             <CardHeader className="p-4 pb-2">
                 <div className="flex justify-between items-start mb-2">
                     <Badge variant="secondary" className="text-xs font-normal">
-                        {service.category || 'General'}
+                        {serviceCategoryLabel(service.category)}
                     </Badge>
                     <div className="flex items-center text-yellow-500 text-xs font-bold gap-1">
                         <Star className="w-3 h-3 fill-yellow-500" />

@@ -16,6 +16,8 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShieldAlert } from "lucide-react";
 import { InteractiveButton } from "@/components/shared/InteractiveButton";
+import { PdfFileInput } from "@/components/olympiad/PdfFileInput";
+import { MATERIAL_UPLOADER_ROLES } from "@/lib/olympiad";
 
 export default async function NewMaterialPage() {
     const supabase = await createClient();
@@ -25,7 +27,8 @@ export default async function NewMaterialPage() {
 
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
 
-    if (!profile || !['admin', 'moderator'].includes(profile.role)) {
+    const allowedRoles: readonly string[] = MATERIAL_UPLOADER_ROLES;
+    if (!profile || !allowedRoles.includes(profile.role)) {
         return (
             <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50/50">
                 <Card className="max-w-md w-full border-0 shadow-2xl text-center p-8 space-y-4">
@@ -33,7 +36,7 @@ export default async function NewMaterialPage() {
                         <ShieldAlert className="w-10 h-10 text-red-600" />
                     </div>
                     <CardTitle className="text-2xl font-bold text-slate-900">Access Denied</CardTitle>
-                    <p className="text-slate-600">Only Admins and Moderators can add study materials.</p>
+                    <p className="text-slate-600">Only Admins, Moderators and Parliament members can add study materials.</p>
                     <Button variant="outline" className="w-full mt-4" asChild>
                         <a href="/olympiad">Back</a>
                     </Button>
@@ -95,6 +98,19 @@ export default async function NewMaterialPage() {
                                             <SelectItem value="hard">Hard</SelectItem>
                                         </SelectContent>
                                     </Select>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="year" className="text-sm font-semibold text-slate-700">Olympiad Year (optional)</Label>
+                                    <Input id="year" name="year" type="number" min={1990} max={2100} placeholder="e.g. 2024" className="h-11 border-slate-200 focus:ring-indigo-500 rounded-lg shadow-sm" />
+                                    <p className="text-[11px] text-muted-foreground italic">Year of the olympiad or paper — used by the archive year filter.</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="pdf" className="text-sm font-semibold text-slate-700">PDF Attachment (optional)</Label>
+                                    <PdfFileInput />
+                                    <p className="text-[11px] text-muted-foreground italic">.pdf only, max 10 MB. Students get a download button.</p>
                                 </div>
                             </div>
 

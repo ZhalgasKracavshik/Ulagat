@@ -16,6 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ShieldAlert } from "lucide-react";
+import { EVENT_CREATOR_ROLES, EVENT_TAGS } from "@/lib/events";
 
 export default async function NewEventPage() {
     const supabase = await createClient();
@@ -25,7 +26,8 @@ export default async function NewEventPage() {
 
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
 
-    if (profile?.role !== 'admin' && profile?.role !== 'moderator') {
+    const allowedRoles: readonly string[] = EVENT_CREATOR_ROLES;
+    if (!profile || !allowedRoles.includes(profile.role)) {
         return (
             <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50/50">
                 <Card className="max-w-md w-full border-0 shadow-2xl text-center p-8 space-y-4">
@@ -33,7 +35,7 @@ export default async function NewEventPage() {
                         <ShieldAlert className="w-10 h-10 text-red-600" />
                     </div>
                     <CardTitle className="text-2xl font-bold text-slate-900">Access Denied</CardTitle>
-                    <p className="text-slate-600">Only Admins and Moderators can create events/olympiads.</p>
+                    <p className="text-slate-600">Only Teachers, Admins, Moderators and Parliament members can create events/olympiads.</p>
                     <Button variant="outline" className="w-full mt-4" asChild>
                         <a href="/events">Back to Events</a>
                     </Button>
@@ -73,6 +75,27 @@ export default async function NewEventPage() {
                                 <div className="space-y-2">
                                     <Label htmlFor="location" className="text-sm font-semibold text-slate-700">Location</Label>
                                     <Input id="location" name="location" placeholder="e.g. Auditorium" className="h-11 border-slate-200 focus:ring-blue-500 rounded-lg shadow-sm" />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="registration_deadline" className="text-sm font-semibold text-slate-700">Registration Deadline (optional)</Label>
+                                    <Input id="registration_deadline" name="registration_deadline" type="date" className="h-11 border-slate-200 focus:ring-blue-500 rounded-lg shadow-sm" />
+                                    <p className="text-[11px] text-muted-foreground italic">Participants get an email reminder the day before this deadline.</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-semibold text-slate-700">Tags</Label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {EVENT_TAGS.map((tag) => (
+                                            <label key={tag} className="cursor-pointer">
+                                                <input type="checkbox" name="tags" value={tag} className="peer sr-only" />
+                                                <span className="inline-block px-3 py-1.5 rounded-full text-xs font-bold border border-slate-200 bg-slate-50 text-slate-600 transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 capitalize">
+                                                    {tag}
+                                                </span>
+                                            </label>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
 

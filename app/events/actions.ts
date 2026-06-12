@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { EVENT_CREATOR_ROLES, isEventTag } from "@/lib/events";
 
 export async function createEvent(formData: FormData) {
     const supabase = await createClient();
@@ -22,8 +23,9 @@ export async function createEvent(formData: FormData) {
 
     console.log(`[createEvent] User: ${user.id}, Role: ${profile?.role}`);
 
-    // Allow admins, moderators ONLY (No teachers)
-    const allowedRoles = ['admin', 'moderator'];
+    // Phase 3: teachers, admins, moderators and parliament can create events.
+    // New events keep status 'pending' (DB default) for the moderation flow.
+    const allowedRoles: readonly string[] = EVENT_CREATOR_ROLES;
 
     if (!profile || !allowedRoles.includes(profile.role)) {
         console.error(`[createEvent] Unauthorized access attempt by role: ${profile?.role}`);
@@ -38,6 +40,16 @@ export async function createEvent(formData: FormData) {
     const durationDays = parseInt(formData.get("duration") as string) || 30; // Default 30 days for events
     const max_students_raw = formData.get("max_students") as string;
     const max_students = max_students_raw ? parseInt(max_students_raw) : null;
+
+    // Phase 3: tags (validated against the allowed list) + registration deadline
+    const tags = formData
+        .getAll("tags")
+        .map((t) => String(t))
+        .filter(isEventTag);
+    const registration_deadline_raw = (formData.get("registration_deadline") as string | null)?.trim() || "";
+    const registration_deadline = /^\d{4}-\d{2}-\d{2}$/.test(registration_deadline_raw)
+        ? registration_deadline_raw
+        : null;
 
     if (!title || !description || !event_date) {
         throw new Error("Missing fields");
@@ -56,6 +68,8 @@ export async function createEvent(formData: FormData) {
         image_url: image_url || null,
         expires_at: expirationDate.toISOString(),
         max_students,
+        tags,
+        registration_deadline,
     });
 
     if (error) {

@@ -11,6 +11,8 @@ export type Profile = {
     class_letter?: string | null;
     phone?: string | null;
     external_skud_id?: string | null;
+    /** Phase 6: show a pseudonym instead of name/avatar on the leaderboard */
+    leaderboard_anonymous?: boolean;
     created_at: string;
 };
 

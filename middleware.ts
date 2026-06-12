@@ -16,6 +16,7 @@ const PROTECTED_ROUTES = [
     '/admin',
     '/schedule',
     '/announcements',
+    '/achievements',
     '/lost-found',
     '/certificates',
     '/career',
@@ -42,10 +43,14 @@ const STAFF_ONLY_ROUTES = ['/schedule/manage', '/schedule/substitutions'];
 // /announcements itself stays available to every authenticated user.
 const ANNOUNCEMENT_STAFF_ROUTES = ['/announcements/new'];
 
-// P1-1: PARLIAMENT_ALLOWED_NEW_ROUTES was declared but never referenced in the middleware logic.
-// Parliament is allowed to access /events/new, /clubs/new, /lost-found/new (same as above comment).
-// The parliament block below explicitly lists the routes parliament CANNOT access (/services/new, /olympiad/new)
-// rather than checking against an allowlist, which makes the logic self-contained and easy to audit.
+// Achievement verification (Phase 6) — parliament, moderator and admin.
+// Lives outside /admin so parliament can access it without widening /admin.
+const ACHIEVEMENT_REVIEW_ROUTES = ['/achievements/review'];
+const ACHIEVEMENT_REVIEWER_ROLES = ['parliament', 'moderator', 'admin'];
+
+// Parliament (Phases 3-5): allowed to access every creation route —
+// /events/new, /services/new, /olympiad/new, /clubs/new, /lost-found/new.
+// Server actions + RLS policies enforce the same role rules defensively.
 
 function getRole(profile: { role: string } | null): string {
     return profile?.role ?? 'student';
@@ -130,6 +135,14 @@ export async function middleware(request: NextRequest) {
         return sessionResponse;
     }
 
+    // Achievement review (parliament / moderator / admin)
+    if (ACHIEVEMENT_REVIEW_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'))) {
+        if (!ACHIEVEMENT_REVIEWER_ROLES.includes(role)) {
+            return NextResponse.redirect(new URL('/home', request.url));
+        }
+        return sessionResponse;
+    }
+
     // Parent role restrictions
     if (role === 'parent') {
         const isBlocked = PARENT_BLOCKED_ROUTES.some(
@@ -141,16 +154,11 @@ export async function middleware(request: NextRequest) {
         return sessionResponse;
     }
 
-    // Parliament role: same as student EXCEPT parliament-allowed creation routes are unblocked
+    // Parliament role: Phases 3-5 allow parliament to create events, services
+    // (bulletin board posts) and olympiad materials, so no creation routes are
+    // blocked for parliament anymore. Admin/staff-only routes are already
+    // handled above.
     if (role === 'parliament') {
-        // Block the teacher/admin-only routes that parliament cannot access
-        const teacherOnlyRoutes = ['/services/new', '/olympiad/new'];
-        const isBlocked = teacherOnlyRoutes.some(
-            (r) => pathname === r || pathname.startsWith(r + '/')
-        );
-        if (isBlocked) {
-            return NextResponse.redirect(new URL('/home', request.url));
-        }
         return sessionResponse;
     }
 

@@ -3,34 +3,70 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BookOpen, GraduationCap, ExternalLink, PlusCircle, Filter } from "lucide-react";
+import { BookOpen, GraduationCap, ExternalLink, PlusCircle, Filter, FileDown, Gauge } from "lucide-react";
 import Link from "next/link";
 import { InteractiveButton } from "@/components/shared/InteractiveButton";
+import { YearFilter } from "@/components/olympiad/YearFilter";
+import { MATERIAL_DIFFICULTIES, MATERIAL_UPLOADER_ROLES, isMaterialDifficulty } from "@/lib/olympiad";
 
 export const dynamic = 'force-dynamic';
+
+type MaterialRow = {
+    id: string;
+    title: string;
+    description: string | null;
+    url: string | null;
+    file_url: string | null;
+    category: string;
+    difficulty: string;
+    year: number | null;
+    profiles: { full_name: string | null } | null;
+};
 
 export default async function OlympiadPrepPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const supabase = await createClient();
     const params = await searchParams;
     const categoryFilter = typeof params?.category === 'string' ? params.category : null;
+    const rawDifficulty = typeof params?.difficulty === 'string' ? params.difficulty : null;
+    const difficultyFilter = rawDifficulty && isMaterialDifficulty(rawDifficulty) ? rawDifficulty : null;
+    const rawYear = typeof params?.year === 'string' ? Number(params.year) : NaN;
+    const yearFilter = Number.isInteger(rawYear) && rawYear >= 1990 && rawYear <= 2100 ? rawYear : null;
 
     const { data: { user } } = await supabase.auth.getUser();
-    let isAdminOrMod = false;
+    let canUpload = false;
     if (user) {
         const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-        isAdminOrMod = ['admin', 'moderator'].includes(profile?.role || '');
+        canUpload = (MATERIAL_UPLOADER_ROLES as readonly string[]).includes(profile?.role || '');
     }
 
     let query = supabase
         .from('study_materials')
         .select('*, profiles:uploaded_by(full_name)')
+        .eq('status', 'active')
         .order('created_at', { ascending: false });
 
     if (categoryFilter) {
         query = query.eq('category', categoryFilter);
     }
+    if (difficultyFilter) {
+        query = query.eq('difficulty', difficultyFilter);
+    }
+    if (yearFilter) {
+        query = query.eq('year', yearFilter);
+    }
 
-    const { data: materials } = await query;
+    const { data: materialsRaw } = await query;
+    const materials = (materialsRaw ?? []) as unknown as MaterialRow[];
+
+    // Distinct years across all active materials (for the year dropdown)
+    const { data: yearRows } = await supabase
+        .from('study_materials')
+        .select('year')
+        .eq('status', 'active')
+        .not('year', 'is', null);
+    const years = Array.from(
+        new Set(((yearRows ?? []) as { year: number }[]).map((r) => r.year))
+    ).sort((a, b) => b - a);
 
     const CATEGORIES = ["Math", "Physics", "Chemistry", "Biology", "Informatics", "English", "History"];
 
@@ -39,6 +75,25 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
         medium: "bg-amber-100 text-amber-700 border-amber-200",
         hard: "bg-red-100 text-red-700 border-red-200",
     };
+
+    // Build hrefs preserving the other active filters
+    function buildHref(overrides: { category?: string | null; difficulty?: string | null; year?: number | null }): string {
+        const next = new URLSearchParams();
+        const category = overrides.category !== undefined ? overrides.category : categoryFilter;
+        const difficulty = overrides.difficulty !== undefined ? overrides.difficulty : difficultyFilter;
+        const year = overrides.year !== undefined ? overrides.year : yearFilter;
+        if (category) next.set('category', category);
+        if (difficulty) next.set('difficulty', difficulty);
+        if (year) next.set('year', String(year));
+        const qs = next.toString();
+        return qs ? `/olympiad?${qs}` : '/olympiad';
+    }
+
+    const yearBaseParams: Record<string, string> = {};
+    if (categoryFilter) yearBaseParams.category = categoryFilter;
+    if (difficultyFilter) yearBaseParams.difficulty = difficultyFilter;
+
+    const hasFilter = Boolean(categoryFilter || difficultyFilter || yearFilter);
 
     return (
         <div className="container mx-auto py-8 space-y-8 px-4 md:px-6 min-h-screen">
@@ -53,7 +108,7 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
                         Study materials, example questions, and resources to ace your next olympiad.
                     </p>
                 </div>
-                {isAdminOrMod && (
+                {canUpload && (
                     <Link href="/olympiad/new">
                         <Button
                             size="lg"
@@ -66,10 +121,10 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
                 )}
             </div>
 
-            {/* Filter Bar */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-none">
+            {/* Subject Filter Bar */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
                 <Filter className="w-4 h-4 text-slate-400 shrink-0" />
-                <Link href="/olympiad">
+                <Link href={buildHref({ category: null })}>
                     <Button
                         variant={!categoryFilter ? "secondary" : "ghost"}
                         size="sm"
@@ -79,7 +134,7 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
                     </Button>
                 </Link>
                 {CATEGORIES.map(cat => (
-                    <Link key={cat} href={`/olympiad?category=${cat}`}>
+                    <Link key={cat} href={buildHref({ category: cat })}>
                         <Button
                             variant={categoryFilter === cat ? "secondary" : "ghost"}
                             size="sm"
@@ -91,10 +146,36 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
                 ))}
             </div>
 
+            {/* Difficulty chips + Year dropdown */}
+            <div className="flex flex-wrap items-center gap-2 -mt-4">
+                <Gauge className="w-4 h-4 text-slate-400 shrink-0" />
+                <Link href={buildHref({ difficulty: null })}>
+                    <Button variant={!difficultyFilter ? "secondary" : "ghost"} size="sm" className="rounded-full px-4">
+                        Any difficulty
+                    </Button>
+                </Link>
+                {MATERIAL_DIFFICULTIES.map((level) => (
+                    <Link key={level} href={buildHref({ difficulty: level })}>
+                        <Button
+                            variant={difficultyFilter === level ? "secondary" : "ghost"}
+                            size="sm"
+                            className="rounded-full px-4 capitalize"
+                        >
+                            {level}
+                        </Button>
+                    </Link>
+                ))}
+                {years.length > 0 && (
+                    <div className="ml-auto">
+                        <YearFilter years={years} value={yearFilter} baseParams={yearBaseParams} />
+                    </div>
+                )}
+            </div>
+
             {/* Resources Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {materials && materials.length > 0 ? (
-                    materials.map((material: any) => (
+                {materials.length > 0 ? (
+                    materials.map((material) => (
                         <Card key={material.id} className="group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-indigo-100/50 overflow-hidden bg-white">
                             <div className="h-2 bg-gradient-to-r from-indigo-500 to-purple-500 opacity-80 group-hover:opacity-100 transition-opacity" />
                             <CardHeader className="space-y-4">
@@ -108,6 +189,11 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <Badge variant="outline" className="text-[10px] uppercase tracking-wider font-bold bg-slate-50">{material.category}</Badge>
+                                    {material.year && (
+                                        <Badge variant="outline" className="text-[10px] tracking-wider font-bold bg-indigo-50/50 border-indigo-200 text-indigo-700">
+                                            {material.year}
+                                        </Badge>
+                                    )}
                                 </div>
                             </CardHeader>
                             <CardContent className="space-y-6">
@@ -123,18 +209,32 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
                                             {material.profiles?.full_name || 'Admin'}
                                         </span>
                                     </div>
-                                    {material.url && (
-                                        <a href={material.url} target="_blank" rel="noopener noreferrer">
-                                            <InteractiveButton
-                                                size="sm"
-                                                variant="outline"
-                                                className="gap-1.5 text-indigo-600 border-indigo-200 bg-indigo-50/30 hover:bg-indigo-600 hover:text-white transition-all font-bold"
-                                            >
-                                                <ExternalLink className="w-3.5 h-3.5" />
-                                                Open
-                                            </InteractiveButton>
-                                        </a>
-                                    )}
+                                    <div className="flex items-center gap-2">
+                                        {material.file_url && (
+                                            <a href={material.file_url} target="_blank" rel="noopener noreferrer" download>
+                                                <InteractiveButton
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="gap-1.5 text-purple-600 border-purple-200 bg-purple-50/30 hover:bg-purple-600 hover:text-white transition-all font-bold"
+                                                >
+                                                    <FileDown className="w-3.5 h-3.5" />
+                                                    PDF
+                                                </InteractiveButton>
+                                            </a>
+                                        )}
+                                        {material.url && (
+                                            <a href={material.url} target="_blank" rel="noopener noreferrer">
+                                                <InteractiveButton
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="gap-1.5 text-indigo-600 border-indigo-200 bg-indigo-50/30 hover:bg-indigo-600 hover:text-white transition-all font-bold"
+                                                >
+                                                    <ExternalLink className="w-3.5 h-3.5" />
+                                                    Open
+                                                </InteractiveButton>
+                                            </a>
+                                        )}
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
@@ -146,9 +246,9 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
                         </div>
                         <h3 className="text-xl font-bold text-slate-800">No Materials Found</h3>
                         <p className="text-muted-foreground">
-                            {categoryFilter
-                                ? `No resources for "${categoryFilter}" yet.`
-                                : "Admins and Moderators will add study materials soon!"}
+                            {hasFilter
+                                ? "No resources match the selected filters yet."
+                                : "Staff and Parliament will add study materials soon!"}
                         </p>
                     </div>
                 )}

@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { SERVICE_CREATOR_ROLES } from "@/lib/services";
 
 export async function createService(formData: FormData) {
     const supabase = await createClient();
@@ -23,9 +24,9 @@ export async function createService(formData: FormData) {
 
     console.log(`[createService] User: ${user.id}, Role: ${profile?.role}`);
 
-    // Allow Teachers, Admins, Moderators
-    // Students CANNOT create services
-    const allowedRoles = ['teacher', 'admin', 'moderator'];
+    // Phase 5: Teachers, Admins, Moderators and Parliament can post.
+    // Students CANNOT create listings.
+    const allowedRoles: readonly string[] = SERVICE_CREATOR_ROLES;
 
     if (!profile || !allowedRoles.includes(profile.role)) {
         console.error(`[createService] Unauthorized access attempt by role: ${profile?.role}`);
@@ -49,27 +50,27 @@ export async function createService(formData: FormData) {
     const expirationDate = new Date();
     expirationDate.setDate(expirationDate.getDate() + durationDays);
 
-    // Insert service with 'pending' status (waiting for payment)
-    const { data, error } = await supabase.from("services").insert({
+    // Phase 5: posting is FREE — the listing goes straight to 'pending'
+    // moderation without a payment step. The Stripe pay flow
+    // (app/services/[id]/pay, app/api/checkout) is kept intact for the
+    // Phase 14 subscriptions work; we simply no longer redirect to it.
+    const { error } = await supabase.from("services").insert({
         owner_id: user.id,
         title,
         description,
         price,
         category,
-        status: 'pending', // Pending payment
+        status: 'pending', // Awaiting moderation
         image_url: image_url || null,
         expires_at: expirationDate.toISOString()
-    }).select().single();
+    });
 
     if (error) {
         console.error("Error creating service:", error);
         throw new Error("Failed to create service");
     }
 
-    // Redirect to Payment (Stripe Checkout)
-    // For MVP/Demo, we might skip to active or a dummy payment page
-    // Let's redirect to a payment confirmation page
-    redirect(`/services/${data.id}/pay`);
+    redirect('/services?submitted=true');
 }
 
 export async function deleteService(serviceId: string) {

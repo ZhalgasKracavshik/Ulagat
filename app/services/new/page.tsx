@@ -17,6 +17,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ShieldAlert } from "lucide-react";
+import { SERVICE_CATEGORIES, SERVICE_CREATOR_ROLES } from "@/lib/services";
 
 export default async function NewServicePage() {
     const supabase = await createClient();
@@ -26,8 +27,8 @@ export default async function NewServicePage() {
 
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
 
-    // Allow Teachers, Admins, Moderators
-    const allowedRoles = ['teacher', 'admin', 'moderator'];
+    // Allow Teachers, Admins, Moderators and Parliament (Phase 5)
+    const allowedRoles: readonly string[] = SERVICE_CREATOR_ROLES;
     if (!profile || !allowedRoles.includes(profile.role)) {
         return (
             <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50/50">
@@ -36,9 +37,9 @@ export default async function NewServicePage() {
                         <ShieldAlert className="w-10 h-10 text-red-600" />
                     </div>
                     <CardTitle className="text-2xl font-bold text-slate-900">Access Denied</CardTitle>
-                    <p className="text-slate-600">Students cannot post services directly. This feature is for teachers and staff.</p>
+                    <p className="text-slate-600">Students cannot post listings directly. This feature is for teachers, staff and parliament members.</p>
                     <Button variant="outline" className="w-full mt-4" asChild>
-                        <a href="/services">Back to Services</a>
+                        <a href="/services">Back to Bulletin Board</a>
                     </Button>
                 </Card>
             </div>
@@ -49,16 +50,16 @@ export default async function NewServicePage() {
         <div className="min-h-screen bg-slate-50/50 py-12 px-4">
             <div className="max-w-2xl mx-auto space-y-8">
                 <div className="text-center space-y-2">
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Post a New Service</h1>
-                    <p className="text-slate-500">Offer your skills to the school community and grow your reputation.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Post to the Bulletin Board</h1>
+                    <p className="text-slate-500">Offer courses, tutoring, internships or mentorship to the school community.</p>
                 </div>
 
                 <Card className="border-0 shadow-xl shadow-indigo-100/50 overflow-hidden">
                     <div className="h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
                     <CardHeader className="pb-4">
-                        <CardTitle className="text-xl">Service Details</CardTitle>
+                        <CardTitle className="text-xl">Listing Details</CardTitle>
                         <CardDescription>
-                            Listings cost <span className="font-bold text-indigo-600">100 ₸</span> and will be visible after payment.
+                            Posting is free. Listings are reviewed by moderators before going live.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -76,11 +77,9 @@ export default async function NewServicePage() {
                                             <SelectValue placeholder="Select functionality" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="tutoring">Tutoring</SelectItem>
-                                            <SelectItem value="cleaning">Cleaning</SelectItem>
-                                            <SelectItem value="tech-support">Tech Support</SelectItem>
-                                            <SelectItem value="delivery">Delivery</SelectItem>
-                                            <SelectItem value="other">Other</SelectItem>
+                                            {SERVICE_CATEGORIES.map((cat) => (
+                                                <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -124,7 +123,7 @@ export default async function NewServicePage() {
                             </div>
 
                             <Button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-lg h-14 rounded-xl shadow-lg transition-all active:scale-[0.98] mt-4">
-                                Proceed to Payment (100 ₸)
+                                Submit for Review
                             </Button>
                         </form>
                     </CardContent>

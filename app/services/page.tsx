@@ -3,17 +3,18 @@ import { createClient } from "@/lib/supabase/server";
 import { ServiceCard } from "@/components/services/ServiceCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, PlusCircle, Filter } from "lucide-react";
+import { Search, PlusCircle } from "lucide-react";
 import Link from "next/link";
+import { SERVICE_CATEGORIES, SERVICE_CREATOR_ROLES } from "@/lib/services";
 
 export default async function ServicesPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const supabase = await createClient();
     const params = await searchParams;
     const categoryFilter = typeof params?.category === 'string' ? params.category : null;
-    const { payment_success } = params || {};
+    const submitted = Boolean(params?.submitted || params?.payment_success);
 
     const { data: { user } } = await supabase.auth.getUser();
-    let profile = null;
+    let profile: { role: string } | null = null;
     if (user) {
         const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single();
         profile = data;
@@ -34,17 +35,18 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
         query = query.eq('category', categoryFilter);
     }
 
-    const { data: services, error } = await query;
+    const { data: services } = await query;
 
-    const CATEGORIES = ["Math", "English", "Music", "Coding", "Arts", "Sports"];
+    const canPost =
+        profile !== null && (SERVICE_CREATOR_ROLES as readonly string[]).includes(profile.role);
 
     return (
         <div className="container mx-auto py-8 space-y-8 min-h-screen px-4 md:px-6">
             {/* Success Banner */}
-            {payment_success && (
+            {submitted && (
                 <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
                     <strong className="font-bold">Success! </strong>
-                    <span className="block sm:inline">Your service has been submitted and is currently under review by our moderators. It will appear here once approved.</span>
+                    <span className="block sm:inline">Your listing has been submitted and is currently under review by our moderators. It will appear here once approved.</span>
                 </div>
             )}
 
@@ -52,18 +54,18 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
             <div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-4 bg-gradient-to-r from-primary/5 to-transparent p-6 rounded-2xl border border-primary/10">
                 <div className="space-y-2">
                     <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">
-                        Find the Best Tutor for You
+                        Bulletin Board
                     </h1>
                     <p className="text-muted-foreground text-lg max-w-xl">
-                        Discover peer tutors, music lessons, and creative workshops from the Ulagat community.
+                        Courses, tutoring, project help, internships and mentorship from the Ulagat community.
                     </p>
                 </div>
-                {/* Only Teachers, Admins, Moderators can post */}
-                {['teacher', 'admin', 'moderator'].includes(profile?.role) && (
+                {/* Teachers, Admins, Moderators and Parliament can post */}
+                {canPost && (
                     <Link href="/services/new">
                         <Button size="lg" className="rounded-full shadow-lg gap-2 text-md font-bold px-6">
                             <PlusCircle className="w-5 h-5" />
-                            Post Ad (100₸)
+                            Post Listing
                         </Button>
                     </Link>
                 )}
@@ -75,14 +77,14 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
                     <Link href="/services">
                         <Button variant={!categoryFilter ? "secondary" : "ghost"} size="sm" className="rounded-full">All</Button>
                     </Link>
-                    {CATEGORIES.map(cat => (
-                        <Link key={cat} href={`/services?category=${cat}`}>
+                    {SERVICE_CATEGORIES.map(cat => (
+                        <Link key={cat.value} href={`/services?category=${cat.value}`}>
                             <Button
-                                variant={categoryFilter === cat ? "secondary" : "ghost"}
+                                variant={categoryFilter === cat.value ? "secondary" : "ghost"}
                                 size="sm"
                                 className="rounded-full text-slate-600"
                             >
-                                {cat}
+                                {cat.label}
                             </Button>
                         </Link>
                     ))}
@@ -101,13 +103,13 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
             {/* Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {services && services.length > 0 ? (
-                    services.map((service: any) => (
+                    services.map((service: { id: string }) => (
                         <ServiceCard key={service.id} service={service} />
                     ))
                 ) : (
                     <div className="col-span-full py-20 text-center space-y-4">
                         <div className="text-6xl">🙈</div>
-                        <h3 className="text-xl font-bold">No services found for {categoryFilter || 'this category'}</h3>
+                        <h3 className="text-xl font-bold">No listings found{categoryFilter ? ' in this category' : ''}</h3>
                         <p className="text-muted-foreground">Be the first to offer something cool!</p>
                         <Link href="/services/new">
                             <Button variant="outline" className="mt-4">Create First Listing</Button>

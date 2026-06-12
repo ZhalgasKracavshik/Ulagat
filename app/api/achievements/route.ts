@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { isAchievementTier } from "@/lib/leaderboard";
 
 export async function POST(request: Request) {
     const supabase = await createClient();
@@ -14,6 +15,10 @@ export async function POST(request: Request) {
     const description = formData.get("description") as string;
     const achievement_date = formData.get("achievement_date") as string;
     const imageFile = formData.get("image") as File | null;
+
+    // Phase 6: tier determines the points awarded after verification
+    const tierRaw = (formData.get("tier") as string) || "school";
+    const tier = isAchievementTier(tierRaw) ? tierRaw : "school";
 
     if (!title) {
         return NextResponse.json({ error: "Title is required" }, { status: 400 });
@@ -44,12 +49,15 @@ export async function POST(request: Request) {
         }
     }
 
+    // status defaults to 'pending' in the DB — points are awarded only when a
+    // reviewer (parliament/moderator/admin) verifies the achievement.
     const { error } = await supabase.from("achievements").insert({
         user_id: user.id,
         title,
         description: description || null,
         achievement_date: achievement_date || null,
         image_url,
+        tier,
     });
 
     if (error) {
