@@ -245,3 +245,129 @@ CREATE POLICY "Role Upload Lost Found" ON storage.objects
         AND role IN ('student', 'teacher', 'parliament', 'moderator', 'admin')
     )
   );
+
+
+-- ============================================================
+-- SECURITY HARDENING (post-review of Phase 8)
+-- Idempotent — safe to run on databases that already applied the
+-- sections above.
+-- ============================================================
+
+-- ------------------------------------------------------------
+-- P1-1: The guard trigger let an item be marked 'claimed' without a
+-- matching row in the immutable claim log — staff (or the service
+-- role) could set claimed_by to an arbitrary user who never clicked
+-- "This is mine!", corrupting the anti-fraud audit trail.
+--
+-- Fix: require NEW.claimed_by IS NOT NULL AND a matching claim to
+-- exist whenever NEW.status = 'claimed'. This is a data-integrity
+-- invariant, not a permission check, so it runs for EVERY caller —
+-- including the service role (auth.uid() IS NULL) — by sitting before
+-- the early return. Staff are still bound by it: they may only hand an
+-- item to someone who actually registered a claim. claimed_at is still
+-- auto-stamped on the flip to 'claimed' and cleared on the way out.
+-- ------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.tr_lost_item_guard()
+RETURNS TRIGGER AS $$
+DECLARE
+  caller UUID := (SELECT auth.uid());
+  is_staff BOOLEAN;
+BEGIN
+  -- Data-integrity invariant (applies to ALL callers, service role
+  -- included): an item can only be 'claimed' by someone who has a
+  -- registered claim in the immutable log.
+  IF NEW.status = 'claimed' THEN
+    IF NEW.claimed_by IS NULL OR NOT EXISTS (
+      SELECT 1 FROM public.lost_item_claims
+      WHERE item_id = NEW.id AND claimant_id = NEW.claimed_by
+    ) THEN
+      RAISE EXCEPTION 'Cannot mark claimed: recipient has no registered claim for this item';
+    END IF;
+  END IF;
+
+  IF caller IS NULL THEN
+    -- Service role / SQL editor: still keep claimed_at consistent.
+    IF TG_OP = 'INSERT' THEN
+      IF NEW.status = 'claimed' AND NEW.claimed_at IS NULL THEN
+        NEW.claimed_at := now();
+      END IF;
+    ELSIF NEW.status IS DISTINCT FROM OLD.status THEN
+      IF NEW.status = 'claimed' THEN
+        NEW.claimed_at := COALESCE(NEW.claimed_at, now());
+      ELSE
+        NEW.claimed_at := NULL;
+        NEW.claimed_by := NULL;
+      END IF;
+    END IF;
+    RETURN NEW;
+  END IF;
+
+  SELECT EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE id = caller
+      AND role IN ('parliament', 'moderator', 'admin')
+  ) INTO is_staff;
+
+  IF TG_OP = 'INSERT' THEN
+    -- Non-staff may only open a post as 'lost' or 'found'.
+    IF NOT is_staff AND NEW.status NOT IN ('lost', 'found') THEN
+      NEW.status := 'found';
+    END IF;
+    NEW.claimed_by := NULL;
+    NEW.claimed_at := NULL;
+    RETURN NEW;
+  END IF;
+
+  -- UPDATE.
+  IF NOT is_staff
+     AND NEW.status IS DISTINCT FROM OLD.status THEN
+    RAISE EXCEPTION 'Only parliament, moderators and admins can change a lost item''s status';
+  END IF;
+
+  -- Keep claimed_at in sync with status whoever makes the change.
+  IF NEW.status IS DISTINCT FROM OLD.status THEN
+    IF NEW.status = 'claimed' THEN
+      NEW.claimed_at := COALESCE(NEW.claimed_at, now());
+    ELSE
+      NEW.claimed_at := NULL;
+      NEW.claimed_by := NULL;
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
+
+DROP TRIGGER IF EXISTS tr_lost_item_guard ON public.lost_items;
+CREATE TRIGGER tr_lost_item_guard
+  BEFORE INSERT OR UPDATE ON public.lost_items
+  FOR EACH ROW EXECUTE PROCEDURE public.tr_lost_item_guard();
+
+-- ------------------------------------------------------------
+-- P1-2: lost_item_claims.item_id is ON DELETE CASCADE, and the prior
+-- DELETE policy ("Poster and staff can delete lost items") let any
+-- poster delete their own item — cascading away (and destroying) the
+-- immutable claim audit log. A poster could thus erase every
+-- "This is mine!" record simply by deleting the post.
+--
+-- Fix: a poster may delete their item ONLY while no claims exist;
+-- once anyone has claimed it, only staff (moderator/admin) may delete
+-- it. Staff deletion is an intentional, audited administrative action.
+-- ------------------------------------------------------------
+DROP POLICY IF EXISTS "Poster and staff can delete lost items" ON public.lost_items;
+DROP POLICY IF EXISTS "Poster or staff can delete items" ON public.lost_items;
+CREATE POLICY "Poster or staff can delete items"
+  ON public.lost_items FOR DELETE
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.profiles
+      WHERE id = auth.uid()
+        AND role IN ('moderator', 'admin')
+    )
+    OR (
+      posted_by = auth.uid()
+      AND NOT EXISTS (
+        SELECT 1 FROM public.lost_item_claims WHERE item_id = lost_items.id
+      )
+    )
+  );

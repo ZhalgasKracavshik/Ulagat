@@ -169,6 +169,16 @@ export async function updateItemStatus(formData: FormData) {
         .single();
     if (itemError || !item) throw new Error("Item not found.");
 
+    // Explicit transition guard — prevent nonsensical jumps. 'claimed' is
+    // terminal: once an item has been returned to its owner it can no longer
+    // move back to 'lost'/'found'. Every other transition is allowed:
+    // lost↔found in either direction and lost/found → claimed, plus
+    // re-setting the same status as a no-op.
+    const currentStatus = item.status as LostItemStatus;
+    if (currentStatus === 'claimed' && nextStatus !== 'claimed') {
+        throw new Error("This item has already been returned to its owner and can no longer change status.");
+    }
+
     const update: { status: LostItemStatus; claimed_by?: string | null } = {
         status: nextStatus,
     };
@@ -221,13 +231,22 @@ export async function updateItemStatus(formData: FormData) {
     revalidateLostFoundPaths(itemId);
 }
 
-/** Deletes a lost & found post (the poster or staff). */
+/**
+ * Deletes a lost & found post. The poster may delete only while no
+ * claims exist (deleting cascades the immutable claim audit log, so a
+ * poster must not be able to erase claims by deleting the item). Once
+ * anyone has claimed it, only staff (moderator/admin) may delete it —
+ * mirrors the "Poster or staff can delete items" RLS policy.
+ */
 export async function deleteLostItem(formData: FormData) {
     const itemId = ((formData.get('item_id') as string) || '').trim();
     if (!UUID_RE.test(itemId)) throw new Error("Invalid item id.");
 
     const { supabase, userId, role } = await requireUser();
-    const isStaff = (LOST_ITEM_STAFF_ROLES as readonly string[]).includes(role);
+    // The DELETE-once-claimed path is restricted to moderator/admin to
+    // match the RLS policy (parliament is a poster role here, not a
+    // claim-log custodian).
+    const canDeleteClaimed = role === 'moderator' || role === 'admin';
 
     const { data: item, error: itemError } = await supabase
         .from('lost_items')
@@ -236,8 +255,25 @@ export async function deleteLostItem(formData: FormData) {
         .single();
     if (itemError || !item) throw new Error("Item not found.");
 
-    if (item.posted_by !== userId && !isStaff) {
+    const isPoster = item.posted_by === userId;
+    if (!isPoster && !canDeleteClaimed) {
         throw new Error("Unauthorized: only the poster or staff can delete this item.");
+    }
+
+    // If claims exist, the poster is blocked — deleting would destroy the
+    // immutable claim audit log. Only staff may delete a claimed-on item.
+    if (!canDeleteClaimed) {
+        const { count, error: claimCountError } = await supabase
+            .from('lost_item_claims')
+            .select('id', { count: 'exact', head: true })
+            .eq('item_id', itemId);
+        if (claimCountError) {
+            console.error("[deleteLostItem] claim count failed:", claimCountError);
+            throw new Error("Failed to verify whether this item can be deleted.");
+        }
+        if ((count ?? 0) > 0) {
+            throw new Error("This item already has claims and can only be removed by staff.");
+        }
     }
 
     const { error } = await supabase
