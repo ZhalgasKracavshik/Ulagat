@@ -257,6 +257,48 @@ export type CareerTarget = {
     created_at: string;
 };
 
+/**
+ * Phase 13: Two-phase interface mode.
+ *   'express' — morning/compact, mobile, glanceable (schedule + substitutions
+ *               + pinned announcements + current lesson).
+ *   'full'    — evening/desktop, full feature access.
+ */
+export type UIPhase = 'express' | 'full';
+
+/**
+ * Phase 14: Freemium subscription infrastructure.
+ *   'free'    — all current campus features.
+ *   'premium' — future AI mentor + extras (1500-2000₸/month). Plumbing only.
+ */
+export type SubscriptionPlan = 'free' | 'premium';
+
+export type SubscriptionStatus = 'active' | 'canceled' | 'past_due';
+
+export type Subscription = {
+    id: string;
+    user_id: string;
+    plan: SubscriptionPlan;
+    status: SubscriptionStatus;
+    stripe_customer_id: string | null;
+    stripe_subscription_id: string | null;
+    /** NULL = no period boundary (e.g. free plan). */
+    current_period_end: string | null;
+    created_at: string;
+    updated_at: string;
+};
+
+/**
+ * Phase 14: per-day AI question counter for the freemium quota.
+ * One row per (user, date). Incremented server-side via the admin client
+ * when the AI mentor launches; the table is plumbing for now.
+ */
+export type AiUsage = {
+    id: string;
+    user_id: string;
+    date: string; // ISO date
+    question_count: number;
+};
+
 /** Subset of Profile used in the admin users management table */
 export type AdminUserRow = {
     id: string;

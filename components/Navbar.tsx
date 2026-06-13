@@ -20,12 +20,17 @@ import {
     ShieldCheck,
     Star,
     Megaphone,
-    PackageSearch
+    PackageSearch,
+    Sun,
+    Moon,
+    Sparkles
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { User as AuthUser } from "@supabase/supabase-js";
 import type { Profile } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useUIPhase } from "@/hooks/useUIPhase";
+import { resolvePlan } from "@/lib/subscription-plan";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -44,7 +49,9 @@ export function Navbar() {
     const [pendingFriendRequests, setPendingFriendRequests] = useState(0);
     const [pendingModerationCount, setPendingModerationCount] = useState(0);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isPremium, setIsPremium] = useState(false);
     const supabase = createClient();
+    const { phase, ready: phaseReady, toggle } = useUIPhase();
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -52,12 +59,16 @@ export function Navbar() {
             setUser(user);
 
             if (user) {
-                const [{ data: profileData }, { count: friendshipCount }] = await Promise.all([
+                const [{ data: profileData }, { count: friendshipCount }, { data: subscription }] = await Promise.all([
                     supabase.from('profiles').select('*').eq('id', user.id).single(),
-                    supabase.from('friendships').select('*', { count: 'exact', head: true }).eq('addressee_id', user.id).eq('status', 'pending')
+                    supabase.from('friendships').select('*', { count: 'exact', head: true }).eq('addressee_id', user.id).eq('status', 'pending'),
+                    supabase.from('subscriptions').select('plan, status, current_period_end').eq('user_id', user.id).maybeSingle()
                 ]);
                 setProfile(profileData);
                 setPendingFriendRequests(friendshipCount || 0);
+
+                // Shared resolver: premium only when active and not expired.
+                setIsPremium(resolvePlan(subscription ?? null, Date.now()) === 'premium');
 
                 if (profileData?.role === 'admin' || profileData?.role === 'moderator') {
                     const [{ count: sCount }, { count: eCount }, { count: mCount }] = await Promise.all([
@@ -86,6 +97,12 @@ export function Navbar() {
         return () => subscription.unsubscribe();
     }, []);
 
+    // Express (morning) mode shows a deliberately minimal nav: just the
+    // glanceable essentials. Only collapse once the phase has resolved
+    // client-side (phaseReady, avoids hydration mismatch) AND a user is
+    // logged in — logged-out visitors always get the full marketing nav.
+    const isExpress = phaseReady && phase === "express" && Boolean(user);
+
     const NavItems = (isMobile = false) => (
         <>
             {user && (
@@ -108,6 +125,13 @@ export function Navbar() {
                     <span>Schedule</span>
                 </Link>
             )}
+            {/* In express mode we stop here — everything below is full-mode only. */}
+            {isExpress ? null : fullNavItems(isMobile)}
+        </>
+    );
+
+    const fullNavItems = (isMobile: boolean) => (
+        <>
             <Link
                 href="/services"
                 onClick={() => isMobile && setIsMobileMenuOpen(false)}
@@ -208,6 +232,20 @@ export function Navbar() {
                     )}
                 </Link>
             )}
+            {user && (
+                <Link
+                    href="/pricing"
+                    onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                    className={
+                        isPremium
+                            ? "transition-colors flex items-center gap-2 md:gap-1 font-semibold text-amber-600"
+                            : "transition-colors flex items-center gap-2 md:gap-1 font-semibold text-amber-600 hover:text-amber-700"
+                    }
+                >
+                    <Sparkles className="w-5 h-5 md:w-4 md:h-4" />
+                    <span>{isPremium ? "Premium" : "Upgrade"}</span>
+                </Link>
+            )}
         </>
     );
 
@@ -242,6 +280,33 @@ export function Navbar() {
                 <div className="ml-auto flex items-center space-x-4">
                     {user ? (
                         <div className="flex items-center gap-3">
+                            {/* Express/Full mode toggle. Only show after the phase
+                                resolves client-side to avoid a hydration flash. */}
+                            {phaseReady && (
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-9 w-9"
+                                    onClick={toggle}
+                                    title={
+                                        phase === "express"
+                                            ? "Express mode (morning) — tap for Full mode"
+                                            : "Full mode — tap for Express (morning) mode"
+                                    }
+                                    aria-label={
+                                        phase === "express"
+                                            ? "Switch to Full mode"
+                                            : "Switch to Express mode"
+                                    }
+                                >
+                                    {phase === "express" ? (
+                                        <Sun className="h-5 w-5 text-amber-500" />
+                                    ) : (
+                                        <Moon className="h-5 w-5 text-indigo-500" />
+                                    )}
+                                </Button>
+                            )}
+
                             <div className="hidden sm:flex items-center gap-1 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
                                 <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
                                 <span className="text-sm font-bold text-amber-700">{profile?.reputation || 0}</span>
