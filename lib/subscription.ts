@@ -15,9 +15,10 @@ export type { PlanRow } from '@/lib/subscription-plan';
  * access. It is written ONLY by the Stripe webhook (service role), so
  * reads here are trustworthy: a user cannot self-grant premium.
  *
- * A subscription counts as premium only when it is plan='premium',
- * status='active', and not past its current_period_end. Otherwise we
- * fall back to 'free' (no row, canceled, past_due, or expired).
+ * A subscription counts as premium while plan='premium' and the
+ * current_period_end is still in the future — even if it is canceled
+ * (cancel-at-period-end keeps access until the paid period ends).
+ * Otherwise we fall back to 'free' (no row, no/expired period).
  */
 export async function getUserPlan(userId: string): Promise<SubscriptionPlan> {
     const supabase = await createClient();

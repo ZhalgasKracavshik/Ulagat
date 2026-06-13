@@ -18,16 +18,19 @@ export type PlanRow = {
 
 /**
  * Pure resolver: given a subscriptions row (or null) and the current epoch ms,
- * return the effective plan. Premium only when plan='premium', status='active'
- * and not past current_period_end.
+ * return the effective plan.
+ *
+ * Access lasts until the end of the paid period: a row counts as premium when
+ * plan='premium' AND current_period_end is still in the future — EVEN IF the
+ * status is 'canceled'. Cancel-at-period-end is the normal Stripe flow, and a
+ * user who has paid through a period keeps premium until that period passes.
+ * Once current_period_end is in the past (or absent), the plan is 'free'.
  */
 export function resolvePlan(row: PlanRow, nowMs: number): SubscriptionPlan {
     if (!row) return 'free';
     if (row.plan !== 'premium') return 'free';
-    if (row.status !== 'active') return 'free';
-    if (row.current_period_end) {
-        const end = new Date(row.current_period_end).getTime();
-        if (Number.isFinite(end) && end <= nowMs) return 'free';
-    }
+    if (!row.current_period_end) return 'free';
+    const end = new Date(row.current_period_end).getTime();
+    if (!Number.isFinite(end) || end <= nowMs) return 'free';
     return 'premium';
 }
