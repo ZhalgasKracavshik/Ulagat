@@ -143,6 +143,12 @@ export default async function HomePage() {
             profiles: s.profiles ?? null,
         })),
         announcements,
+        // Today's class schedule — drives the new schedule-first home layout.
+        todayCells,
+        hasSchoolToday,
+        hasClassSet: classLabel !== null,
+        classLabel,
+        todayDow,
     };
 
     const expressData: ExpressData = {
