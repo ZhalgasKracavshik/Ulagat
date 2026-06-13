@@ -35,6 +35,9 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+// Roles that see the Career (ЕНТ tracker) link — not teacher/parliament.
+const CAREER_NAV_ROLES: string[] = ['student', 'parent', 'moderator', 'admin'];
+
 export function Navbar() {
     const [user, setUser] = useState<AuthUser | null>(null);
     const [profile, setProfile] = useState<(Profile & { reputation?: number }) | null>(null);
@@ -139,6 +142,16 @@ export function Navbar() {
                 >
                     <PackageSearch className="w-5 h-5 md:w-4 md:h-4 text-teal-500 md:text-inherit" />
                     <span>Lost &amp; Found</span>
+                </Link>
+            )}
+            {profile && CAREER_NAV_ROLES.includes(profile.role) && (
+                <Link
+                    href="/career"
+                    onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                    className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-2 md:gap-1"
+                >
+                    <GraduationCap className="w-5 h-5 md:w-4 md:h-4 text-rose-500 md:text-inherit" />
+                    <span>Career</span>
                 </Link>
             )}
             <Link

@@ -55,6 +55,13 @@ const ACHIEVEMENT_REVIEWER_ROLES = ['parliament', 'moderator', 'admin'];
 const CLUB_CREATE_ROUTES = ['/clubs/new'];
 const CLUB_CREATOR_ROLES = ['parliament', 'moderator', 'admin'];
 
+// Career orientation tracker (Phase 12) — student, parent, moderator and
+// admin only. Teachers and parliament don't have a personal ЕНТ tracker.
+// Parent/staff viewing another student's tracker is controlled in-page via
+// family_bonds / role checks.
+const CAREER_ROUTES = ['/career'];
+const CAREER_ALLOWED_ROLES = ['student', 'parent', 'moderator', 'admin'];
+
 // Parliament (Phases 3-5): allowed to access every creation route —
 // /events/new, /services/new, /olympiad/new, /clubs/new, /lost-found/new.
 // Server actions + RLS policies enforce the same role rules defensively.
@@ -154,6 +161,14 @@ export async function middleware(request: NextRequest) {
     if (CLUB_CREATE_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'))) {
         if (!CLUB_CREATOR_ROLES.includes(role)) {
             return NextResponse.redirect(new URL('/clubs', request.url));
+        }
+        return sessionResponse;
+    }
+
+    // Career tracker (student / parent / moderator / admin — not teacher/parliament)
+    if (CAREER_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'))) {
+        if (!CAREER_ALLOWED_ROLES.includes(role)) {
+            return NextResponse.redirect(new URL('/home', request.url));
         }
         return sessionResponse;
     }
