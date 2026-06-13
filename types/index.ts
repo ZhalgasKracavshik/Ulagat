@@ -183,6 +183,43 @@ export type ClubAnnouncement = {
     created_at: string;
 };
 
+export type LostItemCategory =
+    | 'electronics'
+    | 'clothing'
+    | 'books'
+    | 'accessories'
+    | 'documents'
+    | 'other';
+
+/**
+ * 'lost'    = someone lost it and is looking for it;
+ * 'found'   = someone found it / it is in the lost & found office;
+ * 'claimed' = handed back to the owner.
+ */
+export type LostItemStatus = 'lost' | 'found' | 'claimed';
+
+export type LostItem = {
+    id: string;
+    title: string;
+    description: string | null;
+    category: LostItemCategory;
+    photo_url: string | null;
+    location: string | null;
+    status: LostItemStatus;
+    posted_by: string;
+    claimed_by: string | null;
+    claimed_at: string | null;
+    created_at: string;
+};
+
+export type LostItemClaim = {
+    id: string;
+    item_id: string;
+    claimant_id: string;
+    note: string | null;
+    created_at: string;
+};
+
 /** Subset of Profile used in the admin users management table */
 export type AdminUserRow = {
     id: string;

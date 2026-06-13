@@ -19,7 +19,8 @@ import {
     X,
     ShieldCheck,
     Star,
-    Megaphone
+    Megaphone,
+    PackageSearch
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { User as AuthUser } from "@supabase/supabase-js";
@@ -128,6 +129,16 @@ export function Navbar() {
                 >
                     <Users2 className="w-5 h-5 md:w-4 md:h-4 text-violet-500 md:text-inherit" />
                     <span>Clubs</span>
+                </Link>
+            )}
+            {user && (
+                <Link
+                    href="/lost-found"
+                    onClick={() => isMobile && setIsMobileMenuOpen(false)}
+                    className="transition-colors hover:text-foreground/80 text-foreground/60 flex items-center gap-2 md:gap-1"
+                >
+                    <PackageSearch className="w-5 h-5 md:w-4 md:h-4 text-teal-500 md:text-inherit" />
+                    <span>Lost &amp; Found</span>
                 </Link>
             )}
             <Link

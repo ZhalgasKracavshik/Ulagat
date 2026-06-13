@@ -1,0 +1,233 @@
+import { createClient } from "@/lib/supabase/server";
+import { notFound, redirect } from "next/navigation";
+import Link from "next/link";
+import { format } from "date-fns";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+    MapPin,
+    Clock,
+    ArrowLeft,
+    ShieldCheck,
+    CheckCircle2,
+    User as UserIcon,
+} from "lucide-react";
+import { LOST_ITEM_CATEGORY_LABELS, LOST_ITEM_STAFF_ROLES } from "@/lib/lost-found";
+import { LOST_ITEM_CATEGORY_ICONS } from "@/components/lost-found/category-icons";
+import { StatusBadge } from "@/components/lost-found/StatusBadge";
+import { ClaimButton } from "@/components/lost-found/ClaimButton";
+import { StatusManager, type Claimant } from "@/components/lost-found/StatusManager";
+import { DeleteItemButton } from "@/components/lost-found/DeleteItemButton";
+import type { LostItem } from "@/types";
+
+export const dynamic = 'force-dynamic';
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+type ClaimRow = {
+    id: string;
+    claimant_id: string;
+    note: string | null;
+    created_at: string;
+    profiles: {
+        id: string;
+        full_name: string | null;
+        avatar_url: string | null;
+    } | null;
+};
+
+export default async function LostItemPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    if (!UUID_RE.test(id)) notFound();
+
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) redirect(`/login?next=/lost-found/${id}`);
+
+    const [{ data: itemRaw }, { data: profile }] = await Promise.all([
+        supabase.from('lost_items').select('*').eq('id', id).single(),
+        supabase.from('profiles').select('role').eq('id', user.id).single(),
+    ]);
+
+    if (!itemRaw) notFound();
+    const item = itemRaw as LostItem;
+    const role = profile?.role ?? 'student';
+    const isStaff = (LOST_ITEM_STAFF_ROLES as readonly string[]).includes(role);
+    const isPoster = item.posted_by === user.id;
+
+    // Poster name + (staff only) the full immutable claim audit log.
+    const [{ data: posterProfile }, { data: claimsRaw }, { data: myClaim }] = await Promise.all([
+        supabase.from('profiles').select('id, full_name, avatar_url').eq('id', item.posted_by).single(),
+        isStaff
+            ? supabase
+                .from('lost_item_claims')
+                .select('id, claimant_id, note, created_at, profiles:claimant_id(id, full_name, avatar_url)')
+                .eq('item_id', id)
+                .order('created_at', { ascending: true })
+            : Promise.resolve({ data: null }),
+        supabase
+            .from('lost_item_claims')
+            .select('id')
+            .eq('item_id', id)
+            .eq('claimant_id', user.id)
+            .maybeSingle(),
+    ]);
+
+    const claims = (claimsRaw ?? []) as unknown as ClaimRow[];
+    const hasClaimed = !!myClaim;
+    const canClaim = !isPoster && item.status !== 'claimed' && !hasClaimed;
+
+    const claimants: Claimant[] = claims.map((c) => ({
+        id: c.claimant_id,
+        name: c.profiles?.full_name || 'Unknown',
+    }));
+
+    const CategoryIcon = LOST_ITEM_CATEGORY_ICONS[item.category];
+
+    return (
+        <div className="container mx-auto py-8 space-y-6 px-4 md:px-6 max-w-4xl">
+            <Link href="/lost-found" className="inline-flex">
+                <Button variant="ghost" size="sm" className="gap-2 text-slate-500">
+                    <ArrowLeft className="w-4 h-4" />
+                    All items
+                </Button>
+            </Link>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Photo */}
+                <div className="aspect-square w-full rounded-2xl overflow-hidden border bg-slate-100 flex items-center justify-center">
+                    {item.photo_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={item.photo_url} alt={item.title} className="object-cover w-full h-full" />
+                    ) : (
+                        <div className="flex items-center justify-center w-full h-full bg-teal-50 text-teal-200">
+                            <CategoryIcon className="w-24 h-24" />
+                        </div>
+                    )}
+                </div>
+
+                {/* Details */}
+                <div className="space-y-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <StatusBadge status={item.status} />
+                        <Badge variant="outline" className="border-teal-200 text-teal-700 font-bold">
+                            {LOST_ITEM_CATEGORY_LABELS[item.category]}
+                        </Badge>
+                    </div>
+
+                    <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">{item.title}</h1>
+
+                    {item.description && (
+                        <p className="text-slate-600 whitespace-pre-line">{item.description}</p>
+                    )}
+
+                    <div className="space-y-2 text-sm pt-1">
+                        <div className="flex items-center gap-2 text-slate-600">
+                            <MapPin className="w-4 h-4 text-teal-500 shrink-0" />
+                            <span>{item.location || 'No location given'}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-slate-600">
+                            <Clock className="w-4 h-4 text-teal-500 shrink-0" />
+                            <span>Posted {format(new Date(item.created_at), 'MMM d, yyyy')}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-slate-600">
+                            <UserIcon className="w-4 h-4 text-teal-500 shrink-0" />
+                            <span>
+                                Posted by{' '}
+                                <Link href={`/profile/${item.posted_by}`} className="text-teal-700 hover:underline font-semibold">
+                                    {posterProfile?.full_name || 'Unknown'}
+                                </Link>
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Claim area */}
+                    <div className="pt-2">
+                        {item.status === 'claimed' ? (
+                            <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800 font-semibold">
+                                <CheckCircle2 className="w-5 h-5" />
+                                This item has been returned to its owner.
+                            </div>
+                        ) : hasClaimed ? (
+                            <div className="flex items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 p-4 text-teal-800 font-semibold">
+                                <CheckCircle2 className="w-5 h-5" />
+                                You&apos;ve claimed this — awaiting verification.
+                            </div>
+                        ) : canClaim ? (
+                            <ClaimButton itemId={item.id} />
+                        ) : isPoster ? (
+                            <p className="text-sm text-slate-500 italic">You posted this item.</p>
+                        ) : null}
+                    </div>
+
+                    {(isPoster || isStaff) && (
+                        <div className="pt-2">
+                            <DeleteItemButton itemId={item.id} />
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Staff: status management + immutable claim audit log */}
+            {isStaff && (
+                <Card className="border-indigo-100">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-lg">
+                            <ShieldCheck className="w-5 h-5 text-indigo-500" />
+                            Verification &amp; status
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <StatusManager itemId={item.id} status={item.status} claimants={claimants} />
+
+                        <div className="space-y-3">
+                            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">
+                                Claim audit log ({claims.length})
+                            </h3>
+                            {claims.length > 0 ? (
+                                <div className="space-y-3">
+                                    {claims.map((claim) => (
+                                        <div
+                                            key={claim.id}
+                                            className={`flex items-start gap-3 p-3 rounded-lg border ${claim.claimant_id === item.claimed_by ? 'border-emerald-200 bg-emerald-50/60' : 'border-slate-100 bg-slate-50/50'}`}
+                                        >
+                                            <Avatar className="w-9 h-9 border shrink-0">
+                                                <AvatarImage src={claim.profiles?.avatar_url ?? undefined} />
+                                                <AvatarFallback className="bg-indigo-50 text-indigo-600 text-sm">
+                                                    {claim.profiles?.full_name?.[0] || '?'}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex-grow min-w-0 space-y-1">
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <Link href={`/profile/${claim.claimant_id}`} className="font-semibold text-slate-800 hover:text-indigo-700 hover:underline">
+                                                        {claim.profiles?.full_name || 'Unknown'}
+                                                    </Link>
+                                                    {claim.claimant_id === item.claimed_by && (
+                                                        <Badge variant="outline" className="border-emerald-300 text-emerald-700 text-[10px] font-bold gap-1">
+                                                            <CheckCircle2 className="w-3 h-3" />
+                                                            Received
+                                                        </Badge>
+                                                    )}
+                                                    <span className="text-[11px] text-muted-foreground">
+                                                        {format(new Date(claim.created_at), 'MMM d, yyyy · HH:mm')}
+                                                    </span>
+                                                </div>
+                                                {claim.note && (
+                                                    <p className="text-sm text-slate-600 whitespace-pre-line">{claim.note}</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-muted-foreground py-2">No one has claimed this item yet.</p>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+        </div>
+    );
+}
