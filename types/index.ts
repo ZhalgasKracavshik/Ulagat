@@ -220,6 +220,43 @@ export type LostItemClaim = {
     created_at: string;
 };
 
+/**
+ * Phase 12: Career orientation tracker (ЕНТ / UNT prep).
+ *
+ * The five ЕНТ subject scores. Three mandatory (math literacy, reading,
+ * history of Kazakhstan) plus the two chosen profile subjects. Each value is
+ * out of 40, total out of 140. Any key may be absent until the student fills
+ * it in.
+ */
+export type EntScores = {
+    math_literacy?: number;
+    reading?: number;
+    history?: number;
+    subject_1?: number;
+    subject_2?: number;
+};
+
+export type CareerTracker = {
+    id: string;
+    user_id: string;
+    profile_subject_1: string | null;
+    profile_subject_2: string | null;
+    ent_scores: EntScores;
+    target_score: number | null;
+    notes: string | null;
+    updated_at: string;
+};
+
+export type CareerTarget = {
+    id: string;
+    user_id: string;
+    university: string;
+    specialty: string;
+    cutoff_score: number | null;
+    grant_deadline: string | null; // ISO date
+    created_at: string;
+};
+
 /** Subset of Profile used in the admin users management table */
 export type AdminUserRow = {
     id: string;
