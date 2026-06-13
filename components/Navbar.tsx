@@ -11,12 +11,14 @@ import {
     Moon,
     Sparkles,
     ChevronDown,
+    Settings,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { User as AuthUser } from "@supabase/supabase-js";
 import type { Profile } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUIPhase } from "@/hooks/useUIPhase";
+import { useT } from "@/contexts/LocaleContext";
 import { resolvePlan } from "@/lib/subscription-plan";
 import { NAV, MORE_GROUPS, canSee, STAFF_ROLES } from "@/lib/nav-config";
 import {
@@ -36,6 +38,7 @@ export function Navbar() {
     const [isPremium, setIsPremium] = useState(false);
     const supabase = createClient();
     const { phase, ready: phaseReady, toggle } = useUIPhase();
+    const { t } = useT();
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -117,7 +120,7 @@ export function Navbar() {
                                         className="group flex items-center gap-1.5 text-foreground/60 transition-colors hover:text-foreground"
                                     >
                                         <Icon className={`w-4 h-4 ${item.color}`} />
-                                        <span>{item.label}</span>
+                                        <span>{t(`nav.${item.key}`)}</span>
                                     </Link>
                                 );
                             })}
@@ -131,7 +134,7 @@ export function Navbar() {
                                             className="flex items-center gap-1 text-foreground/60 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md relative"
                                             aria-label="More destinations"
                                         >
-                                            <span>More</span>
+                                            <span>{t("nav.more")}</span>
                                             <ChevronDown className="w-4 h-4" />
                                             {(pendingFriendRequests > 0 || (isStaff && pendingModerationCount > 0)) && (
                                                 <span className="absolute -top-1.5 -right-2 flex h-2 w-2 rounded-full bg-red-500" />
@@ -146,7 +149,7 @@ export function Navbar() {
                                                 <div key={group.label}>
                                                     {gIdx > 0 && <DropdownMenuSeparator />}
                                                     <DropdownMenuLabel className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                                                        {group.label}
+                                                        {t(`nav.${group.label.toLowerCase()}`)}
                                                     </DropdownMenuLabel>
                                                     {visible.map((item) => {
                                                         const Icon = item.icon;
@@ -156,7 +159,7 @@ export function Navbar() {
                                                             <DropdownMenuItem key={item.key} asChild>
                                                                 <Link href={item.href} className="cursor-pointer">
                                                                     <Icon className={`mr-2 h-4 w-4 ${item.color}`} />
-                                                                    <span>{item.label}</span>
+                                                                    <span>{t(`nav.${item.key}`)}</span>
                                                                     {showFriendBadge && (
                                                                         <span className="ml-auto px-1.5 py-0.5 text-[10px] font-semibold bg-red-500 text-white rounded-full">
                                                                             {pendingFriendRequests}
@@ -173,12 +176,18 @@ export function Navbar() {
                                         {/* Account group — Premium always available here. */}
                                         <DropdownMenuSeparator />
                                         <DropdownMenuLabel className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                                            Account
+                                            {t("nav.account")}
                                         </DropdownMenuLabel>
                                         <DropdownMenuItem asChild>
                                             <Link href={NAV.premium.href} className="cursor-pointer">
                                                 <Sparkles className="mr-2 h-4 w-4 text-amber-500" />
-                                                <span>{isPremium ? "Premium" : "Upgrade"}</span>
+                                                <span>{isPremium ? t("nav.premium") : t("nav.upgrade")}</span>
+                                            </Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/settings" className="cursor-pointer">
+                                                <Settings className="mr-2 h-4 w-4 text-slate-500" />
+                                                <span>{t("nav.settings")}</span>
                                             </Link>
                                         </DropdownMenuItem>
 
@@ -187,12 +196,12 @@ export function Navbar() {
                                             <>
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuLabel className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                                                    Staff
+                                                    {t("nav.staff")}
                                                 </DropdownMenuLabel>
                                                 <DropdownMenuItem asChild>
                                                     <Link href="/admin/moderation" className="cursor-pointer font-medium">
                                                         <ShieldCheck className="mr-2 h-4 w-4 text-indigo-600" />
-                                                        <span>Moderation</span>
+                                                        <span>{t("nav.moderation")}</span>
                                                         {pendingModerationCount > 0 && (
                                                             <span className="ml-auto px-1.5 py-0.5 text-[10px] font-semibold bg-red-500 text-white rounded-full">
                                                                 {pendingModerationCount}
@@ -222,7 +231,7 @@ export function Navbar() {
                                 }
                             >
                                 <Sparkles className="w-3.5 h-3.5" />
-                                <span>{isPremium ? "Premium" : "Upgrade"}</span>
+                                <span>{isPremium ? t("nav.premium") : t("nav.upgrade")}</span>
                             </Link>
 
                             {/* Reputation pill */}
@@ -231,13 +240,15 @@ export function Navbar() {
                                 <span className="text-sm font-bold text-amber-700">{profile?.reputation || 0}</span>
                             </div>
 
-                            {/* Express/Full mode toggle. Only show after the phase
-                                resolves client-side to avoid a hydration flash. */}
+                            {/* Express/Full mode toggle. Desktop (md+) only — on
+                                mobile this lives in the Settings page instead.
+                                Only show after the phase resolves client-side to
+                                avoid a hydration flash. */}
                             {phaseReady && (
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-9 w-9"
+                                    className="hidden md:inline-flex h-9 w-9"
                                     onClick={toggle}
                                     title={
                                         phase === "express"
@@ -257,6 +268,18 @@ export function Navbar() {
                                     )}
                                 </Button>
                             )}
+
+                            {/* Mobile-only Settings gear (replaces the Sun/Moon
+                                toggle below md). The express/full toggle and theme
+                                live inside the Settings page. */}
+                            <Link
+                                href="/settings"
+                                aria-label={t("nav.settings")}
+                                title={t("nav.settings")}
+                                className="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground/70 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                            >
+                                <Settings className="h-5 w-5" />
+                            </Link>
 
                             {/* Avatar → personal cabinet (direct link, no dropdown).
                                 Sign-out now lives inside the cabinet page. Hidden on

@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -7,11 +9,13 @@ import {
     ShieldCheck,
     Sparkles,
     Edit,
+    Settings,
     ArrowRight,
     BookOpen,
     type LucideIcon,
 } from "lucide-react";
 import { NAV, CAREER_NAV_ROLES, INVITE_PARENT_ROLES } from "@/lib/nav-config";
+import { useT } from "@/hooks/useT";
 import type { Profile } from "@/types";
 
 type CabinetQuickAction = {
@@ -41,6 +45,7 @@ export function PersonalCabinet({
     isChainValid: boolean;
     isPremium: boolean;
 }) {
+    const { t } = useT();
     const role = profile.role;
     const classLabel =
         profile.grade != null
@@ -54,7 +59,7 @@ export function PersonalCabinet({
     actions.push({
         key: "schedule",
         href: NAV.schedule.href,
-        label: "My Schedule",
+        label: t("cabinet.mySchedule"),
         hint: NAV.schedule.hint,
         icon: NAV.schedule.icon,
         color: NAV.schedule.color,
@@ -65,7 +70,7 @@ export function PersonalCabinet({
         actions.push({
             key: "career",
             href: NAV.career.href,
-            label: "Career",
+            label: t("cabinet.career"),
             hint: NAV.career.hint,
             icon: NAV.career.icon,
             color: NAV.career.color,
@@ -76,7 +81,7 @@ export function PersonalCabinet({
     actions.push({
         key: "clubs",
         href: NAV.clubs.href,
-        label: "Clubs",
+        label: t("cabinet.clubs"),
         hint: NAV.clubs.hint,
         icon: NAV.clubs.icon,
         color: NAV.clubs.color,
@@ -87,8 +92,8 @@ export function PersonalCabinet({
         actions.push({
             key: "invite",
             href: "/profile/me#invite",
-            label: "Invite Parent",
-            hint: "Generate a parent link code",
+            label: t("cabinet.inviteParent"),
+            hint: t("cabinet.inviteParentHint"),
             icon: NAV.friends.icon,
             color: "text-blue-500",
             bg: "bg-blue-50",
@@ -98,8 +103,8 @@ export function PersonalCabinet({
     actions.push({
         key: "premium",
         href: NAV.premium.href,
-        label: isPremium ? "Premium" : "Go Premium",
-        hint: isPremium ? "Manage your subscription" : NAV.premium.hint,
+        label: isPremium ? t("cabinet.premium") : t("cabinet.goPremium"),
+        hint: isPremium ? t("cabinet.managePremiumHint") : NAV.premium.hint,
         icon: Sparkles,
         color: "text-amber-500",
         bg: "bg-amber-50",
@@ -108,7 +113,7 @@ export function PersonalCabinet({
     actions.push({
         key: "guide",
         href: NAV.guide.href,
-        label: "Guide",
+        label: t("cabinet.guide"),
         hint: NAV.guide.hint,
         icon: NAV.guide.icon,
         color: NAV.guide.color,
@@ -116,10 +121,20 @@ export function PersonalCabinet({
     });
 
     actions.push({
+        key: "settings",
+        href: "/settings",
+        label: t("cabinet.settings"),
+        hint: t("cabinet.settingsHint"),
+        icon: Settings,
+        color: "text-slate-500",
+        bg: "bg-slate-100",
+    });
+
+    actions.push({
         key: "edit",
         href: "/profile/edit",
-        label: "Edit Profile",
-        hint: "Update your details and links",
+        label: t("cabinet.editProfile"),
+        hint: t("cabinet.editProfileHint"),
         icon: Edit,
         color: "text-slate-500",
         bg: "bg-slate-100",
@@ -150,19 +165,19 @@ export function PersonalCabinet({
                                 </Badge>
                                 {classLabel && (
                                     <Badge variant="outline" className="font-medium">
-                                        Class {classLabel}
+                                        {t("cabinet.class")} {classLabel}
                                     </Badge>
                                 )}
                                 {isPremium && (
                                     <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-amber-200 gap-1">
                                         <Sparkles className="w-3 h-3" />
-                                        Premium
+                                        {t("cabinet.premium")}
                                     </Badge>
                                 )}
                                 {isChainValid ? (
                                     <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-green-200 gap-1">
                                         <ShieldCheck className="w-3 h-3" />
-                                        Verified ledger
+                                        {t("cabinet.verifiedLedger")}
                                     </Badge>
                                 ) : (
                                     <Badge
@@ -170,14 +185,14 @@ export function PersonalCabinet({
                                         title="Reputation ledger has been tampered with"
                                     >
                                         <ShieldCheck className="w-3 h-3" />
-                                        Invalid ledger
+                                        {t("cabinet.invalidLedger")}
                                     </Badge>
                                 )}
                             </div>
                             <div className="flex items-center gap-1.5 text-sm text-slate-500">
                                 <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
                                 <span className="font-semibold text-slate-900">{totalPoints}</span>
-                                reputation points
+                                {t("cabinet.reputationPoints")}
                             </div>
                         </div>
                     </div>
@@ -189,7 +204,7 @@ export function PersonalCabinet({
                             className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300"
                         >
                             <Edit className="w-4 h-4" />
-                            Edit profile
+                            {t("cabinet.editProfileShort")}
                         </Link>
                         <SignOutButton />
                     </div>
@@ -201,7 +216,7 @@ export function PersonalCabinet({
                     className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700"
                 >
                     <BookOpen className="w-4 h-4" />
-                    New here? Read the guide
+                    {t("cabinet.readGuide")}
                     <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
             </div>
@@ -209,7 +224,7 @@ export function PersonalCabinet({
             {/* Quick actions */}
             <div>
                 <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
-                    Quick actions
+                    {t("cabinet.quickActions")}
                 </h2>
                 <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(150px,1fr))]">
                     {actions.map((action) => {
