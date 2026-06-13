@@ -3,6 +3,7 @@ import { Outfit } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Navbar } from "@/components/Navbar";
+import { MobileTabBar } from "@/components/MobileTabBar";
 import { UIPhaseProvider } from "@/contexts/UIPhaseContext";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
@@ -25,9 +26,10 @@ export default function RootLayout({
         <UIPhaseProvider>
           <div className="relative flex min-h-screen flex-col">
             <Navbar />
-            <main className="flex-1">
+            <main className="flex-1 pb-20 md:pb-0">
               {children}
             </main>
+            <MobileTabBar />
           </div>
         </UIPhaseProvider>
         <Toaster position="top-center" richColors />

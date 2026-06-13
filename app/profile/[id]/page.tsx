@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Crown, Star, Calendar, Edit, ShieldCheck, Users, ExternalLink } from "lucide-react";
+import { Crown, Star, Calendar, ShieldCheck, Users, ExternalLink } from "lucide-react";
 import { ServiceCard } from "@/components/services/ServiceCard";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,7 +11,9 @@ import { FriendButton } from "@/components/shared/FriendButton";
 import { AchievementsSection } from "@/components/profile/AchievementsSection";
 import { ContactTutorButton } from "@/components/shared/ContactTutorButton";
 import { InviteParentSection } from "@/components/profile/InviteParentSection";
+import { PersonalCabinet } from "@/components/profile/PersonalCabinet";
 import { verifyChain } from "@/lib/reputation";
+import { resolvePlan } from "@/lib/subscription-plan";
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -98,6 +100,17 @@ export default async function ProfilePage({ params }: PageProps) {
     const totalActions = repBlocks?.filter((b: any) => b.action_type !== 'genesis').length || 0;
     const isChainValid = await verifyChain(id);
 
+    // Premium status — only needed for the owner's cabinet badge.
+    let isPremium = false;
+    if (isOwner) {
+        const { data: subscription } = await supabase
+            .from('subscriptions')
+            .select('plan, status, current_period_end')
+            .eq('user_id', id)
+            .maybeSingle();
+        isPremium = resolvePlan(subscription ?? null, Date.now()) === 'premium';
+    }
+
     // Fetch Friends
     const { data: friendships } = await supabase
         .from('friendships')
@@ -152,7 +165,28 @@ export default async function ProfilePage({ params }: PageProps) {
 
     return (
         <div className="min-h-screen bg-slate-50/50">
-            {/* Header / Cover Area */}
+            {/* Owner: Personal Cabinet (home base) above the tabs. */}
+            {isOwner && (
+                <div className="container mx-auto px-4 pt-8">
+                    <PersonalCabinet
+                        profile={profile}
+                        totalPoints={totalPoints}
+                        isChainValid={isChainValid}
+                        isPremium={isPremium}
+                    />
+                    {(profile.role === 'student' || profile.role === 'parliament') && (
+                        <div id="invite" className="mt-6 max-w-md scroll-mt-20">
+                            <InviteParentSection
+                                studentId={id}
+                                existingTokens={existingInviteTokens}
+                            />
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Public header / cover area (non-owner view stays as before). */}
+            {!isOwner && (
             <div className="bg-white border-b">
                 <div className="container mx-auto px-4 py-8">
                     <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
@@ -164,11 +198,6 @@ export default async function ProfilePage({ params }: PageProps) {
                                     {profile.full_name?.[0]?.toUpperCase() || '?'}
                                 </AvatarFallback>
                             </Avatar>
-                            {isOwner && (
-                                <Link href="/profile/edit" className="absolute bottom-0 right-0 bg-white p-2 rounded-full shadow-md border hover:bg-slate-50 text-slate-600">
-                                    <Edit className="w-4 h-4" />
-                                </Link>
-                            )}
                         </div>
 
                         {/* Info */}
@@ -233,7 +262,7 @@ export default async function ProfilePage({ params }: PageProps) {
 
                         {/* Action Buttons */}
                         <div className="flex flex-col gap-3 items-center">
-                            {!isOwner && currentUser && (
+                            {currentUser && (
                                 <>
                                     <FriendButton
                                         targetUserId={id}
@@ -247,25 +276,11 @@ export default async function ProfilePage({ params }: PageProps) {
                                     />
                                 </>
                             )}
-                            {isOwner && (
-                                <Link href="/profile/edit">
-                                    <button className="border border-slate-300 bg-white text-slate-700 px-6 py-2 rounded-full font-medium hover:bg-slate-50 transition-colors">
-                                        Edit Profile
-                                    </button>
-                                </Link>
-                            )}
-                            {isOwner && (profile.role === 'student' || profile.role === 'parliament') && (
-                                <div className="w-full max-w-xs">
-                                    <InviteParentSection
-                                        studentId={id}
-                                        existingTokens={existingInviteTokens}
-                                    />
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>
             </div>
+            )}
 
             {/* Tabs Content */}
             <div className="container mx-auto px-4 py-8">
