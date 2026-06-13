@@ -24,13 +24,25 @@ function autoDetectPhase(): UIPhase {
     return hour < 9 ? "express" : "full";
 }
 
+/**
+ * The user-selectable mode. "express" / "full" are explicit overrides;
+ * "auto" means "follow the device clock" (the original no-override behaviour).
+ */
+export type UIMode = "express" | "full" | "auto";
+
 type UIPhaseContextValue = {
     phase: UIPhase;
     /** True once the value has been resolved from localStorage / auto-detect (avoids hydration flicker). */
     ready: boolean;
     /** True when the current value is an explicit user override, false when auto-detected. */
     isOverride: boolean;
+    /** The selected mode: "express"/"full" (override) or "auto" (clock-driven). */
+    mode: UIMode;
     setPhase: (phase: UIPhase) => void;
+    /** Choose express/full (override) or auto (clear override, follow the clock). */
+    setMode: (mode: UIMode) => void;
+    /** Clear any override and return to clock-driven auto detection. */
+    reset: () => void;
     toggle: () => void;
 };
 
@@ -85,6 +97,37 @@ export function UIPhaseProvider({ children }: { children: ReactNode }) {
         setState((prev) => ({ ...prev, phase: next, isOverride: true }));
     }, []);
 
+    const setMode = useCallback((next: UIMode) => {
+        if (next === "auto") {
+            // Clear the override and re-derive from the device clock.
+            try {
+                window.localStorage.removeItem(STORAGE_KEY);
+            } catch {
+                // Ignore — the in-memory reset below still applies.
+            }
+            setState((prev) => ({
+                ...prev,
+                phase: autoDetectPhase(),
+                isOverride: false,
+            }));
+            return;
+        }
+        setState((prev) => ({ ...prev, phase: next, isOverride: true }));
+    }, []);
+
+    const reset = useCallback(() => {
+        try {
+            window.localStorage.removeItem(STORAGE_KEY);
+        } catch {
+            // Ignore — the in-memory reset below still applies.
+        }
+        setState((prev) => ({
+            ...prev,
+            phase: autoDetectPhase(),
+            isOverride: false,
+        }));
+    }, []);
+
     const toggle = useCallback(() => {
         // Derive the next phase from the latest state, then persist + set.
         // Keeping the persistence side effect out of the setState updater
@@ -111,7 +154,10 @@ export function UIPhaseProvider({ children }: { children: ReactNode }) {
                 phase: state.phase,
                 ready: state.ready,
                 isOverride: state.isOverride,
+                mode: state.isOverride ? state.phase : "auto",
                 setPhase,
+                setMode,
+                reset,
                 toggle,
             }}
         >

@@ -117,29 +117,6 @@ export default async function EditProfilePage({
                         </CardContent>
                     </Card>
 
-                    {/* Privacy */}
-                    <Card className="border-0 shadow-lg">
-                        <CardHeader>
-                            <CardTitle className="text-lg">Privacy</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <label className="flex items-start gap-3 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    name="leaderboard_anonymous"
-                                    defaultChecked={Boolean(profile?.leaderboard_anonymous)}
-                                    className="mt-1 h-4 w-4 rounded border-slate-300 accent-slate-900"
-                                />
-                                <span className="text-sm">
-                                    <span className="font-semibold text-slate-900 block">Hide my name on the leaderboard</span>
-                                    <span className="text-muted-foreground">
-                                        You will appear under a neutral pseudonym like &quot;Anonymous Eagle&quot; instead of your name and photo.
-                                    </span>
-                                </span>
-                            </label>
-                        </CardContent>
-                    </Card>
-
                     {/* Social Links */}
                     <Card className="border-0 shadow-lg">
                         <CardHeader>

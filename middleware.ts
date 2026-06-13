@@ -23,6 +23,7 @@ const PROTECTED_ROUTES = [
     '/clubs',
     '/pricing',
     '/guide',
+    '/settings',
 ];
 
 // Routes that parents CANNOT access (creation / submission routes)

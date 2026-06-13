@@ -32,8 +32,9 @@ export async function updateProfile(formData: FormData) {
     const classLetterRaw = (formData.get("class_letter") as string | null)?.trim() ?? "";
     const class_letter = classLetterRaw ? classLetterRaw.slice(0, 3) : null;
 
-    // Leaderboard privacy pseudonym toggle (Phase 6)
-    const leaderboard_anonymous = formData.get("leaderboard_anonymous") === "on";
+    // Leaderboard privacy now lives on the /settings page (updatePrivacy server
+    // action). This form intentionally no longer touches leaderboard_anonymous
+    // so saving the profile never clobbers that preference.
 
     // Parse social links JSON
     let social_links: { network?: string; url?: string }[] = [];
@@ -52,7 +53,6 @@ export async function updateProfile(formData: FormData) {
         social_links,
         grade,
         class_letter,
-        leaderboard_anonymous,
     }).eq("id", user.id);
 
     if (error) {

@@ -24,7 +24,9 @@ import {
     Sparkles,
     ShieldCheck,
     LogOut,
+    Settings,
 } from "lucide-react";
+import { useT } from "@/contexts/LocaleContext";
 
 /**
  * Mobile-only bottom tab bar. Replaces the old hamburger menu. Renders only
@@ -43,6 +45,7 @@ export function MobileTabBar() {
     const [moreOpen, setMoreOpen] = useState(false);
     const supabase = createClient();
     const pathname = usePathname();
+    const { t } = useT();
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -119,10 +122,10 @@ export function MobileTabBar() {
         window.location.href = "/";
     }
 
-    const tabs: { key: string; href: string; label: string; icon: typeof Home; color: string }[] = [
-        { key: "home", href: "/home", label: "Home", icon: Home, color: "text-indigo-600" },
-        { key: "schedule", href: "/schedule", label: "Schedule", icon: CalendarDays, color: "text-sky-500" },
-        { key: "announcements", href: "/announcements", label: "News", icon: Megaphone, color: "text-indigo-500" },
+    const tabs: { key: string; href: string; labelKey: string; icon: typeof Home; color: string }[] = [
+        { key: "home", href: "/home", labelKey: "nav.home", icon: Home, color: "text-indigo-600" },
+        { key: "schedule", href: "/schedule", labelKey: "nav.schedule", icon: CalendarDays, color: "text-sky-500" },
+        { key: "announcements", href: "/announcements", labelKey: "nav.news", icon: Megaphone, color: "text-indigo-500" },
     ];
 
     return (
@@ -144,7 +147,7 @@ export function MobileTabBar() {
                             >
                                 <Icon className={`w-5 h-5 ${active ? tab.color : "text-muted-foreground"}`} />
                                 <span className={active ? "text-foreground" : "text-muted-foreground"}>
-                                    {tab.label}
+                                    {t(tab.labelKey)}
                                 </span>
                             </Link>
                         );
@@ -160,7 +163,7 @@ export function MobileTabBar() {
                         aria-label="More destinations"
                     >
                         <LayoutGrid className="w-5 h-5" />
-                        <span>More</span>
+                        <span>{t("nav.more")}</span>
                         {hasMoreBadge && (
                             <span className="absolute top-2.5 right-[calc(50%-1.25rem)] flex h-2 w-2 rounded-full bg-red-500" />
                         )}
@@ -178,7 +181,7 @@ export function MobileTabBar() {
                             <AvatarFallback className="text-[10px]">{profile?.full_name?.[0] || "U"}</AvatarFallback>
                         </Avatar>
                         <span className={isActive("/profile/me") ? "text-foreground" : "text-muted-foreground"}>
-                            Me
+                            {t("nav.me")}
                         </span>
                     </Link>
                 </div>
@@ -228,9 +231,10 @@ export function MobileTabBar() {
                             return (
                                 <MoreSection
                                     key={group.label}
-                                    label={group.label}
+                                    label={t(`nav.${group.label.toLowerCase()}`)}
                                     items={visible}
                                     pendingFriendRequests={pendingFriendRequests}
+                                    t={t}
                                 />
                             );
                         })}
@@ -238,14 +242,20 @@ export function MobileTabBar() {
                         {/* Account */}
                         <section className="space-y-2">
                             <h2 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground px-1">
-                                Account
+                                {t("nav.account")}
                             </h2>
                             <div className="grid grid-cols-2 gap-2">
                                 <OverlayTile
                                     href={NAV.premium.href}
-                                    label={isPremium ? "Premium" : "Upgrade"}
+                                    label={isPremium ? t("nav.premium") : t("nav.upgrade")}
                                     icon={Sparkles}
                                     color="text-amber-500"
+                                />
+                                <OverlayTile
+                                    href="/settings"
+                                    label={t("nav.settings")}
+                                    icon={Settings}
+                                    color="text-slate-500"
                                 />
                             </div>
                         </section>
@@ -254,12 +264,12 @@ export function MobileTabBar() {
                         {isStaff && (
                             <section className="space-y-2">
                                 <h2 className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground px-1">
-                                    Staff
+                                    {t("nav.staff")}
                                 </h2>
                                 <div className="grid grid-cols-2 gap-2">
                                     <OverlayTile
                                         href="/admin/moderation"
-                                        label="Moderation"
+                                        label={t("nav.moderation")}
                                         icon={ShieldCheck}
                                         color="text-indigo-600"
                                         badge={pendingModerationCount > 0 ? pendingModerationCount : undefined}
@@ -276,7 +286,7 @@ export function MobileTabBar() {
                                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600 transition-colors hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300"
                             >
                                 <LogOut className="w-4 h-4" />
-                                Sign out
+                                {t("nav.signOut")}
                             </button>
                         </div>
                     </div>
@@ -290,10 +300,12 @@ function MoreSection({
     label,
     items,
     pendingFriendRequests,
+    t,
 }: {
     label: string;
     items: NavDestination[];
     pendingFriendRequests: number;
+    t: (key: string) => string;
 }) {
     return (
         <section className="space-y-2">
@@ -305,7 +317,7 @@ function MoreSection({
                     <OverlayTile
                         key={item.key}
                         href={item.href}
-                        label={item.label}
+                        label={t(`nav.${item.key}`)}
                         icon={item.icon}
                         color={item.color}
                         badge={
