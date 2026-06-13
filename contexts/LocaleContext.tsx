@@ -60,8 +60,15 @@ export function LocaleProvider({
 
     const t = useMemo<TranslateFn>(() => {
         const dict = getDictionary(locale);
+        const enDict = getDictionary("en");
         return (key, vars) => {
+            // Active locale → English fallback → the key itself. The English
+            // fallback prevents raw dot-paths from leaking to ru/kk users if a
+            // future key exists only in en.
             let value = resolveKey(dict, key);
+            if (value === key && dict !== enDict) {
+                value = resolveKey(enDict, key);
+            }
             if (vars) {
                 for (const [name, replacement] of Object.entries(vars)) {
                     value = value.replace(`{${name}}`, String(replacement));
@@ -93,11 +100,15 @@ export function useT(): LocaleContextValue {
     // Defensive fallback — should not happen in the running app since the
     // provider wraps the whole tree in app/layout.tsx.
     const dict = getDictionary(DEFAULT_LOCALE);
+    const enDict = getDictionary("en");
     return {
         locale: DEFAULT_LOCALE,
         setLocale: () => {},
         t: (key, vars) => {
             let value = resolveKey(dict, key);
+            if (value === key && dict !== enDict) {
+                value = resolveKey(enDict, key);
+            }
             if (vars) {
                 for (const [name, replacement] of Object.entries(vars)) {
                     value = value.replace(`{${name}}`, String(replacement));
