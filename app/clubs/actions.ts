@@ -10,8 +10,8 @@ import {
     isClubCategory,
 } from "@/lib/clubs";
 import { almatyTodayIso } from "@/lib/schedule/almaty-time";
+import { UUID_RE } from "@/lib/validation";
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 type ServerSupabase = Awaited<ReturnType<typeof createClient>>;

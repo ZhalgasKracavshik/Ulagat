@@ -80,7 +80,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
 
             {/* Grade filter chips */}
             <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none max-w-3xl mx-auto">
-                <GraduationCap className="w-4 h-4 text-slate-400 shrink-0" />
+                <GraduationCap className="w-4 h-4 text-muted-foreground shrink-0" />
                 <Link href="/leaderboard">
                     <Button variant={!gradeFilter ? "secondary" : "ghost"} size="sm" className="rounded-full px-4">
                         All
@@ -109,15 +109,15 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
 
                         const identity = (
                             <>
-                                <Avatar className="w-12 h-12 sm:w-16 sm:h-16 border-2 border-white shadow-sm transition-transform group-hover/user:scale-105">
+                                <Avatar className="w-12 h-12 sm:w-16 sm:h-16 border-2 border-card shadow-sm transition-transform group-hover/user:scale-105">
                                     {!isAnonymous && <AvatarImage src={user.avatar_url ?? undefined} />}
-                                    <AvatarFallback className="bg-slate-100">
-                                        {isAnonymous ? <VenetianMask className="w-6 h-6 text-slate-400" /> : user.full_name?.[0]}
+                                    <AvatarFallback className="bg-muted">
+                                        {isAnonymous ? <VenetianMask className="w-6 h-6 text-muted-foreground" /> : user.full_name?.[0]}
                                     </AvatarFallback>
                                 </Avatar>
 
                                 <div className="flex-grow min-w-0">
-                                    <h3 className="font-extrabold text-lg sm:text-xl truncate flex items-center gap-2 text-slate-900 group-hover/user:text-primary transition-colors">
+                                    <h3 className="font-extrabold text-lg sm:text-xl truncate flex items-center gap-2 text-foreground group-hover/user:text-primary transition-colors">
                                         {displayName}
                                         <ShieldCheck className="w-4 h-4 text-primary opacity-80" />
                                     </h3>
@@ -133,17 +133,17 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
                         return (
                             <Card key={user.id} className={`
                                 transform transition-all duration-300 hover:scale-[1.02] border-2
-                                ${index === 0 ? 'border-yellow-400 bg-yellow-50/50 shadow-yellow-200 shadow-xl' : ''}
-                                ${index === 1 ? 'border-slate-300 bg-slate-50/50 shadow-md' : ''}
-                                ${index === 2 ? 'border-orange-300 bg-orange-50/50 shadow-md' : ''}
+                                ${index === 0 ? 'border-yellow-400 bg-yellow-50/50 dark:bg-yellow-950/20 shadow-yellow-200 shadow-xl' : ''}
+                                ${index === 1 ? 'border-slate-300 dark:border-slate-600 bg-slate-50/50 dark:bg-muted shadow-md' : ''}
+                                ${index === 2 ? 'border-orange-300 bg-orange-50/50 dark:bg-orange-950/20 shadow-md' : ''}
                                 ${index > 2 ? 'border-transparent hover:border-border' : ''}
                             `}>
                                 <CardContent className="flex items-center p-4 sm:p-6 gap-4 sm:gap-6">
-                                    <div className="flex-shrink-0 w-10 text-center font-bold text-xl text-slate-400">
+                                    <div className="flex-shrink-0 w-10 text-center font-bold text-xl text-muted-foreground">
                                         {index === 0 && <Crown className="w-10 h-10 text-yellow-500 mx-auto animate-pulse drop-shadow-md" />}
                                         {index === 1 && <Medal className="w-9 h-9 text-slate-400 mx-auto drop-shadow-sm" />}
                                         {index === 2 && <Medal className="w-9 h-9 text-orange-500 mx-auto drop-shadow-sm" />}
-                                        {index > 2 && <span className="text-slate-300">#{index + 1}</span>}
+                                        {index > 2 && <span className="text-muted-foreground/60">#{index + 1}</span>}
                                     </div>
 
                                     {/* Anonymous entries don't link to a profile — that would defeat the pseudonym */}
@@ -161,7 +161,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
                                         <div className="font-black text-2xl sm:text-3xl text-primary tabular-nums tracking-tight">
                                             {user.points}
                                         </div>
-                                        <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded-full mt-1">
+                                        <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest bg-muted px-2 py-0.5 rounded-full mt-1">
                                             Points
                                         </div>
                                     </div>
@@ -171,8 +171,8 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
                     })
                 ) : (
                     <div className="text-center py-20 space-y-4">
-                        <Trophy className="w-16 h-16 mx-auto text-slate-200" />
-                        <h3 className="text-xl font-bold text-slate-400">No Champions Yet</h3>
+                        <Trophy className="w-16 h-16 mx-auto text-muted-foreground/40" />
+                        <h3 className="text-xl font-bold text-muted-foreground">No Champions Yet</h3>
                         <p className="text-muted-foreground">
                             {gradeFilter
                                 ? `No grade ${gradeFilter} students on the board yet.`

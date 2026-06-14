@@ -30,17 +30,17 @@ export default async function EditProfilePage({
     const { error: saveError } = await searchParams;
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white py-10 px-4">
+        <div className="min-h-screen bg-background py-10 px-4">
             <div className="mx-auto max-w-2xl space-y-6">
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-slate-900">Edit Your Profile</h1>
+                    <h1 className="text-3xl font-bold text-foreground">Edit Your Profile</h1>
                     <p className="text-muted-foreground mt-2">Make your profile stand out in the Ulagat community.</p>
                 </div>
 
                 {saveError && (
                     <div
                         role="alert"
-                        className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+                        className="rounded-lg border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 px-4 py-3 text-sm font-medium text-red-700 dark:text-red-300"
                     >
                         {saveError}
                     </div>

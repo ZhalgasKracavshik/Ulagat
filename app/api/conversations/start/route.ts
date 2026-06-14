@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { isUuid } from "@/lib/validation";
 
 export async function POST(request: Request) {
     const supabase = await createClient();
@@ -11,7 +12,9 @@ export async function POST(request: Request) {
 
     const { otherUserId } = await request.json();
 
-    if (!otherUserId || user.id === otherUserId) {
+    // otherUserId is interpolated into the .or() filter below — must be a
+    // validated UUID before use.
+    if (!isUuid(otherUserId) || user.id === otherUserId) {
         return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }
 

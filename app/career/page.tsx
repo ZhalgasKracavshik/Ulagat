@@ -156,7 +156,7 @@ export default async function CareerPage({
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-rose-500/10 to-transparent p-6 rounded-2xl border border-rose-500/10">
                 <div className="space-y-1">
-                    <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
+                    <h1 className="text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
                         <GraduationCap className="w-8 h-8 text-rose-500" />
                         Career &amp; ЕНТ Tracker
                     </h1>
@@ -215,7 +215,7 @@ export default async function CareerPage({
                                             key={key}
                                             className="flex items-center justify-between text-sm"
                                         >
-                                            <span className="text-slate-600">
+                                            <span className="text-muted-foreground">
                                                 {entScoreLabel(key, subject1, subject2)}
                                             </span>
                                             <span className="font-semibold tabular-nums">
@@ -226,7 +226,7 @@ export default async function CareerPage({
                                     ))}
                                 </div>
                                 <div className="border-t pt-3 flex items-center justify-between">
-                                    <span className="font-bold text-slate-900">Total</span>
+                                    <span className="font-bold text-foreground">Total</span>
                                     <span className="text-2xl font-extrabold text-rose-600 tabular-nums">
                                         {total}
                                         <span className="text-sm text-muted-foreground font-medium">
@@ -240,7 +240,7 @@ export default async function CareerPage({
                                             <span>Progress toward goal ({targetScore})</span>
                                             <span>{targetProgress}%</span>
                                         </div>
-                                        <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
+                                        <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
                                             <div
                                                 className="h-full rounded-full bg-rose-500 transition-all"
                                                 style={{ width: `${targetProgress}%` }}
@@ -272,16 +272,16 @@ export default async function CareerPage({
                         {subject1 && subject2 ? (
                             <>
                                 <div className="flex items-center gap-2 flex-wrap">
-                                    <Badge className="bg-indigo-100 text-indigo-700 hover:bg-indigo-100">
+                                    <Badge className="bg-indigo-100 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100">
                                         {subject1}
                                     </Badge>
                                     <span className="text-muted-foreground">+</span>
-                                    <Badge className="bg-indigo-100 text-indigo-700 hover:bg-indigo-100">
+                                    <Badge className="bg-indigo-100 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100">
                                         {subject2}
                                     </Badge>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-slate-700 mb-2">
+                                    <p className="text-sm font-medium text-foreground mb-2">
                                         Unlocks:
                                     </p>
                                     {groups.length > 0 ? (
@@ -290,7 +290,7 @@ export default async function CareerPage({
                                                 <Badge
                                                     key={g}
                                                     variant="outline"
-                                                    className="border-emerald-300 text-emerald-700 bg-emerald-50"
+                                                    className="border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40"
                                                 >
                                                     {g}
                                                 </Badge>
@@ -335,7 +335,7 @@ export default async function CareerPage({
                                 return (
                                     <div key={t.id} className="space-y-1.5">
                                         <div className="flex items-center justify-between text-sm">
-                                            <span className="font-medium text-slate-700 truncate">
+                                            <span className="font-medium text-foreground truncate">
                                                 {t.university} · {t.specialty}
                                             </span>
                                             <span className="flex items-center gap-2 shrink-0">
@@ -349,7 +349,7 @@ export default async function CareerPage({
                                                 </span>
                                             </span>
                                         </div>
-                                        <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
+                                        <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
                                             <div
                                                 className={`h-full rounded-full transition-all ${style?.bar ?? "bg-slate-400"}`}
                                                 style={{ width: `${pct}%` }}
@@ -385,10 +385,10 @@ export default async function CareerPage({
                             return (
                                 <div
                                     key={t.id}
-                                    className="flex items-center justify-between gap-4 rounded-lg border border-slate-100 bg-slate-50 px-4 py-3"
+                                    className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted px-4 py-3"
                                 >
                                     <div className="min-w-0">
-                                        <p className="font-semibold text-slate-800 truncate">
+                                        <p className="font-semibold text-foreground truncate">
                                             {t.university}
                                         </p>
                                         <p className="text-sm text-muted-foreground truncate">
@@ -400,7 +400,7 @@ export default async function CareerPage({
                                         {t.grant_deadline && (
                                             <p className="mt-1 flex items-center gap-1 text-xs">
                                                 <CalendarClock className="w-3.5 h-3.5 text-rose-400" />
-                                                <span className="text-slate-600">
+                                                <span className="text-muted-foreground">
                                                     {t.grant_deadline}
                                                 </span>
                                                 <span
@@ -428,7 +428,7 @@ export default async function CareerPage({
                                                 type="submit"
                                                 variant="ghost"
                                                 size="icon"
-                                                className="text-slate-400 hover:text-red-600 shrink-0"
+                                                className="text-muted-foreground hover:text-red-600 shrink-0"
                                                 aria-label="Remove target"
                                             >
                                                 <Trash2 className="w-4 h-4" />
@@ -489,10 +489,10 @@ function EmptyHint({
 function ParentNoChildren() {
     return (
         <div className="container mx-auto py-16 px-4 max-w-xl text-center space-y-4">
-            <div className="mx-auto w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center">
-                <GraduationCap className="w-10 h-10 text-rose-300" />
+            <div className="mx-auto w-20 h-20 bg-rose-50 dark:bg-rose-950/40 rounded-full flex items-center justify-center">
+                <GraduationCap className="w-10 h-10 text-rose-300 dark:text-rose-600" />
             </div>
-            <h1 className="text-2xl font-bold text-slate-800">No linked student</h1>
+            <h1 className="text-2xl font-bold text-foreground">No linked student</h1>
             <p className="text-muted-foreground">
                 You aren&apos;t linked to any student yet. Once your child links your account, you
                 will see their ЕНТ tracker and university targets here.

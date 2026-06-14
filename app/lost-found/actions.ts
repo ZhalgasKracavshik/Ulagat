@@ -10,8 +10,7 @@ import {
 } from "@/lib/lost-found";
 import { notifyItemFound } from "@/lib/notifications/lost-found";
 import type { LostItemStatus } from "@/types";
-
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { UUID_RE } from "@/lib/validation";
 
 type ServerSupabase = Awaited<ReturnType<typeof createClient>>;
 

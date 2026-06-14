@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { timingSafeEqual } from 'crypto';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { almatyTodayIso, addDaysIso } from '@/lib/schedule/almaty-time';
 import { notifyEventReminder, type ReminderEvent } from '@/lib/notifications/event-reminder';
@@ -20,7 +21,12 @@ export async function GET(request: Request) {
         console.error('[event-reminders] CRON_SECRET is not configured');
         return NextResponse.json({ error: 'Cron not configured' }, { status: 500 });
     }
-    if (request.headers.get('authorization') !== `Bearer ${cronSecret}`) {
+    // Timing-safe comparison of the bearer token to avoid leaking the secret
+    // via response-time differences. Guard the length first, since
+    // timingSafeEqual throws on unequal-length buffers.
+    const expected = Buffer.from(`Bearer ${cronSecret}`);
+    const provided = Buffer.from(request.headers.get('authorization') ?? '');
+    if (provided.length !== expected.length || !timingSafeEqual(provided, expected)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

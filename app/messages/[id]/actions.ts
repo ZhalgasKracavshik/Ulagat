@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { isUuid } from "@/lib/validation";
 
 export async function sendMessage(conversationId: string, formData: FormData) {
     const supabase = await createClient();
@@ -38,6 +39,9 @@ export async function startConversation(otherUserId: string) {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) throw new Error("Unauthorized");
+    // otherUserId is interpolated into the .or() filter below — must be a
+    // validated UUID before use.
+    if (!isUuid(otherUserId)) throw new Error("Invalid user id");
     if (user.id === otherUserId) throw new Error("Cannot chat with yourself");
 
     // Check existing conversation

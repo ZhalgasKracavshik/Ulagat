@@ -199,7 +199,7 @@ export function Navbar() {
                                                     {t("nav.staff")}
                                                 </DropdownMenuLabel>
                                                 <DropdownMenuItem asChild>
-                                                    <Link href="/admin/moderation" className="cursor-pointer font-medium">
+                                                    <Link href="/admin" className="cursor-pointer font-medium">
                                                         <ShieldCheck className="mr-2 h-4 w-4 text-indigo-600" />
                                                         <span>{t("nav.moderation")}</span>
                                                         {pendingModerationCount > 0 && (

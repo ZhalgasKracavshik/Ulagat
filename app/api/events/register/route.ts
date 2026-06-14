@@ -18,12 +18,16 @@ export async function POST(request: Request) {
     // Check event capacity
     const { data: event } = await supabase
         .from('events')
-        .select('max_students')
+        .select('max_students, status')
         .eq('id', event_id)
         .single();
 
     if (!event) {
         return NextResponse.json({ error: "Event not found" }, { status: 404 });
+    }
+
+    if (event.status !== 'active') {
+        return NextResponse.json({ error: "This event is not open for registration" }, { status: 400 });
     }
 
     if (event.max_students) {

@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { isUuid } from "@/lib/validation";
 
 export async function POST(request: Request) {
     const supabase = await createClient();
@@ -12,6 +13,12 @@ export async function POST(request: Request) {
     const { action, targetUserId, friendshipId } = await request.json();
 
     if (action === "add") {
+        // targetUserId is interpolated into the .or() filter below — must be a
+        // validated UUID before use.
+        if (!isUuid(targetUserId)) {
+            return NextResponse.json({ error: "Invalid target user id" }, { status: 400 });
+        }
+
         // Check if friendship already exists
         const { data: existing } = await supabase
             .from("friendships")

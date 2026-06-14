@@ -98,7 +98,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sch
     const header = (
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gradient-to-r from-sky-500/10 to-transparent p-6 rounded-2xl border border-sky-500/10">
             <div className="space-y-1">
-                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 flex items-center gap-3">
+                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground flex items-center gap-3">
                     <CalendarDays className="w-8 h-8 text-sky-500" />
                     Schedule
                 </h1>
@@ -142,20 +142,20 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sch
             <div className="container mx-auto py-8 space-y-8 px-4 md:px-6">
                 {header}
                 <Card className="max-w-lg mx-auto text-center p-8 space-y-4 border-dashed">
-                    <div className="mx-auto w-16 h-16 bg-sky-50 rounded-full flex items-center justify-center">
+                    <div className="mx-auto w-16 h-16 bg-sky-50 dark:bg-sky-950/40 rounded-full flex items-center justify-center">
                         <UserCog className="w-8 h-8 text-sky-400" />
                     </div>
                     {parentWithoutChild ? (
                         <>
                             <CardTitle className="text-xl">No linked child found</CardTitle>
-                            <p className="text-slate-600 text-sm">
+                            <p className="text-muted-foreground text-sm">
                                 Ask your child to send you a parent invite so we can show you their class schedule.
                             </p>
                         </>
                     ) : isStaff ? (
                         <>
                             <CardTitle className="text-xl">No timetables published yet</CardTitle>
-                            <p className="text-slate-600 text-sm">
+                            <p className="text-muted-foreground text-sm">
                                 Create the first class timetable to get started.
                             </p>
                             <Button asChild className="mt-2">
@@ -165,7 +165,7 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sch
                     ) : (
                         <>
                             <CardTitle className="text-xl">Set your class first</CardTitle>
-                            <p className="text-slate-600 text-sm">
+                            <p className="text-muted-foreground text-sm">
                                 Set your grade and class letter in profile settings to see your schedule.
                             </p>
                             <Button asChild className="mt-2">
