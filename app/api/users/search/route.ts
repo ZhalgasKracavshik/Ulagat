@@ -12,6 +12,12 @@ export async function GET(request: Request) {
 
     const supabase = await createClient();
 
+    // Require authentication — search must not be reachable anonymously.
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     // Search for users by full_name (case-insensitive)
     const { data: users, error } = await supabase
         .from('profiles')
