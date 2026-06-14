@@ -17,6 +17,7 @@ import {
     Archive,
     ArrowLeft,
     Crown,
+    Sparkles,
 } from "lucide-react";
 import { joinClub, leaveClub } from "../actions";
 import { CLUB_CATEGORY_LABELS, CLUB_JOINER_ROLES } from "@/lib/clubs";
@@ -101,12 +102,12 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
     const todayMeetings = meetings.filter((m) => m.date >= todayIso);
     const pastMeetings = meetings.filter((m) => m.date < todayIso);
 
-    const CategoryIcon = CLUB_CATEGORY_ICONS[club.category];
+    const CategoryIcon = CLUB_CATEGORY_ICONS[club.category] ?? Sparkles;
 
     return (
         <div className="container mx-auto py-8 space-y-8 px-4 md:px-6 max-w-5xl">
             <Link href="/clubs" className="inline-flex">
-                <Button variant="ghost" size="sm" className="gap-2 text-slate-500">
+                <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
                     <ArrowLeft className="w-4 h-4" />
                     All clubs
                 </Button>
@@ -117,40 +118,40 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
                 <div className="h-2 bg-gradient-to-r from-violet-500 via-purple-500 to-indigo-500" />
                 <CardContent className="p-6 md:p-8">
                     <div className="flex flex-col md:flex-row gap-6 md:items-center">
-                        <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden border-2 border-white shadow-lg bg-violet-50 flex items-center justify-center shrink-0">
+                        <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden border-2 border-card shadow-lg bg-violet-50 dark:bg-violet-950/40 flex items-center justify-center shrink-0">
                             {club.logo_url ? (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img src={club.logo_url} alt={club.name} className="object-cover w-full h-full" />
                             ) : (
-                                <CategoryIcon className="w-12 h-12 text-violet-300" />
+                                <CategoryIcon className="w-12 h-12 text-violet-300 dark:text-violet-600" />
                             )}
                         </div>
                         <div className="flex-grow min-w-0 space-y-2">
                             <div className="flex flex-wrap items-center gap-2">
-                                <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">{club.name}</h1>
-                                <Badge variant="outline" className="border-violet-200 text-violet-700 font-bold">
+                                <h1 className="text-3xl font-extrabold tracking-tight text-foreground">{club.name}</h1>
+                                <Badge variant="outline" className="border-violet-200 dark:border-violet-800 text-violet-700 dark:text-violet-300 font-bold">
                                     {CLUB_CATEGORY_LABELS[club.category]}
                                 </Badge>
                                 {club.status === 'archived' && (
-                                    <Badge variant="outline" className="border-slate-300 text-slate-500 font-bold gap-1">
+                                    <Badge variant="outline" className="border-border text-muted-foreground font-bold gap-1">
                                         <Archive className="w-3 h-3" />
                                         Archived
                                     </Badge>
                                 )}
                             </div>
                             {club.description && (
-                                <p className="text-slate-600 max-w-2xl">{club.description}</p>
+                                <p className="text-muted-foreground max-w-2xl">{club.description}</p>
                             )}
                             <div className="flex flex-wrap items-center gap-4 text-sm pt-1">
                                 <span className="flex items-center gap-1.5 font-bold text-amber-600">
                                     <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
                                     {club.points} points
                                 </span>
-                                <span className="flex items-center gap-1.5 text-slate-600 font-medium">
+                                <span className="flex items-center gap-1.5 text-muted-foreground font-medium">
                                     <Users className="w-4 h-4 text-violet-500" />
                                     {members.length} members
                                 </span>
-                                <span className="flex items-center gap-1.5 text-slate-600 font-medium">
+                                <span className="flex items-center gap-1.5 text-muted-foreground font-medium">
                                     <Crown className="w-4 h-4 text-yellow-500" />
                                     Leader:{' '}
                                     <Link href={`/profile/${club.leader_id}`} className="text-violet-700 hover:underline font-semibold">
@@ -162,7 +163,7 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
                         <div className="flex flex-col gap-2 shrink-0">
                             {canManage && (
                                 <Link href={`/clubs/${club.id}/manage`}>
-                                    <Button variant="outline" className="w-full gap-2 border-violet-200 text-violet-700 hover:bg-violet-50 font-bold">
+                                    <Button variant="outline" className="w-full gap-2 border-violet-200 dark:border-violet-800 text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-950/40 font-bold">
                                         <Settings className="w-4 h-4" />
                                         Manage
                                     </Button>
@@ -180,7 +181,7 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
                             {isMember && !isLeader && (
                                 <form action={leaveClub}>
                                     <input type="hidden" name="club_id" value={club.id} />
-                                    <Button type="submit" variant="outline" className="w-full gap-2 border-red-200 text-red-600 hover:bg-red-50 font-bold">
+                                    <Button type="submit" variant="outline" className="w-full gap-2 border-red-200 dark:border-red-900 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 font-bold">
                                         <LogOut className="w-4 h-4" />
                                         Leave Club
                                     </Button>
@@ -206,21 +207,21 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
                                 <Link
                                     key={member.id}
                                     href={`/profile/${member.user_id}`}
-                                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 transition-colors group"
+                                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors group"
                                 >
                                     <Avatar className="w-9 h-9 border">
                                         <AvatarImage src={member.profiles?.avatar_url ?? undefined} />
-                                        <AvatarFallback className="bg-violet-50 text-violet-600 text-sm">
+                                        <AvatarFallback className="bg-violet-50 dark:bg-violet-950/40 text-violet-600 text-sm">
                                             {member.profiles?.full_name?.[0] || '?'}
                                         </AvatarFallback>
                                     </Avatar>
-                                    <span className="flex-grow min-w-0 truncate font-medium text-slate-800 group-hover:text-violet-700 transition-colors">
+                                    <span className="flex-grow min-w-0 truncate font-medium text-foreground group-hover:text-violet-700 transition-colors">
                                         {member.profiles?.full_name || 'Unknown'}
                                         {member.user_id === club.leader_id && (
                                             <Crown className="inline w-3.5 h-3.5 text-yellow-500 ml-1.5 -mt-0.5" />
                                         )}
                                     </span>
-                                    <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-full tabular-nums shrink-0">
+                                    <span className="text-xs font-bold text-muted-foreground bg-muted px-2 py-1 rounded-full tabular-nums shrink-0">
                                         {member.total_attendance} attended
                                     </span>
                                 </Link>
@@ -242,14 +243,14 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
                     <CardContent className="space-y-4">
                         {announcements.length > 0 ? (
                             announcements.map((announcement) => (
-                                <div key={announcement.id} className="p-3 rounded-lg border border-slate-100 bg-slate-50/50 space-y-1">
+                                <div key={announcement.id} className="p-3 rounded-lg border border-border bg-muted space-y-1">
                                     <div className="flex items-center justify-between gap-2">
-                                        <h4 className="font-bold text-slate-800 text-sm">{announcement.title}</h4>
+                                        <h4 className="font-bold text-foreground text-sm">{announcement.title}</h4>
                                         <span className="text-[11px] text-muted-foreground shrink-0">
                                             {format(new Date(announcement.created_at), 'MMM d, yyyy')}
                                         </span>
                                     </div>
-                                    <p className="text-sm text-slate-600 whitespace-pre-line">{announcement.body}</p>
+                                    <p className="text-sm text-muted-foreground whitespace-pre-line">{announcement.body}</p>
                                 </div>
                             ))
                         ) : (
@@ -277,7 +278,7 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
                                 <MeetingRow key={meeting.id} meeting={meeting} highlight />
                             ))}
                             {pastMeetings.length > 0 && (
-                                <p className="text-xs font-bold uppercase tracking-wider text-slate-400 pt-1">Past</p>
+                                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground pt-1">Past</p>
                             )}
                             {pastMeetings.map((meeting) => (
                                 <MeetingRow key={meeting.id} meeting={meeting} />
@@ -294,14 +295,14 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
 
 function MeetingRow({ meeting, highlight = false }: { meeting: ClubMeeting; highlight?: boolean }) {
     return (
-        <div className={`flex items-center gap-4 p-3 rounded-lg border ${highlight ? 'border-violet-200 bg-violet-50/50' : 'border-slate-100 bg-slate-50/50'}`}>
-            <div className="font-bold text-slate-800 text-sm tabular-nums shrink-0">
+        <div className={`flex items-center gap-4 p-3 rounded-lg border ${highlight ? 'border-violet-200 dark:border-violet-800 bg-violet-50/50 dark:bg-violet-950/30' : 'border-border bg-muted'}`}>
+            <div className="font-bold text-foreground text-sm tabular-nums shrink-0">
                 {format(new Date(meeting.date + 'T00:00:00'), 'MMM d, yyyy')}
             </div>
-            <div className="flex-grow min-w-0 text-sm text-slate-600 truncate">
+            <div className="flex-grow min-w-0 text-sm text-muted-foreground truncate">
                 {meeting.notes || 'Club meeting'}
             </div>
-            <div className="flex items-center gap-1 text-xs font-bold text-slate-500 bg-white border border-slate-200 px-2 py-1 rounded-full shrink-0">
+            <div className="flex items-center gap-1 text-xs font-bold text-muted-foreground bg-card border border-border px-2 py-1 rounded-full shrink-0">
                 <Users className="w-3 h-3" />
                 {meeting.attendees.length}
             </div>

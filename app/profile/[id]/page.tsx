@@ -164,7 +164,7 @@ export default async function ProfilePage({ params }: PageProps) {
     }).filter(Boolean);
 
     return (
-        <div className="min-h-screen bg-slate-50/50">
+        <div className="min-h-screen bg-background">
             {/* Owner: Personal Cabinet (home base) above the tabs. */}
             {isOwner && (
                 <div className="container mx-auto px-4 pt-8">
@@ -187,12 +187,12 @@ export default async function ProfilePage({ params }: PageProps) {
 
             {/* Public header / cover area (non-owner view stays as before). */}
             {!isOwner && (
-            <div className="bg-white border-b">
+            <div className="bg-card border-b border-border">
                 <div className="container mx-auto px-4 py-8">
                     <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
                         {/* Avatar */}
                         <div className="relative group">
-                            <Avatar className="w-32 h-32 md:w-40 md:h-40 border-4 border-white shadow-lg">
+                            <Avatar className="w-32 h-32 md:w-40 md:h-40 border-4 border-card shadow-lg">
                                 <AvatarImage src={profile.avatar_url} className="object-cover" />
                                 <AvatarFallback className="text-4xl bg-gradient-to-br from-primary/20 to-primary/10 text-primary">
                                     {profile.full_name?.[0]?.toUpperCase() || '?'}
@@ -203,7 +203,7 @@ export default async function ProfilePage({ params }: PageProps) {
                         {/* Info */}
                         <div className="flex-1 text-center md:text-left space-y-3">
                             <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4">
-                                <h1 className="text-3xl font-bold text-slate-900">{profile.full_name}</h1>
+                                <h1 className="text-3xl font-bold text-foreground">{profile.full_name}</h1>
 
                                 <div className="flex gap-2">
                                     <Badge variant="secondary" className="capitalize px-3 py-1">
@@ -240,18 +240,18 @@ export default async function ProfilePage({ params }: PageProps) {
                             )}
 
                             {/* Quick Stats Row */}
-                            <div className="flex items-center justify-center md:justify-start gap-6 pt-2 text-sm text-slate-500">
+                            <div className="flex items-center justify-center md:justify-start gap-6 pt-2 text-sm text-muted-foreground">
                                 <div className="flex items-center gap-1">
                                     <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                                    <span className="font-semibold text-slate-900">{totalPoints}</span> Points
+                                    <span className="font-semibold text-foreground">{totalPoints}</span> Points
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <Crown className="w-4 h-4 text-indigo-500" />
-                                    <span className="font-semibold text-slate-900">{totalActions}</span> Activities
+                                    <span className="font-semibold text-foreground">{totalActions}</span> Activities
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <Users className="w-4 h-4 text-blue-500" />
-                                    <span className="font-semibold text-slate-900">{friendsList.length}</span> Friends
+                                    <span className="font-semibold text-foreground">{friendsList.length}</span> Friends
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <Calendar className="w-4 h-4" />
@@ -285,7 +285,7 @@ export default async function ProfilePage({ params }: PageProps) {
             {/* Tabs Content */}
             <div className="container mx-auto px-4 py-8">
                 <Tabs defaultValue="achievements" className="space-y-6">
-                    <TabsList className="w-full md:w-auto grid grid-cols-2 md:inline-flex h-12 items-center justify-center rounded-lg bg-slate-100 p-1 text-slate-500">
+                    <TabsList className="w-full md:w-auto grid grid-cols-2 md:inline-flex h-12 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
                         <TabsTrigger value="achievements" className="rounded-md px-6 py-2">Achievements</TabsTrigger>
                         <TabsTrigger value="services" className="rounded-md px-6 py-2">Services</TabsTrigger>
                         {profile.role !== 'student' && <TabsTrigger value="events" className="rounded-md px-6 py-2">Events</TabsTrigger>}
@@ -305,7 +305,7 @@ export default async function ProfilePage({ params }: PageProps) {
                                     <ServiceCard key={service.id} service={service} />
                                 ))
                             ) : (
-                                <div className="col-span-full py-12 text-center bg-white rounded-xl border border-dashed">
+                                <div className="col-span-full py-12 text-center bg-card rounded-xl border border-dashed border-border">
                                     <p className="text-muted-foreground">No active services.</p>
                                     {isOwner && profile.role !== 'student' && (
                                         <Link href="/services/new" className="text-primary font-medium hover:underline mt-2 inline-block">
@@ -337,7 +337,7 @@ export default async function ProfilePage({ params }: PageProps) {
                                     </Card>
                                 ))
                             ) : (
-                                <div className="col-span-full py-12 text-center bg-white rounded-xl border border-dashed">
+                                <div className="col-span-full py-12 text-center bg-card rounded-xl border border-dashed border-border">
                                     <p className="text-muted-foreground">No events hosted yet.</p>
                                 </div>
                             )}
@@ -362,8 +362,8 @@ export default async function ProfilePage({ params }: PageProps) {
                                     </Link>
                                 ))
                             ) : (
-                                <div className="col-span-full py-12 text-center bg-white rounded-xl border border-dashed">
-                                    <Users className="w-10 h-10 mx-auto text-slate-300 mb-2" />
+                                <div className="col-span-full py-12 text-center bg-card rounded-xl border border-dashed border-border">
+                                    <Users className="w-10 h-10 mx-auto text-muted-foreground/50 mb-2" />
                                     <p className="text-muted-foreground">No friends yet.</p>
                                 </div>
                             )}

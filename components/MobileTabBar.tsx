@@ -268,7 +268,7 @@ export function MobileTabBar() {
                                 </h2>
                                 <div className="grid grid-cols-2 gap-2">
                                     <OverlayTile
-                                        href="/admin/moderation"
+                                        href="/admin"
                                         label={t("nav.moderation")}
                                         icon={ShieldCheck}
                                         color="text-indigo-600"

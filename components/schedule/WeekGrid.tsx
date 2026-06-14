@@ -18,14 +18,14 @@ function CellContent({ cell }: { cell: DayCell }) {
     const { lesson, substitution } = cell;
 
     if (!lesson && !substitution) {
-        return <span className="text-slate-300">—</span>;
+        return <span className="text-muted-foreground/50">—</span>;
     }
 
     if (!substitution) {
         return (
             <div className="space-y-0.5">
-                <p className="font-semibold text-slate-800 leading-tight">{lesson!.subject}</p>
-                <p className="text-xs text-slate-500">
+                <p className="font-semibold text-foreground leading-tight">{lesson!.subject}</p>
+                <p className="text-xs text-muted-foreground">
                     {lesson!.room && <span>Room {lesson!.room}</span>}
                     {lesson!.room && lesson!.teacher && <span> · </span>}
                     {lesson!.teacher && <span>{lesson!.teacher}</span>}
@@ -40,33 +40,33 @@ function CellContent({ cell }: { cell: DayCell }) {
 
             {substitution.type === 'cancellation' && (
                 <div className="space-y-0.5">
-                    {lesson && <p className="font-semibold text-slate-400 line-through leading-tight">{lesson.subject}</p>}
+                    {lesson && <p className="font-semibold text-muted-foreground line-through leading-tight">{lesson.subject}</p>}
                     <p className="text-xs font-semibold text-red-600">Lesson cancelled</p>
                 </div>
             )}
 
             {substitution.type === 'room_change' && (
                 <div className="space-y-0.5">
-                    {lesson && <p className="font-semibold text-slate-800 leading-tight">{lesson.subject}</p>}
-                    <p className="text-xs text-slate-500">
+                    {lesson && <p className="font-semibold text-foreground leading-tight">{lesson.subject}</p>}
+                    <p className="text-xs text-muted-foreground">
                         {lesson?.room && <span className="line-through mr-1">Room {lesson.room}</span>}
                         <span className="font-semibold text-blue-700">Room {substitution.newRoom ?? '?'}</span>
                     </p>
-                    {lesson?.teacher && <p className="text-xs text-slate-500">{lesson.teacher}</p>}
+                    {lesson?.teacher && <p className="text-xs text-muted-foreground">{lesson.teacher}</p>}
                 </div>
             )}
 
             {substitution.type === 'substitution' && (
                 <div className="space-y-0.5">
                     {lesson && (
-                        <p className="text-xs text-slate-400 line-through leading-tight">
+                        <p className="text-xs text-muted-foreground line-through leading-tight">
                             {lesson.subject}{lesson.teacher ? ` · ${lesson.teacher}` : ''}
                         </p>
                     )}
                     <p className="font-semibold text-orange-700 leading-tight">
                         {substitution.newSubject ?? lesson?.subject ?? '—'}
                     </p>
-                    <p className="text-xs text-slate-600">
+                    <p className="text-xs text-muted-foreground">
                         {(substitution.newRoom ?? lesson?.room) && <span>Room {substitution.newRoom ?? lesson?.room}</span>}
                         {(substitution.newRoom ?? lesson?.room) && substitution.newTeacher && <span> · </span>}
                         {substitution.newTeacher && <span>{substitution.newTeacher}</span>}
@@ -75,7 +75,7 @@ function CellContent({ cell }: { cell: DayCell }) {
             )}
 
             {substitution.note && (
-                <p className="text-[11px] italic text-slate-500">{substitution.note}</p>
+                <p className="text-[11px] italic text-muted-foreground">{substitution.note}</p>
             )}
         </div>
     );
@@ -100,10 +100,10 @@ export function WeekGrid({ days, todayIso }: WeekGridProps) {
             {!hasAnyLesson ? (
                 <Card className="border-dashed">
                     <CardContent className="py-16 text-center space-y-3">
-                        <div className="mx-auto w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center">
+                        <div className="mx-auto w-16 h-16 bg-blue-50 dark:bg-blue-950/40 rounded-full flex items-center justify-center">
                             <CalendarDays className="w-8 h-8 text-blue-300" />
                         </div>
-                        <h3 className="text-lg font-bold text-slate-800">No timetable published yet</h3>
+                        <h3 className="text-lg font-bold text-foreground">No timetable published yet</h3>
                         <p className="text-sm text-muted-foreground">
                             The schedule for this class and week has not been published.
                         </p>
@@ -135,9 +135,9 @@ export function WeekGrid({ days, todayIso }: WeekGridProps) {
                                     return (
                                         <div key={cell.period} className="flex gap-3 px-4 py-3">
                                             <div className="w-14 shrink-0 text-center">
-                                                <p className="text-sm font-bold text-slate-700">{cell.period}</p>
+                                                <p className="text-sm font-bold text-foreground">{cell.period}</p>
                                                 {bell && (
-                                                    <p className="text-[10px] text-slate-400 leading-tight">
+                                                    <p className="text-[10px] text-muted-foreground leading-tight">
                                                         {bell.start}<br />{bell.end}
                                                     </p>
                                                 )}
@@ -153,17 +153,17 @@ export function WeekGrid({ days, todayIso }: WeekGridProps) {
                     </div>
 
                     {/* Desktop: full week grid */}
-                    <div className="hidden md:block overflow-x-auto rounded-xl border bg-white shadow-sm">
+                    <div className="hidden md:block overflow-x-auto rounded-xl border bg-card shadow-sm">
                         <table className="w-full text-sm border-collapse">
                             <thead>
-                                <tr className="bg-slate-50">
-                                    <th className="px-3 py-2 text-left font-semibold text-slate-500 w-24 border-b">Period</th>
+                                <tr className="bg-muted">
+                                    <th className="px-3 py-2 text-left font-semibold text-muted-foreground w-24 border-b">Period</th>
                                     {days.map((d) => (
                                         <th
                                             key={d.dayOfWeek}
-                                            className={`px-3 py-2 text-left font-semibold border-b ${d.date === todayIso ? 'bg-blue-50 text-blue-700' : 'text-slate-700'}`}
+                                            className={`px-3 py-2 text-left font-semibold border-b ${d.date === todayIso ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300' : 'text-foreground'}`}
                                         >
-                                            {d.label} <span className="font-normal text-xs text-slate-400">{formatDayDate(d.date)}</span>
+                                            {d.label} <span className="font-normal text-xs text-muted-foreground">{formatDayDate(d.date)}</span>
                                         </th>
                                     ))}
                                 </tr>
@@ -171,9 +171,9 @@ export function WeekGrid({ days, todayIso }: WeekGridProps) {
                             <tbody>
                                 {BELL_SCHEDULE.map((bell) => (
                                     <tr key={bell.period} className="border-b last:border-b-0">
-                                        <td className="px-3 py-2 align-top border-r bg-slate-50/50">
-                                            <p className="font-bold text-slate-700">{bell.period}</p>
-                                            <p className="text-[11px] text-slate-400">{bell.start}–{bell.end}</p>
+                                        <td className="px-3 py-2 align-top border-r bg-muted">
+                                            <p className="font-bold text-foreground">{bell.period}</p>
+                                            <p className="text-[11px] text-muted-foreground">{bell.start}–{bell.end}</p>
                                         </td>
                                         {days.map((d) => {
                                             const cell = d.cells.find((c) => c.period === bell.period) ?? {
@@ -184,7 +184,7 @@ export function WeekGrid({ days, todayIso }: WeekGridProps) {
                                             return (
                                                 <td
                                                     key={d.dayOfWeek}
-                                                    className={`px-3 py-2 align-top ${d.date === todayIso ? 'bg-blue-50/40' : ''}`}
+                                                    className={`px-3 py-2 align-top ${d.date === todayIso ? 'bg-blue-50/40 dark:bg-blue-950/20' : ''}`}
                                                 >
                                                     <CellContent cell={cell} />
                                                 </td>

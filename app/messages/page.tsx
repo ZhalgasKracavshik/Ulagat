@@ -55,10 +55,10 @@ export default async function MessagesPage() {
     const groups = Array.from(groupMap.values());
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+        <div className="min-h-screen bg-background">
             <div className="container mx-auto py-8 max-w-3xl px-4">
                 <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-3xl font-bold text-slate-900">Messages</h1>
+                    <h1 className="text-3xl font-bold text-foreground">Messages</h1>
                     <Link href="/messages/new-group">
                         <Button variant="outline" className="gap-2 rounded-full">
                             <Plus className="w-4 h-4" />
@@ -70,19 +70,19 @@ export default async function MessagesPage() {
                 {/* Group Chats Section */}
                 {groups.length > 0 && (
                     <div className="mb-8">
-                        <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
                             <Users2 className="w-4 h-4" /> Groups
                         </h2>
                         <div className="space-y-2">
                             {groups.map((group: any) => (
                                 <Link href={`/messages/group/${group.id}`} key={group.id}>
-                                    <div className="flex items-center gap-4 p-4 bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all cursor-pointer mb-2">
-                                        <Avatar className="h-12 w-12 bg-indigo-100">
+                                    <div className="flex items-center gap-4 p-4 bg-card rounded-xl border border-border shadow-sm hover:shadow-md transition-all cursor-pointer mb-2">
+                                        <Avatar className="h-12 w-12 bg-indigo-100 dark:bg-indigo-950/40">
                                             <AvatarImage src={group.avatar_url} />
-                                            <AvatarFallback className="bg-indigo-100 text-indigo-700 font-bold">{group.name?.[0] || 'G'}</AvatarFallback>
+                                            <AvatarFallback className="bg-indigo-100 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 font-bold">{group.name?.[0] || 'G'}</AvatarFallback>
                                         </Avatar>
                                         <div className="flex-1 min-w-0">
-                                            <h3 className="font-bold text-slate-900 truncate">{group.name}</h3>
+                                            <h3 className="font-bold text-foreground truncate">{group.name}</h3>
                                             <p className="text-xs text-muted-foreground">Group chat</p>
                                         </div>
                                     </div>
@@ -94,7 +94,7 @@ export default async function MessagesPage() {
 
                 {/* Direct Messages Section */}
                 <div>
-                    <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
                         <MessageSquare className="w-4 h-4" /> Direct Messages
                     </h2>
                     <div className="space-y-2">
@@ -105,14 +105,14 @@ export default async function MessagesPage() {
 
                                 return (
                                     <Link href={`/messages/${conv.id}`} key={conv.id}>
-                                        <div className="flex items-center gap-4 p-4 bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-all cursor-pointer mb-2">
+                                        <div className="flex items-center gap-4 p-4 bg-card rounded-xl border border-border shadow-sm hover:shadow-md transition-all cursor-pointer mb-2">
                                             <Avatar className="h-12 w-12">
                                                 <AvatarImage src={participant?.avatar_url} />
                                                 <AvatarFallback>{participant?.full_name?.[0] || '?'}</AvatarFallback>
                                             </Avatar>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex justify-between items-start">
-                                                    <h3 className="font-bold text-slate-900 truncate">{participant?.full_name || 'Unknown User'}</h3>
+                                                    <h3 className="font-bold text-foreground truncate">{participant?.full_name || 'Unknown User'}</h3>
                                                     <span className="text-[11px] text-muted-foreground whitespace-nowrap ml-2">
                                                         {formatDistanceToNow(new Date(conv.updated_at), { addSuffix: true })}
                                                     </span>
@@ -126,9 +126,9 @@ export default async function MessagesPage() {
                                 );
                             })
                         ) : (
-                            <div className="text-center py-16 bg-white rounded-xl border border-dashed border-slate-200">
-                                <MessageSquare className="h-10 w-10 mx-auto text-slate-200 mb-4" />
-                                <h3 className="text-lg font-semibold text-slate-800">No messages yet</h3>
+                            <div className="text-center py-16 bg-card rounded-xl border border-dashed border-border">
+                                <MessageSquare className="h-10 w-10 mx-auto text-muted-foreground/50 mb-4" />
+                                <h3 className="text-lg font-semibold text-foreground">No messages yet</h3>
                                 <p className="text-muted-foreground text-sm mt-1">
                                     Start a conversation from a Service or Profile page!
                                 </p>

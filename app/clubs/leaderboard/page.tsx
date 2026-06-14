@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Crown, Medal, Trophy, Users, ArrowLeft } from "lucide-react";
+import { Crown, Medal, Trophy, Users, ArrowLeft, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { CLUB_CATEGORY_LABELS } from "@/lib/clubs";
 import { CLUB_CATEGORY_ICONS } from "@/components/clubs/category-icons";
@@ -55,7 +55,7 @@ export default async function ClubLeaderboardPage() {
             <div className="grid gap-4 max-w-3xl mx-auto">
                 {clubs.length > 0 ? (
                     clubs.map((club, index) => {
-                        const CategoryIcon = CLUB_CATEGORY_ICONS[club.category];
+                        const CategoryIcon = CLUB_CATEGORY_ICONS[club.category] ?? Sparkles;
                         return (
                             <Card key={club.id} className={`
                                 transform transition-all duration-300 hover:scale-[1.02] border-2

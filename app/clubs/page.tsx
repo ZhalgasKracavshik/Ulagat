@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Users, Trophy, Star, Tag, PlusCircle } from "lucide-react";
+import { Users, Trophy, Star, Tag, PlusCircle, Sparkles } from "lucide-react";
 import Link from "next/link";
 import {
     CLUB_CATEGORIES,
@@ -64,7 +64,7 @@ export default async function ClubsPage({ searchParams }: { searchParams: Promis
         <div className="container mx-auto py-8 space-y-8 px-4 md:px-6">
             <div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-4 bg-gradient-to-r from-violet-500/10 to-transparent p-6 rounded-2xl border border-violet-500/10">
                 <div className="space-y-2">
-                    <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">
+                    <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
                         School Clubs
                     </h1>
                     <p className="text-muted-foreground text-lg max-w-xl">
@@ -73,7 +73,7 @@ export default async function ClubsPage({ searchParams }: { searchParams: Promis
                 </div>
                 <div className="flex items-center gap-3">
                     <Link href="/clubs/leaderboard">
-                        <Button variant="outline" size="lg" className="rounded-full gap-2 font-bold px-6 border-amber-300 text-amber-700 hover:bg-amber-50">
+                        <Button variant="outline" size="lg" className="rounded-full gap-2 font-bold px-6 border-amber-300 dark:border-amber-800 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40">
                             <Trophy className="w-5 h-5" />
                             Leaderboard
                         </Button>
@@ -91,7 +91,7 @@ export default async function ClubsPage({ searchParams }: { searchParams: Promis
 
             {/* Category filter chips */}
             <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-                <Tag className="w-4 h-4 text-slate-400 shrink-0" />
+                <Tag className="w-4 h-4 text-muted-foreground shrink-0" />
                 <Link href="/clubs">
                     <Button variant={!categoryFilter ? "secondary" : "ghost"} size="sm" className="rounded-full px-4">
                         All
@@ -113,20 +113,20 @@ export default async function ClubsPage({ searchParams }: { searchParams: Promis
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {clubs.length > 0 ? (
                     clubs.map((club) => {
-                        const CategoryIcon = CLUB_CATEGORY_ICONS[club.category];
+                        const CategoryIcon = CLUB_CATEGORY_ICONS[club.category] ?? Sparkles;
                         return (
                             <Card key={club.id} className="group hover:shadow-xl transition-all border-violet-100 overflow-hidden">
-                                <div className="aspect-video w-full bg-slate-100 relative">
+                                <div className="aspect-video w-full bg-muted relative">
                                     {club.logo_url ? (
                                         // eslint-disable-next-line @next/next/no-img-element
                                         <img src={club.logo_url} alt={club.name} className="object-cover w-full h-full" />
                                     ) : (
-                                        <div className="flex items-center justify-center w-full h-full bg-violet-50 text-violet-200">
+                                        <div className="flex items-center justify-center w-full h-full bg-violet-50 dark:bg-violet-950/40 text-violet-200 dark:text-violet-700">
                                             <CategoryIcon className="w-16 h-16" />
                                         </div>
                                     )}
                                     <div className="absolute top-2 left-2">
-                                        <Badge variant="outline" className="bg-white/90 border-violet-200 text-violet-700 font-bold shadow-sm">
+                                        <Badge variant="outline" className="bg-card/90 border-violet-200 dark:border-violet-800 text-violet-700 dark:text-violet-300 font-bold shadow-sm">
                                             {CLUB_CATEGORY_LABELS[club.category]}
                                         </Badge>
                                     </div>
@@ -147,7 +147,7 @@ export default async function ClubsPage({ searchParams }: { searchParams: Promis
                                     </div>
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="line-clamp-3 text-sm text-slate-600 min-h-[3.75rem]">
+                                    <p className="line-clamp-3 text-sm text-muted-foreground min-h-[3.75rem]">
                                         {club.description || 'No description yet.'}
                                     </p>
                                 </CardContent>
@@ -163,10 +163,10 @@ export default async function ClubsPage({ searchParams }: { searchParams: Promis
                     })
                 ) : (
                     <div className="col-span-full py-20 text-center space-y-4">
-                        <div className="mx-auto w-24 h-24 bg-violet-50 rounded-full flex items-center justify-center">
-                            <Users className="w-12 h-12 text-violet-300" />
+                        <div className="mx-auto w-24 h-24 bg-violet-50 dark:bg-violet-950/40 rounded-full flex items-center justify-center">
+                            <Users className="w-12 h-12 text-violet-300 dark:text-violet-600" />
                         </div>
-                        <h3 className="text-xl font-bold text-slate-800">No Clubs Yet</h3>
+                        <h3 className="text-xl font-bold text-foreground">No Clubs Yet</h3>
                         <p className="text-muted-foreground">
                             {categoryFilter
                                 ? `No ${CLUB_CATEGORY_LABELS[categoryFilter]} clubs yet. Try another category!`

@@ -24,24 +24,24 @@ function LessonLine({ cell }: { cell: DayCell }) {
             <div className="flex items-center gap-2">
                 <span className="text-lg font-bold text-red-600">Lesson cancelled</span>
                 {effective.subject && (
-                    <span className="text-sm text-slate-500 line-through">{effective.subject}</span>
+                    <span className="text-sm text-muted-foreground line-through">{effective.subject}</span>
                 )}
             </div>
         );
     }
     if (!effective.subject) {
-        return <span className="text-lg font-bold text-slate-700">Free period</span>;
+        return <span className="text-lg font-bold text-foreground">Free period</span>;
     }
     return (
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-            <span className="text-lg font-bold text-slate-900">{effective.subject}</span>
+            <span className="text-lg font-bold text-foreground">{effective.subject}</span>
             {effective.room && (
-                <span className="flex items-center gap-1 text-sm text-slate-600">
+                <span className="flex items-center gap-1 text-sm text-muted-foreground">
                     <MapPin className="w-3.5 h-3.5" /> Room {effective.room}
                 </span>
             )}
             {effective.teacher && (
-                <span className="flex items-center gap-1 text-sm text-slate-600">
+                <span className="flex items-center gap-1 text-sm text-muted-foreground">
                     <User className="w-3.5 h-3.5" /> {effective.teacher}
                 </span>
             )}
@@ -68,7 +68,7 @@ export function CurrentLessonWidget({ todayCells }: CurrentLessonWidgetProps) {
     if (!info) {
         // Pre-hydration placeholder (avoids server/client clock mismatch)
         body = (
-            <div className="flex items-center gap-3 text-slate-400">
+            <div className="flex items-center gap-3 text-muted-foreground">
                 <Clock className="w-6 h-6 animate-pulse" />
                 <span className="text-sm">Loading current lesson…</span>
             </div>
@@ -77,14 +77,14 @@ export function CurrentLessonWidget({ todayCells }: CurrentLessonWidgetProps) {
         body = (
             <div className="flex items-center gap-3">
                 <Moon className="w-6 h-6 text-indigo-400" />
-                <span className="text-lg font-bold text-slate-700">No lessons today</span>
+                <span className="text-lg font-bold text-foreground">No lessons today</span>
             </div>
         );
     } else if (info.status === 'after') {
         body = (
             <div className="flex items-center gap-3">
                 <DoorOpen className="w-6 h-6 text-emerald-500" />
-                <span className="text-lg font-bold text-slate-700">School day is over</span>
+                <span className="text-lg font-bold text-foreground">School day is over</span>
             </div>
         );
     } else if (info.status === 'before') {
@@ -120,13 +120,13 @@ export function CurrentLessonWidget({ todayCells }: CurrentLessonWidgetProps) {
                     <Clock className="w-4 h-4" />
                     Lesson {info.period}{time && <> ({time.start}–{time.end})</>} — bell in {info.minutesLeft} min
                 </div>
-                {cell ? <LessonLine cell={cell} /> : <span className="text-lg font-bold text-slate-700">Free period</span>}
+                {cell ? <LessonLine cell={cell} /> : <span className="text-lg font-bold text-foreground">Free period</span>}
             </div>
         );
     }
 
     return (
-        <Card className="border-blue-100 bg-gradient-to-r from-blue-50/80 to-transparent shadow-sm">
+        <Card className="border-blue-100 dark:border-blue-950 bg-gradient-to-r from-blue-50/80 dark:from-blue-950/30 to-transparent shadow-sm">
             <CardContent className="py-4 px-5">{body}</CardContent>
         </Card>
     );

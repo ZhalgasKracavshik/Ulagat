@@ -99,18 +99,18 @@ export default async function GuidePage() {
     ];
 
     return (
-        <div className="min-h-screen bg-slate-50/50">
+        <div className="min-h-screen bg-background">
             <div className="container mx-auto px-4 py-10 md:py-14 space-y-12 max-w-5xl">
                 {/* Hero */}
                 <section className="space-y-4">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 dark:bg-indigo-950/40 px-3 py-1 text-xs font-semibold text-indigo-600">
                         <Sparkles className="w-3.5 h-3.5" />
                         {t("guide.heroBadge")}
                     </span>
-                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900">
+                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
                         {t("guide.heroTitle")}
                     </h1>
-                    <p className="text-lg text-slate-600 max-w-2xl leading-relaxed">
+                    <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed">
                         {t("guide.heroSubtitle")}
                     </p>
                     <div className="flex flex-wrap gap-3 pt-1">
@@ -123,7 +123,7 @@ export default async function GuidePage() {
                         </Link>
                         <Link
                             href="/profile/me"
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300"
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300"
                         >
                             Open my cabinet
                         </Link>
@@ -132,26 +132,26 @@ export default async function GuidePage() {
 
                 {/* How it works */}
                 <section className="space-y-5">
-                    <h2 className="text-xl font-bold text-slate-900">{t("guide.howItWorks")}</h2>
+                    <h2 className="text-xl font-bold text-foreground">{t("guide.howItWorks")}</h2>
                     <div className="grid gap-4 sm:grid-cols-2">
                         <HowItWorks
                             icon={UserCog}
                             color="text-violet-500"
-                            bg="bg-violet-50"
+                            bg="bg-violet-50 dark:bg-violet-950/40"
                             title="Roles shape your view"
                             body="What you can do depends on your role — student, teacher, parent, parliament or staff. Ulagat only shows you what's relevant."
                         />
                         <HowItWorks
                             icon={Award}
                             color="text-amber-500"
-                            bg="bg-amber-50"
+                            bg="bg-amber-50 dark:bg-amber-950/40"
                             title="Reputation & achievements"
                             body="Earn reputation points for verified accomplishments. Your achievements are recorded on a tamper-proof ledger you can show off."
                         />
                         <HowItWorks
                             icon={Sun}
                             color="text-amber-500"
-                            bg="bg-amber-50"
+                            bg="bg-amber-50 dark:bg-amber-950/40"
                             title="Morning / evening toggle"
                             body="Use the Sun/Moon switch in the top bar to flip between Express (just schedule and news) and Full (everything)."
                             secondaryIcon={Moon}
@@ -159,7 +159,7 @@ export default async function GuidePage() {
                         <HowItWorks
                             icon={UsersRound}
                             color="text-blue-500"
-                            bg="bg-blue-50"
+                            bg="bg-blue-50 dark:bg-blue-950/40"
                             title="Parents join by invite"
                             body="Students generate a one-time code from their cabinet. Parents enter it when registering to securely link to their child."
                         />
@@ -169,8 +169,8 @@ export default async function GuidePage() {
                 {/* Feature directory */}
                 <section className="space-y-8">
                     <div className="space-y-1">
-                        <h2 className="text-xl font-bold text-slate-900">{t("guide.everything")}</h2>
-                        <p className="text-slate-600">{t("guide.everythingIntro")}</p>
+                        <h2 className="text-xl font-bold text-foreground">{t("guide.everything")}</h2>
+                        <p className="text-muted-foreground">{t("guide.everythingIntro")}</p>
                     </div>
 
                     {sections.map((section) => {
@@ -178,10 +178,10 @@ export default async function GuidePage() {
                         return (
                             <div key={section.label} className="space-y-3">
                                 <div>
-                                    <h3 className="text-base font-semibold text-slate-900">
+                                    <h3 className="text-base font-semibold text-foreground">
                                         {section.label}
                                     </h3>
-                                    <p className="text-sm text-slate-500">{section.intro}</p>
+                                    <p className="text-sm text-muted-foreground">{section.intro}</p>
                                 </div>
                                 <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
                                     {section.items.map((item) => (
@@ -201,23 +201,23 @@ export default async function GuidePage() {
                     {isStaff && (
                         <div className="space-y-3">
                             <div>
-                                <h3 className="text-base font-semibold text-slate-900">{t("guide.forStaff")}</h3>
-                                <p className="text-sm text-slate-500">
+                                <h3 className="text-base font-semibold text-foreground">{t("guide.forStaff")}</h3>
+                                <p className="text-sm text-muted-foreground">
                                     Tools available to moderators and admins.
                                 </p>
                             </div>
                             <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
-                                <div className="flex items-start gap-3 rounded-xl border bg-white p-4">
-                                    <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-50">
+                                <div className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
+                                    <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-950/40">
                                         <ShieldCheck className="w-5 h-5 text-indigo-600" />
                                     </span>
                                     <div className="min-w-0 flex-1">
-                                        <p className="font-semibold text-slate-900">{t("nav.moderation")}</p>
-                                        <p className="text-sm text-slate-500 leading-snug">
+                                        <p className="font-semibold text-foreground">{t("nav.moderation")}</p>
+                                        <p className="text-sm text-muted-foreground leading-snug">
                                             Review and approve submitted services, events and materials.
                                         </p>
                                         <Link
-                                            href="/admin/moderation"
+                                            href="/admin"
                                             className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-700"
                                         >
                                             {t("common.open")} <ArrowRight className="w-3.5 h-3.5" />
@@ -249,14 +249,14 @@ function HowItWorks({
     body: string;
 }) {
     return (
-        <div className="flex items-start gap-3 rounded-xl border bg-white p-4">
+        <div className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
             <span className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${bg}`}>
                 <Icon className={`w-5 h-5 ${color}`} />
                 {SecondaryIcon && <SecondaryIcon className="w-3.5 h-3.5 text-indigo-500 -ml-1" />}
             </span>
             <div>
-                <p className="font-semibold text-slate-900">{title}</p>
-                <p className="text-sm text-slate-500 leading-snug">{body}</p>
+                <p className="font-semibold text-foreground">{title}</p>
+                <p className="text-sm text-muted-foreground leading-snug">{body}</p>
             </div>
         </div>
     );
@@ -273,13 +273,13 @@ function FeatureCard({
 }) {
     const Icon = item.icon;
     return (
-        <div className="flex items-start gap-3 rounded-xl border bg-white p-4">
-            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-50">
+        <div className="flex items-start gap-3 rounded-xl border border-border bg-card p-4">
+            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted">
                 <Icon className={`w-5 h-5 ${item.color}`} />
             </span>
             <div className="min-w-0 flex-1">
-                <p className="font-semibold text-slate-900">{label}</p>
-                <p className="text-sm text-slate-500 leading-snug">{item.hint}</p>
+                <p className="font-semibold text-foreground">{label}</p>
+                <p className="text-sm text-muted-foreground leading-snug">{item.hint}</p>
                 <Link
                     href={item.href}
                     className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-700"

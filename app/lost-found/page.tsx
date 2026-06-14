@@ -3,7 +3,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MapPin, PlusCircle, Tag, Search, PackageSearch, Clock } from "lucide-react";
+import { MapPin, PlusCircle, Tag, Search, PackageSearch, Clock, Package } from "lucide-react";
 import { format } from "date-fns";
 import Link from "next/link";
 import {
@@ -73,7 +73,7 @@ export default async function LostFoundPage({ searchParams }: { searchParams: Pr
         <div className="container mx-auto py-8 space-y-8 px-4 md:px-6">
             <div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-4 bg-gradient-to-r from-teal-500/10 to-transparent p-6 rounded-2xl border border-teal-500/10">
                 <div className="space-y-2">
-                    <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 flex items-center gap-3">
+                    <h1 className="text-4xl font-extrabold tracking-tight text-foreground flex items-center gap-3">
                         <PackageSearch className="w-9 h-9 text-teal-600" />
                         Lost &amp; Found
                     </h1>
@@ -96,12 +96,12 @@ export default async function LostFoundPage({ searchParams }: { searchParams: Pr
                 {statusFilter && <input type="hidden" name="status" value={statusFilter} />}
                 {categoryFilter && <input type="hidden" name="category" value={categoryFilter} />}
                 <div className="relative flex-grow">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                         name="q"
                         defaultValue={search}
                         placeholder="Search by title…"
-                        className="pl-9 h-11 rounded-full border-slate-200"
+                        className="pl-9 h-11 rounded-full border-border"
                     />
                 </div>
                 <Button type="submit" variant="secondary" className="rounded-full h-11 px-6">Search</Button>
@@ -109,7 +109,7 @@ export default async function LostFoundPage({ searchParams }: { searchParams: Pr
 
             {/* Status filter chips */}
             <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400 shrink-0">Status</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground shrink-0">Status</span>
                 <Link href={buildHref({ status: null })}>
                     <Button variant={!statusFilter ? "secondary" : "ghost"} size="sm" className="rounded-full px-4">
                         All
@@ -126,7 +126,7 @@ export default async function LostFoundPage({ searchParams }: { searchParams: Pr
 
             {/* Category filter chips */}
             <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-                <Tag className="w-4 h-4 text-slate-400 shrink-0" />
+                <Tag className="w-4 h-4 text-muted-foreground shrink-0" />
                 <Link href={buildHref({ category: null })}>
                     <Button variant={!categoryFilter ? "secondary" : "ghost"} size="sm" className="rounded-full px-4">
                         All
@@ -144,21 +144,21 @@ export default async function LostFoundPage({ searchParams }: { searchParams: Pr
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {items.length > 0 ? (
                     items.map((item) => {
-                        const CategoryIcon = LOST_ITEM_CATEGORY_ICONS[item.category];
+                        const CategoryIcon = LOST_ITEM_CATEGORY_ICONS[item.category] ?? Package;
                         return (
                             <Link key={item.id} href={`/lost-found/${item.id}`} className="group">
                                 <Card className="h-full hover:shadow-xl transition-all border-teal-100 overflow-hidden">
-                                    <div className="aspect-video w-full bg-slate-100 relative">
+                                    <div className="aspect-video w-full bg-muted relative">
                                         {item.photo_url ? (
                                             // eslint-disable-next-line @next/next/no-img-element
                                             <img src={item.photo_url} alt={item.title} className="object-cover w-full h-full" />
                                         ) : (
-                                            <div className="flex items-center justify-center w-full h-full bg-teal-50 text-teal-200">
+                                            <div className="flex items-center justify-center w-full h-full bg-teal-50 dark:bg-teal-950/40 text-teal-200 dark:text-teal-700">
                                                 <CategoryIcon className="w-16 h-16" />
                                             </div>
                                         )}
                                         <div className="absolute top-2 left-2">
-                                            <Badge variant="outline" className="bg-white/90 border-teal-200 text-teal-700 font-bold shadow-sm">
+                                            <Badge variant="outline" className="bg-card/90 border-teal-200 dark:border-teal-800 text-teal-700 dark:text-teal-300 font-bold shadow-sm">
                                                 {LOST_ITEM_CATEGORY_LABELS[item.category]}
                                             </Badge>
                                         </div>
@@ -172,7 +172,7 @@ export default async function LostFoundPage({ searchParams }: { searchParams: Pr
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent className="pb-2">
-                                        <p className="line-clamp-2 text-sm text-slate-600 min-h-[2.5rem]">
+                                        <p className="line-clamp-2 text-sm text-muted-foreground min-h-[2.5rem]">
                                             {item.description || 'No description.'}
                                         </p>
                                     </CardContent>
@@ -192,10 +192,10 @@ export default async function LostFoundPage({ searchParams }: { searchParams: Pr
                     })
                 ) : (
                     <div className="col-span-full py-20 text-center space-y-4">
-                        <div className="mx-auto w-24 h-24 bg-teal-50 rounded-full flex items-center justify-center">
-                            <PackageSearch className="w-12 h-12 text-teal-300" />
+                        <div className="mx-auto w-24 h-24 bg-teal-50 dark:bg-teal-950/40 rounded-full flex items-center justify-center">
+                            <PackageSearch className="w-12 h-12 text-teal-300 dark:text-teal-600" />
                         </div>
-                        <h3 className="text-xl font-bold text-slate-800">Nothing here yet</h3>
+                        <h3 className="text-xl font-bold text-foreground">Nothing here yet</h3>
                         <p className="text-muted-foreground">
                             {search || statusFilter || categoryFilter
                                 ? "No items match your filters. Try clearing them."
