@@ -1,9 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { Sparkles } from "lucide-react";
 import { PricingCards } from "@/components/pricing/PricingCards";
 import { CheckoutStatusToast } from "@/components/pricing/CheckoutStatusToast";
 import { getUserPlan } from "@/lib/subscription";
+import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +16,12 @@ export default async function PricingPage({
 }) {
     const { status } = await searchParams;
     const supabase = await createClient();
+
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t = (key: string) => resolveKey(dict, key);
 
     const {
         data: { user },
@@ -41,22 +49,20 @@ export default async function PricingPage({
 
             <div className="text-center space-y-3">
                 <div className="inline-flex items-center gap-2 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 px-3 py-1 text-xs font-semibold text-amber-700">
-                    <Sparkles className="w-3.5 h-3.5" /> Ulagat Premium
+                    <Sparkles className="w-3.5 h-3.5" /> {t("pricing.badge")}
                 </div>
                 <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
-                    Choose your plan
+                    {t("pricing.title")}
                 </h1>
                 <p className="text-muted-foreground max-w-xl mx-auto">
-                    The campus essentials are free forever. Premium unlocks the AI
-                    mentor and priority perks as they roll out.
+                    {t("pricing.subtitle")}
                 </p>
             </div>
 
             <PricingCards currentPlan={plan} periodEnd={periodEnd} />
 
             <p className="text-center text-xs text-muted-foreground max-w-lg mx-auto">
-                AI features are in development. Premium today reserves your access and
-                supports the platform. Billing is handled securely by Stripe.
+                {t("pricing.footer")}
             </p>
         </div>
     );

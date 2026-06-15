@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { PlusCircle } from "lucide-react";
 import { addCareerTarget } from "./actions";
+import { useT } from "@/hooks/useT";
 
 type Prefill = {
     university?: string;
@@ -29,14 +30,16 @@ type Prefill = {
  */
 export function AddTargetDialog({
     prefill,
-    triggerLabel = "Add target",
+    triggerLabel,
     compact = false,
 }: {
     prefill?: Prefill;
     triggerLabel?: string;
     compact?: boolean;
 }) {
+    const { t } = useT();
     const [open, setOpen] = useState(false);
+    const label = triggerLabel ?? t("careerDialog.addTarget");
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -44,12 +47,12 @@ export function AddTargetDialog({
                 {compact ? (
                     <Button size="sm" variant="outline" className="gap-1.5">
                         <PlusCircle className="w-4 h-4" />
-                        {triggerLabel}
+                        {label}
                     </Button>
                 ) : (
                     <Button className="gap-2">
                         <PlusCircle className="w-4 h-4" />
-                        {triggerLabel}
+                        {label}
                     </Button>
                 )}
             </DialogTrigger>
@@ -62,40 +65,39 @@ export function AddTargetDialog({
                     className="space-y-4"
                 >
                     <DialogHeader>
-                        <DialogTitle>Add target university</DialogTitle>
+                        <DialogTitle>{t("careerDialog.title")}</DialogTitle>
                         <DialogDescription>
-                            Track a university and specialty you want to apply for, with its grant
-                            cutoff and deadline.
+                            {t("careerDialog.description")}
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="space-y-2">
-                        <Label htmlFor="university">University</Label>
+                        <Label htmlFor="university">{t("careerDialog.university")}</Label>
                         <Input
                             id="university"
                             name="university"
                             required
                             maxLength={200}
                             defaultValue={prefill?.university ?? ""}
-                            placeholder="e.g. Nazarbayev University"
+                            placeholder={t("careerDialog.universityPlaceholder")}
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="specialty">Specialty</Label>
+                        <Label htmlFor="specialty">{t("careerDialog.specialty")}</Label>
                         <Input
                             id="specialty"
                             name="specialty"
                             required
                             maxLength={200}
                             defaultValue={prefill?.specialty ?? ""}
-                            placeholder="e.g. Computer Science"
+                            placeholder={t("careerDialog.specialtyPlaceholder")}
                         />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="cutoff_score">Grant cutoff (/140)</Label>
+                            <Label htmlFor="cutoff_score">{t("careerDialog.cutoff")}</Label>
                             <Input
                                 id="cutoff_score"
                                 name="cutoff_score"
@@ -103,18 +105,18 @@ export function AddTargetDialog({
                                 min={0}
                                 max={140}
                                 defaultValue={prefill?.cutoff_score ?? ""}
-                                placeholder="e.g. 120"
+                                placeholder={t("careerDialog.cutoffPlaceholder")}
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="grant_deadline">Grant deadline</Label>
+                            <Label htmlFor="grant_deadline">{t("careerDialog.deadline")}</Label>
                             <Input id="grant_deadline" name="grant_deadline" type="date" />
                         </div>
                     </div>
 
                     <DialogFooter>
                         <Button type="submit" className="w-full">
-                            Add target
+                            {t("careerDialog.addTarget")}
                         </Button>
                     </DialogFooter>
                 </form>

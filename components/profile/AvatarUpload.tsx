@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Loader2, Upload, X } from "lucide-react";
 import Image from "next/image";
+import { useT } from "@/hooks/useT";
 
 interface AvatarUploadProps {
     currentAvatarUrl?: string | null;
@@ -13,6 +14,7 @@ interface AvatarUploadProps {
 }
 
 export function AvatarUpload({ currentAvatarUrl, onUploadComplete }: AvatarUploadProps) {
+    const { t } = useT();
     const [avatarUrl, setAvatarUrl] = useState<string | null>(currentAvatarUrl || null);
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -25,7 +27,7 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete }: AvatarUploa
             setError(null);
 
             if (!event.target.files || event.target.files.length === 0) {
-                throw new Error("You must select an image to upload.");
+                throw new Error(t("avatarUpload.selectImage"));
             }
 
             const file = event.target.files[0];
@@ -94,11 +96,11 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete }: AvatarUploa
                     {uploading ? (
                         <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Uploading...
+                            {t("avatarUpload.uploading")}
                         </>
                     ) : (
                         <>
-                            Change Photo
+                            {t("avatarUpload.changePhoto")}
                             <input
                                 type="file"
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
@@ -111,7 +113,7 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete }: AvatarUploa
                 </Button>
                 {error && <p className="text-xs text-red-500">{error}</p>}
                 <p className="text-xs text-muted-foreground">
-                    Recommended: Square JPG or PNG.
+                    {t("avatarUpload.recommended")}
                 </p>
             </div>
 

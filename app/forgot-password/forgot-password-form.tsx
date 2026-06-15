@@ -5,8 +5,10 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { Mail, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { useT } from "@/hooks/useT";
 
 export function ForgotPasswordForm() {
+    const { t } = useT();
     const [error, setError] = useState<string | null>(null);
     const [sent, setSent] = useState(false);
 
@@ -33,17 +35,16 @@ export function ForgotPasswordForm() {
                     <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
                         <CheckCircle2 className="w-8 h-8 text-green-600" />
                     </div>
-                    <h2 className="text-2xl font-bold text-foreground">Check your email</h2>
+                    <h2 className="text-2xl font-bold text-foreground">{t('auth.checkEmail')}</h2>
                     <p className="text-muted-foreground">
-                        We&apos;ve sent a password reset link to your email address.
-                        Please check your inbox and click the link to set a new password.
+                        {t('auth.checkEmailBody')}
                     </p>
                     <Link
                         href="/login"
                         className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
                     >
                         <ArrowLeft className="w-4 h-4" />
-                        Back to login
+                        {t('auth.backToLogin')}
                     </Link>
                 </div>
             </div>
@@ -58,17 +59,17 @@ export function ForgotPasswordForm() {
                         <Mail className="w-7 h-7 text-primary" />
                     </div>
                     <h2 className="text-2xl font-bold tracking-tight text-foreground">
-                        Forgot your password?
+                        {t('auth.forgotTitle')}
                     </h2>
                     <p className="mt-2 text-sm text-muted-foreground">
-                        Enter your email and we&apos;ll send you a reset link.
+                        {t('auth.forgotSubtitle')}
                     </p>
                 </div>
 
                 <form action={handleSubmit} className="mt-8 space-y-6">
                     <div>
                         <label htmlFor="email" className="mb-2 block text-sm font-medium text-foreground">
-                            Email Address
+                            {t('auth.emailAddress')}
                         </label>
                         <input
                             id="email"
@@ -83,11 +84,11 @@ export function ForgotPasswordForm() {
 
                     {error && (
                         <div className="rounded-lg bg-red-50 dark:bg-red-950/40 p-4 text-sm text-red-800" role="alert">
-                            <span className="font-medium">Error:</span> {error}
+                            <span className="font-medium">{t('auth.errorPrefix')}</span> {error}
                         </div>
                     )}
 
-                    <SubmitButton>Send Reset Link</SubmitButton>
+                    <SubmitButton>{t('auth.sendResetLink')}</SubmitButton>
                 </form>
 
                 <div className="text-center">
@@ -96,7 +97,7 @@ export function ForgotPasswordForm() {
                         className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
                     >
                         <ArrowLeft className="w-4 h-4" />
-                        Back to login
+                        {t('auth.backToLogin')}
                     </Link>
                 </div>
             </div>

@@ -144,8 +144,8 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
                                         {displayName}
                                         <ShieldCheck className="w-4 h-4 text-primary opacity-80" />
                                     </h3>
-                                    <p className="text-sm text-muted-foreground capitalize font-medium">
-                                        {user.role}
+                                    <p className="text-sm text-muted-foreground font-medium">
+                                        {t(`common.roles.${user.role}`)}
                                         {/* P2-4: grade narrows down who an anonymous entry is — show it only for named entries */}
                                         {!isAnonymous && user.grade ? ` · ${t('leaderboard.grade', { grade: user.grade })}` : ''}
                                     </p>

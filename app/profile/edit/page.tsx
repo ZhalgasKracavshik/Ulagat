@@ -7,9 +7,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { updateProfile } from "./actions";
 import { AvatarUpload } from "@/components/profile/AvatarUpload";
 import { SocialLinksEditor } from "@/components/profile/SocialLinksEditor";
+import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
 
 export default async function EditProfilePage({
     searchParams,
@@ -20,6 +22,12 @@ export default async function EditProfilePage({
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) redirect("/login");
+
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t = (key: string) => resolveKey(dict, key);
 
     const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
 
@@ -33,8 +41,8 @@ export default async function EditProfilePage({
         <div className="min-h-screen bg-background py-10 px-4">
             <div className="mx-auto max-w-2xl space-y-6">
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-foreground">Edit Your Profile</h1>
-                    <p className="text-muted-foreground mt-2">Make your profile stand out in the Ulagat community.</p>
+                    <h1 className="text-3xl font-bold text-foreground">{t('profileEdit.title')}</h1>
+                    <p className="text-muted-foreground mt-2">{t('profileEdit.subtitle')}</p>
                 </div>
 
                 {saveError && (
@@ -50,7 +58,7 @@ export default async function EditProfilePage({
                     {/* Avatar Section */}
                     <Card className="border-0 shadow-lg">
                         <CardHeader>
-                            <CardTitle className="text-lg">Profile Photo</CardTitle>
+                            <CardTitle className="text-lg">{t('profileEdit.photo')}</CardTitle>
                         </CardHeader>
                         <CardContent className="flex justify-center">
                             <AvatarUpload currentAvatarUrl={profile?.avatar_url} />
@@ -60,11 +68,11 @@ export default async function EditProfilePage({
                     {/* Basic Info */}
                     <Card className="border-0 shadow-lg">
                         <CardHeader>
-                            <CardTitle className="text-lg">Basic Information</CardTitle>
+                            <CardTitle className="text-lg">{t('profileEdit.basicInfo')}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="full_name">Full Name</Label>
+                                <Label htmlFor="full_name">{t('profileEdit.fullName')}</Label>
                                 <Input
                                     id="full_name"
                                     name="full_name"
@@ -76,7 +84,7 @@ export default async function EditProfilePage({
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="grade">Grade</Label>
+                                    <Label htmlFor="grade">{t('profileEdit.grade')}</Label>
                                     <Input
                                         id="grade"
                                         name="grade"
@@ -84,33 +92,33 @@ export default async function EditProfilePage({
                                         min={1}
                                         max={11}
                                         defaultValue={profile?.grade ?? ''}
-                                        placeholder="e.g. 7"
+                                        placeholder={t('profileEdit.gradePlaceholder')}
                                         className="h-11"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="class_letter">Class letter</Label>
+                                    <Label htmlFor="class_letter">{t('profileEdit.classLetter')}</Label>
                                     <Input
                                         id="class_letter"
                                         name="class_letter"
                                         maxLength={3}
                                         defaultValue={profile?.class_letter ?? ''}
-                                        placeholder="e.g. А"
+                                        placeholder={t('profileEdit.classLetterPlaceholder')}
                                         className="h-11"
                                     />
                                 </div>
                                 <p className="col-span-2 text-xs text-muted-foreground -mt-2">
-                                    Your grade and class letter are used to show your class schedule.
+                                    {t('profileEdit.classHint')}
                                 </p>
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="bio">Bio</Label>
+                                <Label htmlFor="bio">{t('profileEdit.bio')}</Label>
                                 <Textarea
                                     id="bio"
                                     name="bio"
                                     defaultValue={profile?.bio || ''}
-                                    placeholder="Tell us about yourself, your interests, and what you teach or study..."
+                                    placeholder={t('profileEdit.bioPlaceholder')}
                                     className="min-h-[120px] resize-none"
                                 />
                             </div>
@@ -120,8 +128,8 @@ export default async function EditProfilePage({
                     {/* Social Links */}
                     <Card className="border-0 shadow-lg">
                         <CardHeader>
-                            <CardTitle className="text-lg">Social Links</CardTitle>
-                            <CardDescription>Add links to your social media profiles. You choose which networks to display.</CardDescription>
+                            <CardTitle className="text-lg">{t('profileEdit.socialLinks')}</CardTitle>
+                            <CardDescription>{t('profileEdit.socialLinksHint')}</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <SocialLinksEditor initialLinks={socialLinks} />
@@ -131,9 +139,9 @@ export default async function EditProfilePage({
                     {/* Action Buttons */}
                     <div className="flex gap-4 pt-4">
                         <Link href="/profile/me" className="w-full">
-                            <Button variant="outline" className="w-full h-12 text-base" type="button">Cancel</Button>
+                            <Button variant="outline" className="w-full h-12 text-base" type="button">{t('profileEdit.cancel')}</Button>
                         </Link>
-                        <Button type="submit" className="w-full h-12 text-base font-bold">Save Changes</Button>
+                        <Button type="submit" className="w-full h-12 text-base font-bold">{t('profileEdit.saveChanges')}</Button>
                     </div>
                 </form>
             </div>

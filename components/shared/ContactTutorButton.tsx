@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useT } from "@/hooks/useT";
 
 interface ContactTutorButtonProps {
     otherUserId: string;
@@ -11,6 +12,7 @@ interface ContactTutorButtonProps {
 }
 
 export function ContactTutorButton({ otherUserId, currentUserId }: ContactTutorButtonProps) {
+    const { t } = useT();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
 
@@ -36,11 +38,11 @@ export function ContactTutorButton({ otherUserId, currentUserId }: ContactTutorB
             if (data.conversationId) {
                 router.push(`/messages/${data.conversationId}`);
             } else {
-                alert("Failed to start conversation");
+                alert(t("contactTutor.failed"));
             }
         } catch (err) {
             console.error(err);
-            alert("Something went wrong");
+            alert(t("contactTutor.error"));
         } finally {
             setLoading(false);
         }
@@ -53,7 +55,7 @@ export function ContactTutorButton({ otherUserId, currentUserId }: ContactTutorB
             className="w-full mt-4 gap-2 font-bold shadow-lg shadow-primary/20"
         >
             <MessageCircle className="w-4 h-4" />
-            {loading ? "Opening chat..." : "Contact Tutor"}
+            {loading ? t("contactTutor.opening") : t("contactTutor.contactTutor")}
         </Button>
     );
 }

@@ -6,23 +6,24 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, Sparkles, Loader2, Crown } from "lucide-react";
+import { useT } from "@/hooks/useT";
 import type { SubscriptionPlan } from "@/types";
 
-type Feature = { label: string; soon?: boolean };
+type Feature = { key: string; soon?: boolean };
 
 const FREE_FEATURES: Feature[] = [
-    { label: "Full schedule, substitutions & announcements" },
-    { label: "Events, clubs, leaderboard & lost-and-found" },
-    { label: "Career / ЕНТ tracker" },
-    { label: "10 AI mentor questions per day", soon: true },
+    { key: "pricing.freeFeat1" },
+    { key: "pricing.freeFeat2" },
+    { key: "pricing.freeFeat3" },
+    { key: "pricing.freeFeat4", soon: true },
 ];
 
 const PREMIUM_FEATURES: Feature[] = [
-    { label: "Everything in Free" },
-    { label: "Unlimited AI mentor questions", soon: true },
-    { label: "Saved AI conversation history", soon: true },
-    { label: "Priority certificate review queue", soon: true },
-    { label: "Early access to new features" },
+    { key: "pricing.premiumFeat1" },
+    { key: "pricing.premiumFeat2", soon: true },
+    { key: "pricing.premiumFeat3", soon: true },
+    { key: "pricing.premiumFeat4", soon: true },
+    { key: "pricing.premiumFeat5" },
 ];
 
 const PREMIUM_PRICE = "1 800 ₸";
@@ -34,6 +35,7 @@ export function PricingCards({
     currentPlan: SubscriptionPlan;
     periodEnd: string | null;
 }) {
+    const { t, locale } = useT();
     const [loading, setLoading] = useState<null | "upgrade" | "manage">(null);
     const isPremium = currentPlan === "premium";
 
@@ -43,13 +45,13 @@ export function PricingCards({
             const res = await fetch("/api/subscriptions/checkout", { method: "POST" });
             const data = (await res.json()) as { url?: string; error?: string };
             if (!res.ok || !data.url) {
-                toast.error(data.error ?? "Could not start checkout.");
+                toast.error(data.error ?? t("pricing.checkoutError"));
                 setLoading(null);
                 return;
             }
             window.location.href = data.url;
         } catch {
-            toast.error("Network error. Please try again.");
+            toast.error(t("pricing.networkError"));
             setLoading(null);
         }
     }
@@ -60,13 +62,13 @@ export function PricingCards({
             const res = await fetch("/api/subscriptions/portal", { method: "POST" });
             const data = (await res.json()) as { url?: string; error?: string };
             if (!res.ok || !data.url) {
-                toast.error(data.error ?? "Could not open billing portal.");
+                toast.error(data.error ?? t("pricing.portalError"));
                 setLoading(null);
                 return;
             }
             window.location.href = data.url;
         } catch {
-            toast.error("Network error. Please try again.");
+            toast.error(t("pricing.networkError"));
             setLoading(null);
         }
     }
@@ -77,30 +79,30 @@ export function PricingCards({
             <Card className={isPremium ? "" : "border-2 border-indigo-200 shadow-lg"}>
                 <CardHeader className="space-y-2">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-bold text-foreground">Free</h2>
+                        <h2 className="text-xl font-bold text-foreground">{t("pricing.free")}</h2>
                         {!isPremium && (
                             <Badge className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-200 border-0">
-                                Current plan
+                                {t("pricing.currentPlan")}
                             </Badge>
                         )}
                     </div>
                     <p className="text-3xl font-extrabold text-foreground">
-                        0 ₸<span className="text-base font-medium text-muted-foreground"> / month</span>
+                        0 ₸<span className="text-base font-medium text-muted-foreground">{t("pricing.perMonth")}</span>
                     </p>
                     <p className="text-sm text-muted-foreground">
-                        Everything BINOM students need, every day.
+                        {t("pricing.freeTagline")}
                     </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <ul className="space-y-2.5">
                         {FREE_FEATURES.map((f) => (
-                            <li key={f.label} className="flex items-start gap-2 text-sm text-foreground">
+                            <li key={f.key} className="flex items-start gap-2 text-sm text-foreground">
                                 <Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
                                 <span>
-                                    {f.label}
+                                    {t(f.key)}
                                     {f.soon && (
                                         <span className="ml-2 text-[10px] font-semibold uppercase text-muted-foreground">
-                                            coming soon
+                                            {t("pricing.comingSoon")}
                                         </span>
                                     )}
                                 </span>
@@ -108,7 +110,7 @@ export function PricingCards({
                         ))}
                     </ul>
                     <Button variant="outline" className="w-full" disabled>
-                        {isPremium ? "Included" : "Your current plan"}
+                        {isPremium ? t("pricing.included") : t("pricing.yourCurrentPlan")}
                     </Button>
                 </CardContent>
             </Card>
@@ -119,34 +121,34 @@ export function PricingCards({
                 <CardHeader className="space-y-2 relative">
                     <div className="flex items-center justify-between">
                         <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-                            <Crown className="w-5 h-5 text-amber-500" /> Premium
+                            <Crown className="w-5 h-5 text-amber-500" /> {t("pricing.premium")}
                         </h2>
                         {isPremium ? (
-                            <Badge className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 border-0">Active</Badge>
+                            <Badge className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 border-0">{t("pricing.active")}</Badge>
                         ) : (
                             <Badge className="bg-amber-500 text-white border-0 flex items-center gap-1">
-                                <Sparkles className="w-3 h-3" /> Recommended
+                                <Sparkles className="w-3 h-3" /> {t("pricing.recommended")}
                             </Badge>
                         )}
                     </div>
                     <p className="text-3xl font-extrabold text-foreground">
                         {PREMIUM_PRICE}
-                        <span className="text-base font-medium text-muted-foreground"> / month</span>
+                        <span className="text-base font-medium text-muted-foreground">{t("pricing.perMonth")}</span>
                     </p>
                     <p className="text-sm text-muted-foreground">
-                        Unlock the AI mentor and priority perks when they launch.
+                        {t("pricing.premiumTagline")}
                     </p>
                 </CardHeader>
                 <CardContent className="space-y-4 relative">
                     <ul className="space-y-2.5">
                         {PREMIUM_FEATURES.map((f) => (
-                            <li key={f.label} className="flex items-start gap-2 text-sm text-foreground">
+                            <li key={f.key} className="flex items-start gap-2 text-sm text-foreground">
                                 <Check className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
                                 <span>
-                                    {f.label}
+                                    {t(f.key)}
                                     {f.soon && (
                                         <span className="ml-2 text-[10px] font-semibold uppercase text-muted-foreground">
-                                            coming soon
+                                            {t("pricing.comingSoon")}
                                         </span>
                                     )}
                                 </span>
@@ -158,11 +160,11 @@ export function PricingCards({
                         <div className="space-y-2">
                             {periodEnd && (
                                 <p className="text-xs text-muted-foreground text-center">
-                                    Renews on{" "}
-                                    {new Date(periodEnd).toLocaleDateString("en-US", {
-                                        month: "short",
-                                        day: "numeric",
-                                        year: "numeric",
+                                    {t("pricing.renewsOn", {
+                                        date: new Date(periodEnd).toLocaleDateString(
+                                            locale === "en" ? "en-US" : locale === "kk" ? "kk-KZ" : "ru-RU",
+                                            { month: "short", day: "numeric", year: "numeric" },
+                                        ),
                                     })}
                                 </p>
                             )}
@@ -175,7 +177,7 @@ export function PricingCards({
                                 {loading === "manage" ? (
                                     <Loader2 className="w-4 h-4 animate-spin" />
                                 ) : (
-                                    "Manage subscription"
+                                    t("pricing.manageSubscription")
                                 )}
                             </Button>
                         </div>
@@ -189,7 +191,7 @@ export function PricingCards({
                                 <Loader2 className="w-4 h-4 animate-spin" />
                             ) : (
                                 <>
-                                    <Sparkles className="w-4 h-4 mr-2" /> Upgrade to Premium
+                                    <Sparkles className="w-4 h-4 mr-2" /> {t("pricing.upgradeToPremium")}
                                 </>
                             )}
                         </Button>

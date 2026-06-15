@@ -14,6 +14,8 @@ import { InviteParentSection } from "@/components/profile/InviteParentSection";
 import { PersonalCabinet } from "@/components/profile/PersonalCabinet";
 import { verifyChain } from "@/lib/reputation";
 import { resolvePlan } from "@/lib/subscription-plan";
+import { cookies } from "next/headers";
+import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -22,6 +24,20 @@ interface PageProps {
 export default async function ProfilePage({ params }: PageProps) {
     let { id } = await params;
     const supabase = await createClient();
+
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t = (key: string, vars?: Record<string, string | number>) => {
+        let value = resolveKey(dict, key);
+        if (vars) {
+            for (const [name, replacement] of Object.entries(vars)) {
+                value = value.replace(`{${name}}`, String(replacement));
+            }
+        }
+        return value;
+    };
 
     // Handle "me" shortcut
     let currentUser = null;
@@ -32,8 +48,8 @@ export default async function ProfilePage({ params }: PageProps) {
         if (!user) {
             return (
                 <div className="container py-20 text-center">
-                    <p className="mb-4 text-lg text-muted-foreground">Please log in to view your profile.</p>
-                    <Link href="/login" className="px-6 py-2 bg-primary text-white rounded-full font-medium">Log In</Link>
+                    <p className="mb-4 text-lg text-muted-foreground">{t('profile.loginToView')}</p>
+                    <Link href="/login" className="px-6 py-2 bg-primary text-white rounded-full font-medium">{t('profile.login')}</Link>
                 </div>
             );
         }
@@ -48,7 +64,7 @@ export default async function ProfilePage({ params }: PageProps) {
         .single();
 
     if (!profile) {
-        return <div className="container py-20 text-center text-xl">User not found 😕</div>;
+        return <div className="container py-20 text-center text-xl">{t('profile.userNotFound')}</div>;
     }
 
     const isOwner = currentUser?.id === profile.id;
@@ -206,25 +222,25 @@ export default async function ProfilePage({ params }: PageProps) {
                                 <h1 className="text-3xl font-bold text-foreground">{profile.full_name}</h1>
 
                                 <div className="flex gap-2">
-                                    <Badge variant="secondary" className="capitalize px-3 py-1">
-                                        {profile.role}
+                                    <Badge variant="secondary" className="px-3 py-1">
+                                        {t(`common.roles.${profile.role}`)}
                                     </Badge>
                                     {isChainValid ? (
                                         <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-200 hover:bg-green-100 border-green-200 gap-1">
                                             <ShieldCheck className="w-3 h-3" />
-                                            Verified
+                                            {t('profile.verified')}
                                         </Badge>
                                     ) : (
-                                        <Badge className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-200 hover:bg-red-100 border-red-200 gap-1" title="Reputation ledger has been tampered with">
+                                        <Badge className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-200 hover:bg-red-100 border-red-200 gap-1" title={t('profile.invalidLedgerTitle')}>
                                             <ShieldCheck className="w-3 h-3" />
-                                            Invalid Ledger
+                                            {t('profile.invalidLedger')}
                                         </Badge>
                                     )}
                                 </div>
                             </div>
 
                             <p className="text-muted-foreground max-w-2xl text-lg leading-relaxed">
-                                {profile.bio || "This user hasn't written a bio yet."}
+                                {profile.bio || t('profile.noBio')}
                             </p>
 
                             {/* Social Links */}
@@ -243,19 +259,19 @@ export default async function ProfilePage({ params }: PageProps) {
                             <div className="flex items-center justify-center md:justify-start gap-6 pt-2 text-sm text-muted-foreground">
                                 <div className="flex items-center gap-1">
                                     <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                                    <span className="font-semibold text-foreground">{totalPoints}</span> Points
+                                    <span className="font-semibold text-foreground">{totalPoints}</span> {t('profile.points')}
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <Crown className="w-4 h-4 text-indigo-500" />
-                                    <span className="font-semibold text-foreground">{totalActions}</span> Activities
+                                    <span className="font-semibold text-foreground">{totalActions}</span> {t('profile.activities')}
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <Users className="w-4 h-4 text-blue-500" />
-                                    <span className="font-semibold text-foreground">{friendsList.length}</span> Friends
+                                    <span className="font-semibold text-foreground">{friendsList.length}</span> {t('profile.friends')}
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <Calendar className="w-4 h-4" />
-                                    Joined {new Date(profile.created_at).getFullYear()}
+                                    {t('profile.joined', { year: new Date(profile.created_at).getFullYear() })}
                                 </div>
                             </div>
                         </div>
@@ -286,10 +302,10 @@ export default async function ProfilePage({ params }: PageProps) {
             <div className="container mx-auto px-4 py-8">
                 <Tabs defaultValue="achievements" className="space-y-6">
                     <TabsList className="w-full md:w-auto grid grid-cols-2 md:inline-flex h-12 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground">
-                        <TabsTrigger value="achievements" className="rounded-md px-6 py-2">Achievements</TabsTrigger>
-                        <TabsTrigger value="services" className="rounded-md px-6 py-2">Services</TabsTrigger>
-                        {profile.role !== 'student' && <TabsTrigger value="events" className="rounded-md px-6 py-2">Events</TabsTrigger>}
-                        <TabsTrigger value="friends" className="rounded-md px-6 py-2">Friends</TabsTrigger>
+                        <TabsTrigger value="achievements" className="rounded-md px-6 py-2">{t('profile.tabAchievements')}</TabsTrigger>
+                        <TabsTrigger value="services" className="rounded-md px-6 py-2">{t('profile.tabServices')}</TabsTrigger>
+                        {profile.role !== 'student' && <TabsTrigger value="events" className="rounded-md px-6 py-2">{t('profile.tabEvents')}</TabsTrigger>}
+                        <TabsTrigger value="friends" className="rounded-md px-6 py-2">{t('profile.tabFriends')}</TabsTrigger>
                     </TabsList>
 
                     {/* Achievements Tab */}
@@ -306,10 +322,10 @@ export default async function ProfilePage({ params }: PageProps) {
                                 ))
                             ) : (
                                 <div className="col-span-full py-12 text-center bg-card rounded-xl border border-dashed border-border">
-                                    <p className="text-muted-foreground">No active services.</p>
+                                    <p className="text-muted-foreground">{t('profile.noActiveServices')}</p>
                                     {isOwner && profile.role !== 'student' && (
                                         <Link href="/services/new" className="text-primary font-medium hover:underline mt-2 inline-block">
-                                            Create a Service &rarr;
+                                            {t('profile.createService')}
                                         </Link>
                                     )}
                                 </div>
@@ -338,7 +354,7 @@ export default async function ProfilePage({ params }: PageProps) {
                                 ))
                             ) : (
                                 <div className="col-span-full py-12 text-center bg-card rounded-xl border border-dashed border-border">
-                                    <p className="text-muted-foreground">No events hosted yet.</p>
+                                    <p className="text-muted-foreground">{t('profile.noEvents')}</p>
                                 </div>
                             )}
                         </div>
@@ -364,7 +380,7 @@ export default async function ProfilePage({ params }: PageProps) {
                             ) : (
                                 <div className="col-span-full py-12 text-center bg-card rounded-xl border border-dashed border-border">
                                     <Users className="w-10 h-10 mx-auto text-muted-foreground/50 mb-2" />
-                                    <p className="text-muted-foreground">No friends yet.</p>
+                                    <p className="text-muted-foreground">{t('profile.noFriends')}</p>
                                 </div>
                             )}
                         </div>

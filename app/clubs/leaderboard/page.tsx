@@ -4,14 +4,22 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Crown, Medal, Trophy, Users, ArrowLeft, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { CLUB_CATEGORY_LABELS } from "@/lib/clubs";
+import { clubCategoryKey } from "@/lib/clubs-i18n";
 import { CLUB_CATEGORY_ICONS } from "@/components/clubs/category-icons";
+import { cookies } from "next/headers";
+import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
 import type { Club } from "@/types";
 
 export const dynamic = 'force-dynamic';
 
 export default async function ClubLeaderboardPage() {
     const supabase = await createClient();
+
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t = (key: string) => resolveKey(dict, key);
 
     const { data: clubsRaw } = await supabase
         .from('clubs')
@@ -38,16 +46,15 @@ export default async function ClubLeaderboardPage() {
         <div className="container mx-auto py-8 space-y-8 px-4 md:px-6">
             <div className="text-center space-y-4">
                 <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
-                    Club Leaderboard
+                    {t('clubLeaderboard.title')}
                 </h1>
                 <p className="text-muted-foreground max-w-2xl mx-auto">
-                    Every recorded meeting earns points — 5 for holding it, plus 1 per attendee.
-                    The most active clubs rise to the top.
+                    {t('clubLeaderboard.subtitle')}
                 </p>
                 <Link href="/clubs" className="inline-flex">
                     <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
                         <ArrowLeft className="w-4 h-4" />
-                        Back to all clubs
+                        {t('clubLeaderboard.backToClubs')}
                     </Button>
                 </Link>
             </div>
@@ -88,7 +95,7 @@ export default async function ClubLeaderboardPage() {
                                             </h3>
                                             <div className="flex items-center gap-3 mt-1">
                                                 <Badge variant="outline" className="border-violet-200 text-violet-700 text-[10px] font-bold">
-                                                    {CLUB_CATEGORY_LABELS[club.category]}
+                                                    {t(clubCategoryKey(club.category))}
                                                 </Badge>
                                                 <span className="flex items-center gap-1 text-xs text-muted-foreground font-medium">
                                                     <Users className="w-3.5 h-3.5" />
@@ -103,7 +110,7 @@ export default async function ClubLeaderboardPage() {
                                             {club.points}
                                         </div>
                                         <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest bg-muted px-2 py-0.5 rounded-full mt-1">
-                                            Points
+                                            {t('clubLeaderboard.points')}
                                         </div>
                                     </div>
                                 </CardContent>
@@ -113,9 +120,9 @@ export default async function ClubLeaderboardPage() {
                 ) : (
                     <div className="text-center py-20 space-y-4">
                         <Trophy className="w-16 h-16 mx-auto text-slate-200" />
-                        <h3 className="text-xl font-bold text-muted-foreground">No Clubs on the Board Yet</h3>
+                        <h3 className="text-xl font-bold text-muted-foreground">{t('clubLeaderboard.emptyTitle')}</h3>
                         <p className="text-muted-foreground">
-                            Create a club and record meetings to start earning points!
+                            {t('clubLeaderboard.emptyBody')}
                         </p>
                     </div>
                 )}

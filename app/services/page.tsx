@@ -1,17 +1,26 @@
 
 import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
 import { ServiceCard } from "@/components/services/ServiceCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, PlusCircle } from "lucide-react";
 import Link from "next/link";
 import { SERVICE_CATEGORIES, SERVICE_CREATOR_ROLES } from "@/lib/services";
+import { serviceCategoryKey } from "@/lib/services-i18n";
+import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
 
 export default async function ServicesPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const supabase = await createClient();
     const params = await searchParams;
     const categoryFilter = typeof params?.category === 'string' ? params.category : null;
     const submitted = Boolean(params?.submitted || params?.payment_success);
+
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t = (key: string) => resolveKey(dict, key);
 
     const { data: { user } } = await supabase.auth.getUser();
     let profile: { role: string } | null = null;
@@ -45,8 +54,8 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
             {/* Success Banner */}
             {submitted && (
                 <div className="bg-green-100 dark:bg-green-900/30 border border-green-400 text-green-700 dark:text-green-200 px-4 py-3 rounded relative" role="alert">
-                    <strong className="font-bold">Success! </strong>
-                    <span className="block sm:inline">Your listing has been submitted and is currently under review by our moderators. It will appear here once approved.</span>
+                    <strong className="font-bold">{t('servicesList.submittedTitle')} </strong>
+                    <span className="block sm:inline">{t('servicesList.submittedBody')}</span>
                 </div>
             )}
 
@@ -54,10 +63,10 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
             <div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-4 bg-gradient-to-r from-primary/5 to-transparent p-6 rounded-2xl border border-primary/10">
                 <div className="space-y-2">
                     <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
-                        Bulletin Board
+                        {t('servicesList.title')}
                     </h1>
                     <p className="text-muted-foreground text-lg max-w-xl">
-                        Courses, tutoring, project help, internships and mentorship from the Ulagat community.
+                        {t('servicesList.subtitle')}
                     </p>
                 </div>
                 {/* Teachers, Admins, Moderators and Parliament can post */}
@@ -65,7 +74,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
                     <Link href="/services/new">
                         <Button size="lg" className="rounded-full shadow-lg gap-2 text-md font-bold px-6">
                             <PlusCircle className="w-5 h-5" />
-                            Post Listing
+                            {t('servicesList.postListing')}
                         </Button>
                     </Link>
                 )}
@@ -75,7 +84,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
             <div className="sticky top-2 z-30 bg-background/80 backdrop-blur-lg p-2 rounded-xl shadow-sm border flex flex-col md:flex-row gap-4 items-center justify-between">
                 <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 px-2 scrollbar-none">
                     <Link href="/services">
-                        <Button variant={!categoryFilter ? "secondary" : "ghost"} size="sm" className="rounded-full">All</Button>
+                        <Button variant={!categoryFilter ? "secondary" : "ghost"} size="sm" className="rounded-full">{t('servicesList.all')}</Button>
                     </Link>
                     {SERVICE_CATEGORIES.map(cat => (
                         <Link key={cat.value} href={`/services?category=${cat.value}`}>
@@ -84,7 +93,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
                                 size="sm"
                                 className="rounded-full text-muted-foreground"
                             >
-                                {cat.label}
+                                {t(serviceCategoryKey(cat.value))}
                             </Button>
                         </Link>
                     ))}
@@ -94,7 +103,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
                     <Search className="w-4 h-4 text-muted-foreground" />
                     <Input
                         type="text"
-                        placeholder="Search services..."
+                        placeholder={t('servicesList.searchPlaceholder')}
                         className="border-0 bg-transparent focus-visible:ring-0 h-8 w-full md:w-[200px]"
                     />
                 </div>
@@ -109,10 +118,10 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
                 ) : (
                     <div className="col-span-full py-20 text-center space-y-4">
                         <div className="text-6xl">🙈</div>
-                        <h3 className="text-xl font-bold">No listings found{categoryFilter ? ' in this category' : ''}</h3>
-                        <p className="text-muted-foreground">Be the first to offer something cool!</p>
+                        <h3 className="text-xl font-bold">{categoryFilter ? t('servicesList.emptyTitleCategory') : t('servicesList.emptyTitle')}</h3>
+                        <p className="text-muted-foreground">{t('servicesList.emptyBody')}</p>
                         <Link href="/services/new">
-                            <Button variant="outline" className="mt-4">Create First Listing</Button>
+                            <Button variant="outline" className="mt-4">{t('servicesList.createFirst')}</Button>
                         </Link>
                     </div>
                 )}
