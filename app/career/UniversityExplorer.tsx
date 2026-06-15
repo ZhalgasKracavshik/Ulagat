@@ -78,14 +78,14 @@ export function UniversityExplorer({
                 )}
             </div>
 
-            <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/40 px-3 py-2 text-xs text-amber-800">
                 <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{REFERENCE_DATA_DISCLAIMER}</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filtered.map(({ uni, specialties }) => (
-                    <Card key={uni.id} className="border-slate-200">
+                    <Card key={uni.id} className="border-border">
                         <CardHeader className="pb-3">
                             <CardTitle className="text-base">{uni.name}</CardTitle>
                             <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -97,10 +97,10 @@ export function UniversityExplorer({
                             {specialties.map((s) => (
                                 <div
                                     key={s.name}
-                                    className="flex items-center justify-between gap-2 rounded-md border border-slate-100 bg-slate-50 px-3 py-2"
+                                    className="flex items-center justify-between gap-2 rounded-md border border-border bg-muted px-3 py-2"
                                 >
                                     <div className="min-w-0">
-                                        <p className="text-sm font-medium text-slate-800 truncate">
+                                        <p className="text-sm font-medium text-foreground truncate">
                                             {s.name}
                                         </p>
                                         <div className="flex items-center gap-2 mt-0.5">
@@ -108,7 +108,7 @@ export function UniversityExplorer({
                                                 variant="outline"
                                                 className={
                                                     unlockedSet.has(s.group)
-                                                        ? "border-emerald-300 text-emerald-700 bg-emerald-50 text-[10px]"
+                                                        ? "border-emerald-300 text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 text-[10px]"
                                                         : "text-[10px]"
                                                 }
                                             >

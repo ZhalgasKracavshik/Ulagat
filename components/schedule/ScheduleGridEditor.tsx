@@ -181,7 +181,7 @@ export function ScheduleGridEditor() {
                 </CardHeader>
                 <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4 items-end">
                     <div className="space-y-2">
-                        <Label className="text-sm font-semibold text-slate-700">Grade</Label>
+                        <Label className="text-sm font-semibold text-foreground">Grade</Label>
                         <Select value={grade} onValueChange={setGrade}>
                             <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Grade" />
@@ -194,7 +194,7 @@ export function ScheduleGridEditor() {
                         </Select>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="class_letter" className="text-sm font-semibold text-slate-700">Class letter</Label>
+                        <Label htmlFor="class_letter" className="text-sm font-semibold text-foreground">Class letter</Label>
                         <Input
                             id="class_letter"
                             value={classLetter}
@@ -204,7 +204,7 @@ export function ScheduleGridEditor() {
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="reference_date" className="text-sm font-semibold text-slate-700">Valid on date</Label>
+                        <Label htmlFor="reference_date" className="text-sm font-semibold text-foreground">Valid on date</Label>
                         <Input
                             id="reference_date"
                             type="date"
@@ -229,10 +229,10 @@ export function ScheduleGridEditor() {
                         <div className="overflow-x-auto rounded-xl border">
                             <table className="w-full text-sm border-collapse">
                                 <thead>
-                                    <tr className="bg-slate-50">
-                                        <th className="px-3 py-2 text-left font-semibold text-slate-500 w-24 border-b">Period</th>
+                                    <tr className="bg-muted">
+                                        <th className="px-3 py-2 text-left font-semibold text-muted-foreground w-24 border-b">Period</th>
                                         {DAYS.map((d) => (
-                                            <th key={d.value} className="px-2 py-2 text-left font-semibold text-slate-700 border-b">
+                                            <th key={d.value} className="px-2 py-2 text-left font-semibold text-foreground border-b">
                                                 <span className="hidden lg:inline">{d.label}</span>
                                                 <span className="lg:hidden">{d.short}</span>
                                             </th>
@@ -242,9 +242,9 @@ export function ScheduleGridEditor() {
                                 <tbody>
                                     {BELL_SCHEDULE.map((bell) => (
                                         <tr key={bell.period} className="border-b last:border-b-0">
-                                            <td className="px-3 py-2 align-top border-r bg-slate-50/50">
-                                                <p className="font-bold text-slate-700">{bell.period}</p>
-                                                <p className="text-[11px] text-slate-400">{bell.start}–{bell.end}</p>
+                                            <td className="px-3 py-2 align-top border-r bg-muted/50">
+                                                <p className="font-bold text-foreground">{bell.period}</p>
+                                                <p className="text-[11px] text-muted-foreground">{bell.start}–{bell.end}</p>
                                             </td>
                                             {DAYS.map((d) => {
                                                 const entry = findEntry(d.value, bell.period);
@@ -255,21 +255,21 @@ export function ScheduleGridEditor() {
                                                             onClick={() => openCell(d.value, bell.period)}
                                                             disabled={!loaded || isLoading}
                                                             className={`w-full min-h-[56px] rounded-lg border p-2 text-left transition-colors disabled:opacity-50 ${entry
-                                                                ? 'border-sky-200 bg-sky-50/60 hover:bg-sky-100'
-                                                                : 'border-dashed border-slate-200 hover:border-sky-300 hover:bg-sky-50/40'
+                                                                ? 'border-sky-200 bg-sky-50/60 dark:bg-sky-950/60 hover:bg-sky-100'
+                                                                : 'border-dashed border-border hover:border-sky-300 hover:bg-sky-50/40'
                                                                 }`}
                                                         >
                                                             {entry ? (
                                                                 <span className="block space-y-0.5">
-                                                                    <span className="block font-semibold text-slate-800 leading-tight">{entry.subject}</span>
-                                                                    <span className="block text-xs text-slate-500">
+                                                                    <span className="block font-semibold text-foreground leading-tight">{entry.subject}</span>
+                                                                    <span className="block text-xs text-muted-foreground">
                                                                         {entry.room && <>Room {entry.room}</>}
                                                                         {entry.room && entry.teacher_name && <> · </>}
                                                                         {entry.teacher_name}
                                                                     </span>
                                                                 </span>
                                                             ) : (
-                                                                <span className="flex items-center justify-center text-slate-300">
+                                                                <span className="flex items-center justify-center text-muted-foreground">
                                                                     <Plus className="w-4 h-4" />
                                                                 </span>
                                                             )}
@@ -301,7 +301,7 @@ export function ScheduleGridEditor() {
                     {draft && (
                         <div className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="cell_subject" className="text-sm font-semibold text-slate-700">Subject</Label>
+                                <Label htmlFor="cell_subject" className="text-sm font-semibold text-foreground">Subject</Label>
                                 <Input
                                     id="cell_subject"
                                     value={draft.subject}
@@ -312,7 +312,7 @@ export function ScheduleGridEditor() {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="cell_teacher" className="text-sm font-semibold text-slate-700">Teacher</Label>
+                                    <Label htmlFor="cell_teacher" className="text-sm font-semibold text-foreground">Teacher</Label>
                                     <Input
                                         id="cell_teacher"
                                         value={draft.teacher_name}
@@ -321,7 +321,7 @@ export function ScheduleGridEditor() {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="cell_room" className="text-sm font-semibold text-slate-700">Room</Label>
+                                    <Label htmlFor="cell_room" className="text-sm font-semibold text-foreground">Room</Label>
                                     <Input
                                         id="cell_room"
                                         value={draft.room}
@@ -332,7 +332,7 @@ export function ScheduleGridEditor() {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="cell_valid_from" className="text-sm font-semibold text-slate-700">Valid from</Label>
+                                    <Label htmlFor="cell_valid_from" className="text-sm font-semibold text-foreground">Valid from</Label>
                                     <Input
                                         id="cell_valid_from"
                                         type="date"
@@ -341,7 +341,7 @@ export function ScheduleGridEditor() {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="cell_valid_until" className="text-sm font-semibold text-slate-700">Valid until</Label>
+                                    <Label htmlFor="cell_valid_until" className="text-sm font-semibold text-foreground">Valid until</Label>
                                     <Input
                                         id="cell_valid_until"
                                         type="date"

@@ -60,7 +60,7 @@ export function PersonalCabinet({
         key: "schedule",
         href: NAV.schedule.href,
         label: t("cabinet.mySchedule"),
-        hint: NAV.schedule.hint,
+        hint: t("nav.hints.schedule"),
         icon: NAV.schedule.icon,
         color: NAV.schedule.color,
         bg: "bg-sky-50 dark:bg-sky-950/40",
@@ -71,7 +71,7 @@ export function PersonalCabinet({
             key: "career",
             href: NAV.career.href,
             label: t("cabinet.career"),
-            hint: NAV.career.hint,
+            hint: t("nav.hints.career"),
             icon: NAV.career.icon,
             color: NAV.career.color,
             bg: "bg-rose-50 dark:bg-rose-950/40",
@@ -82,7 +82,7 @@ export function PersonalCabinet({
         key: "clubs",
         href: NAV.clubs.href,
         label: t("cabinet.clubs"),
-        hint: NAV.clubs.hint,
+        hint: t("nav.hints.clubs"),
         icon: NAV.clubs.icon,
         color: NAV.clubs.color,
         bg: "bg-violet-50 dark:bg-violet-950/40",
@@ -104,7 +104,7 @@ export function PersonalCabinet({
         key: "premium",
         href: NAV.premium.href,
         label: isPremium ? t("cabinet.premium") : t("cabinet.goPremium"),
-        hint: isPremium ? t("cabinet.managePremiumHint") : NAV.premium.hint,
+        hint: isPremium ? t("cabinet.managePremiumHint") : t("nav.hints.premium"),
         icon: Sparkles,
         color: "text-amber-500",
         bg: "bg-amber-50 dark:bg-amber-950/40",
@@ -114,7 +114,7 @@ export function PersonalCabinet({
         key: "guide",
         href: NAV.guide.href,
         label: t("cabinet.guide"),
-        hint: NAV.guide.hint,
+        hint: t("nav.hints.guide"),
         icon: NAV.guide.icon,
         color: NAV.guide.color,
         bg: "bg-indigo-50 dark:bg-indigo-950/40",
@@ -126,7 +126,7 @@ export function PersonalCabinet({
         label: t("cabinet.settings"),
         hint: t("cabinet.settingsHint"),
         icon: Settings,
-        color: "text-slate-500",
+        color: "text-muted-foreground",
         bg: "bg-muted",
     });
 
@@ -136,7 +136,7 @@ export function PersonalCabinet({
         label: t("cabinet.editProfile"),
         hint: t("cabinet.editProfileHint"),
         icon: Edit,
-        color: "text-slate-500",
+        color: "text-muted-foreground",
         bg: "bg-muted",
     });
 
@@ -169,19 +169,19 @@ export function PersonalCabinet({
                                     </Badge>
                                 )}
                                 {isPremium && (
-                                    <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-amber-200 gap-1">
+                                    <Badge className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-200 hover:bg-amber-100 border-amber-200 gap-1">
                                         <Sparkles className="w-3 h-3" />
                                         {t("cabinet.premium")}
                                     </Badge>
                                 )}
                                 {isChainValid ? (
-                                    <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-green-200 gap-1">
+                                    <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-200 hover:bg-green-100 border-green-200 gap-1">
                                         <ShieldCheck className="w-3 h-3" />
                                         {t("cabinet.verifiedLedger")}
                                     </Badge>
                                 ) : (
                                     <Badge
-                                        className="bg-red-100 text-red-700 hover:bg-red-100 border-red-200 gap-1"
+                                        className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-200 hover:bg-red-100 border-red-200 gap-1"
                                         title="Reputation ledger has been tampered with"
                                     >
                                         <ShieldCheck className="w-3 h-3" />

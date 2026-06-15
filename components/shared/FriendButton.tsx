@@ -49,7 +49,7 @@ export function FriendButton({ targetUserId, currentUserId, initialStatus, frien
     if (status === "accepted") {
         return (
             <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="gap-1 text-green-600 border-green-200 bg-green-50" disabled>
+                <Button variant="outline" size="sm" className="gap-1 text-green-600 border-green-200 bg-green-50 dark:bg-green-950/40" disabled>
                     <UserCheck className="w-4 h-4" />
                     Friends
                 </Button>

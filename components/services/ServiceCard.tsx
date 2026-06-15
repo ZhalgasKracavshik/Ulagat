@@ -16,8 +16,8 @@ export function ServiceCard({ service }: ServiceCardProps) {
     const owner = service.profiles || {};
 
     return (
-        <Card className="overflow-hidden bg-white hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-primary/10 group flex flex-col h-full">
-            <div className="aspect-video w-full bg-slate-100 relative overflow-hidden">
+        <Card className="overflow-hidden bg-card hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-primary/10 group flex flex-col h-full">
+            <div className="aspect-video w-full bg-muted relative overflow-hidden">
                 {service.image_url ? (
                     <img
                         src={service.image_url}
@@ -25,11 +25,11 @@ export function ServiceCard({ service }: ServiceCardProps) {
                         className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
                     />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-300 bg-slate-50">
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground bg-muted">
                         <span className="text-4xl font-bold opacity-20 capitalize">{service.category?.[0] || 'S'}</span>
                     </div>
                 )}
-                <Badge className="absolute top-2 right-2 bg-white/90 text-black hover:bg-white font-bold shadow-sm">
+                <Badge className="absolute top-2 right-2 bg-card/90 text-foreground hover:bg-card font-bold shadow-sm">
                     {service.price > 0 ? `${service.price} ₸` : 'Free'}
                 </Badge>
             </div>
@@ -45,23 +45,23 @@ export function ServiceCard({ service }: ServiceCardProps) {
                     </div>
                 </div>
                 <Link href={`/services/${service.id}`} className="hover:underline decoration-primary">
-                    <h3 className="font-bold text-lg leading-tight line-clamp-2 text-slate-900 group-hover:text-primary transition-colors">
+                    <h3 className="font-bold text-lg leading-tight line-clamp-2 text-foreground group-hover:text-primary transition-colors">
                         {service.title}
                     </h3>
                 </Link>
             </CardHeader>
 
-            <CardContent className="p-4 pt-0 text-sm text-slate-500 flex-grow">
+            <CardContent className="p-4 pt-0 text-sm text-muted-foreground flex-grow">
                 <p className="line-clamp-2 min-h-[40px]">{service.description}</p>
             </CardContent>
 
             <CardFooter className="p-4 pt-0 flex items-center justify-between mt-auto">
                 <Link href={`/profile/${service.owner_id}`} className="flex items-center gap-2 group/author">
-                    <Avatar className="w-8 h-8 border border-slate-200">
+                    <Avatar className="w-8 h-8 border border-border">
                         <AvatarImage src={owner.avatar_url || ''} />
                         <AvatarFallback>{owner.full_name?.[0] || '?'}</AvatarFallback>
                     </Avatar>
-                    <span className="text-xs font-medium text-slate-700 group-hover/author:text-primary transition-colors truncate max-w-[100px]">
+                    <span className="text-xs font-medium text-foreground group-hover/author:text-primary transition-colors truncate max-w-[100px]">
                         {owner.full_name || 'Anonymous'}
                     </span>
                 </Link>

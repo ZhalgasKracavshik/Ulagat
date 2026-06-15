@@ -44,7 +44,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
         <div className="container mx-auto py-8 space-y-8 min-h-screen px-4 md:px-6">
             {/* Success Banner */}
             {submitted && (
-                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                <div className="bg-green-100 dark:bg-green-900/30 border border-green-400 text-green-700 dark:text-green-200 px-4 py-3 rounded relative" role="alert">
                     <strong className="font-bold">Success! </strong>
                     <span className="block sm:inline">Your listing has been submitted and is currently under review by our moderators. It will appear here once approved.</span>
                 </div>
@@ -53,7 +53,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
             {/* Header Section */}
             <div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-4 bg-gradient-to-r from-primary/5 to-transparent p-6 rounded-2xl border border-primary/10">
                 <div className="space-y-2">
-                    <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">
+                    <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
                         Bulletin Board
                     </h1>
                     <p className="text-muted-foreground text-lg max-w-xl">
@@ -82,7 +82,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
                             <Button
                                 variant={categoryFilter === cat.value ? "secondary" : "ghost"}
                                 size="sm"
-                                className="rounded-full text-slate-600"
+                                className="rounded-full text-muted-foreground"
                             >
                                 {cat.label}
                             </Button>
@@ -90,8 +90,8 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
                     ))}
                 </div>
 
-                <div className="flex items-center gap-2 w-full md:w-auto bg-slate-100 rounded-full px-3 py-1">
-                    <Search className="w-4 h-4 text-slate-400" />
+                <div className="flex items-center gap-2 w-full md:w-auto bg-muted rounded-full px-3 py-1">
+                    <Search className="w-4 h-4 text-muted-foreground" />
                     <Input
                         type="text"
                         placeholder="Search services..."

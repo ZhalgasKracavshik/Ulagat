@@ -255,7 +255,7 @@ export function MobileTabBar() {
                                     href="/settings"
                                     label={t("nav.settings")}
                                     icon={Settings}
-                                    color="text-slate-500"
+                                    color="text-muted-foreground"
                                 />
                             </div>
                         </section>
@@ -283,7 +283,7 @@ export function MobileTabBar() {
                             <button
                                 type="button"
                                 onClick={handleSignOut}
-                                className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600 transition-colors hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300"
+                                className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 dark:bg-red-950/40 px-4 py-3 text-sm font-medium text-red-600 transition-colors hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300"
                             >
                                 <LogOut className="w-4 h-4" />
                                 {t("nav.signOut")}

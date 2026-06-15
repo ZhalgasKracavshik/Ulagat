@@ -81,17 +81,17 @@ export function EventReviewTable({ events }: EventReviewTableProps) {
 
                                         <div className="grid gap-4 py-4">
                                             {event.image_url && (
-                                                <div className="relative h-64 w-full rounded-lg overflow-hidden bg-slate-100">
+                                                <div className="relative h-64 w-full rounded-lg overflow-hidden bg-muted">
                                                     <Image src={event.image_url} alt={event.title} fill className="object-cover" />
                                                 </div>
                                             )}
 
                                             <div className="flex flex-col gap-2">
-                                                <div className="flex items-center gap-2 text-sm text-slate-600">
+                                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                     <Calendar className="w-4 h-4 text-blue-500" />
                                                     <strong>{format(new Date(event.event_date), 'EEEE, MMMM do yyyy @ h:mm a')}</strong>
                                                 </div>
-                                                <div className="flex items-center gap-2 text-sm text-slate-600">
+                                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                     <MapPin className="w-4 h-4 text-red-500" />
                                                     <span>{event.location || 'School Hall'}</span>
                                                 </div>
@@ -101,7 +101,7 @@ export function EventReviewTable({ events }: EventReviewTableProps) {
                                                 <h4 className="font-medium flex items-center gap-2">
                                                     <FileText className="w-4 h-4" /> Description
                                                 </h4>
-                                                <div className="text-sm text-slate-600 dark:text-slate-300 whitespace-pre-wrap bg-slate-50 p-4 rounded-md max-h-40 overflow-y-auto border border-dashed">
+                                                <div className="text-sm text-muted-foreground dark:text-slate-300 whitespace-pre-wrap bg-muted p-4 rounded-md max-h-40 overflow-y-auto border border-dashed">
                                                     {event.description}
                                                 </div>
                                             </div>

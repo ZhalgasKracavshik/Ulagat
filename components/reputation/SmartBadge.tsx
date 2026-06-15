@@ -10,20 +10,20 @@ interface SmartBadgeProps {
 
 export function SmartBadge({ points, className }: SmartBadgeProps) {
     let tier = "Newcomer";
-    let colorClass = "bg-slate-100 text-slate-800 border-slate-200";
+    let colorClass = "bg-muted text-foreground border-border";
     let Icon = Shield;
 
     if (points >= 1000) {
         tier = "Legend";
-        colorClass = "bg-amber-100 text-amber-800 border-amber-200";
+        colorClass = "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 border-amber-200";
         Icon = ShieldCheck;
     } else if (points >= 500) {
         tier = "Expert";
-        colorClass = "bg-purple-100 text-purple-800 border-purple-200";
+        colorClass = "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200 border-purple-200";
         Icon = ShieldCheck;
     } else if (points >= 100) {
         tier = "Trusted";
-        colorClass = "bg-blue-100 text-blue-800 border-blue-200";
+        colorClass = "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 border-blue-200";
         Icon = ShieldCheck;
     }
 

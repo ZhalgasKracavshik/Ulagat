@@ -42,7 +42,7 @@ export function PdfFileInput() {
                 type="file"
                 accept="application/pdf,.pdf"
                 onChange={handleChange}
-                className="h-11 border-slate-200 rounded-lg shadow-sm cursor-pointer file:font-semibold file:text-indigo-600"
+                className="h-11 border-border rounded-lg shadow-sm cursor-pointer file:font-semibold file:text-indigo-600"
             />
             {error && <p className="text-xs font-medium text-red-600">{error}</p>}
         </div>

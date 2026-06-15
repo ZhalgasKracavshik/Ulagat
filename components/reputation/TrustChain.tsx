@@ -37,7 +37,7 @@ export async function TrustChain({ userId }: TrustChainProps) {
             <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold">Trust Chain Ledger</h2>
                 {isChainValid ? (
-                    <div className="flex items-center text-green-600 gap-2 bg-green-50 px-3 py-1 rounded-full border border-green-200">
+                    <div className="flex items-center text-green-600 gap-2 bg-green-50 dark:bg-green-950/40 px-3 py-1 rounded-full border border-green-200">
                         <ShieldCheck className="w-4 h-4" />
                         <span className="text-sm font-medium">Chain Verified</span>
                     </div>

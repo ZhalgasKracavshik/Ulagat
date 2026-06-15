@@ -87,11 +87,11 @@ export function MaterialReviewTable({ materials }: MaterialReviewTableProps) {
 
                                         <div className="grid gap-6 py-4">
                                             <div className="flex flex-wrap gap-4">
-                                                <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border">
+                                                <div className="flex items-center gap-2 bg-muted px-3 py-1.5 rounded-lg border">
                                                     <Tag className="w-4 h-4 text-indigo-500" />
                                                     <span className="text-sm font-medium">Category: {material.category}</span>
                                                 </div>
-                                                <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border">
+                                                <div className="flex items-center gap-2 bg-muted px-3 py-1.5 rounded-lg border">
                                                     <ShieldCheck className="w-4 h-4 text-emerald-500" />
                                                     <span className="text-sm font-medium underline">Difficulty: {material.difficulty}</span>
                                                 </div>
@@ -101,14 +101,14 @@ export function MaterialReviewTable({ materials }: MaterialReviewTableProps) {
                                                 <h4 className="font-medium flex items-center gap-2">
                                                     <FileText className="w-4 h-4" /> Description
                                                 </h4>
-                                                <p className="text-sm text-slate-600 bg-slate-50 p-4 rounded-md border border-dashed">
+                                                <p className="text-sm text-muted-foreground bg-muted p-4 rounded-md border border-dashed">
                                                     {material.description || 'No description provided.'}
                                                 </p>
                                             </div>
 
-                                            <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex items-center justify-between">
+                                            <div className="bg-blue-50 dark:bg-blue-950/40 p-4 rounded-xl border border-blue-100 flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="bg-white p-2 rounded-lg shadow-sm">
+                                                    <div className="bg-card p-2 rounded-lg shadow-sm">
                                                         <FileText className="w-6 h-6 text-blue-600" />
                                                     </div>
                                                     <div>

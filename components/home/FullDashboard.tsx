@@ -100,11 +100,11 @@ export function FullDashboard({ data }: { data: FullDashboardData }) {
     const weekdayLabel = t(`home.weekday${todayDow}`);
 
     const quickActions = [
-        { href: "/services", icon: Search, label: t("nav.bulletin"), color: "text-indigo-600", bg: "bg-indigo-50", bgDark: "dark:bg-indigo-950/40", roles: ["student", "teacher", "admin", "moderator", "parent", "parliament"] },
-        { href: "/events", icon: Trophy, label: t("nav.events"), color: "text-amber-500", bg: "bg-amber-50", bgDark: "dark:bg-amber-950/40", roles: ["student", "teacher", "admin", "moderator", "parent", "parliament"] },
-        { href: "/olympiad", icon: GraduationCap, label: t("nav.prep"), color: "text-emerald-500", bg: "bg-emerald-50", bgDark: "dark:bg-emerald-950/40", roles: ["student", "teacher", "admin", "moderator", "parliament"] },
-        { href: "/leaderboard", icon: Trophy, label: t("nav.leaderboard"), color: "text-yellow-500", bg: "bg-yellow-50", bgDark: "dark:bg-yellow-950/40", roles: ["student", "teacher", "admin", "moderator", "parent", "parliament"] },
-        { href: "/services/new", icon: PlusCircle, label: t("nav.bulletin"), color: "text-violet-500", bg: "bg-violet-50", bgDark: "dark:bg-violet-950/40", roles: ["teacher", "admin", "moderator"] },
+        { href: "/services", icon: Search, label: t("nav.bulletin"), color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-950/40", bgDark: "dark:bg-indigo-950/40", roles: ["student", "teacher", "admin", "moderator", "parent", "parliament"] },
+        { href: "/events", icon: Trophy, label: t("nav.events"), color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-950/40", bgDark: "dark:bg-amber-950/40", roles: ["student", "teacher", "admin", "moderator", "parent", "parliament"] },
+        { href: "/olympiad", icon: GraduationCap, label: t("nav.prep"), color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-950/40", bgDark: "dark:bg-emerald-950/40", roles: ["student", "teacher", "admin", "moderator", "parliament"] },
+        { href: "/leaderboard", icon: Trophy, label: t("nav.leaderboard"), color: "text-yellow-500", bg: "bg-yellow-50 dark:bg-yellow-950/40", bgDark: "dark:bg-yellow-950/40", roles: ["student", "teacher", "admin", "moderator", "parent", "parliament"] },
+        { href: "/services/new", icon: PlusCircle, label: t("nav.bulletin"), color: "text-violet-500", bg: "bg-violet-50 dark:bg-violet-950/40", bgDark: "dark:bg-violet-950/40", roles: ["teacher", "admin", "moderator"] },
     ].filter((action) => action.roles.includes(role));
 
     return (
@@ -232,7 +232,7 @@ export function FullDashboard({ data }: { data: FullDashboardData }) {
                                     >
                                         {/* Period + time rail */}
                                         <div className="flex w-12 shrink-0 flex-col items-center text-center">
-                                            <span className="text-[11px] font-bold uppercase tracking-wide text-slate-300 dark:text-slate-600">
+                                            <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground dark:text-muted-foreground">
                                                 {cell.period}
                                             </span>
                                             {time && (
@@ -300,7 +300,7 @@ export function FullDashboard({ data }: { data: FullDashboardData }) {
                         <Link
                             key={action.href}
                             href={action.href}
-                            className="group flex items-center gap-2.5 rounded-xl border border-border bg-card px-3 py-2.5 transition-colors hover:border-slate-200 dark:hover:border-slate-700 hover:bg-muted"
+                            className="group flex items-center gap-2.5 rounded-xl border border-border bg-card px-3 py-2.5 transition-colors hover:border-border dark:hover:border-slate-700 hover:bg-muted"
                         >
                             <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${action.bg} ${action.bgDark} ${action.color}`}>
                                 <action.icon className="h-4 w-4" />
@@ -405,7 +405,7 @@ export function FullDashboard({ data }: { data: FullDashboardData }) {
                                                 {event.location || t("home.online")}
                                             </p>
                                         </div>
-                                        <ArrowUpRight className="h-4 w-4 shrink-0 text-slate-300 dark:text-slate-600 group-hover:text-amber-500" />
+                                        <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground dark:text-muted-foreground group-hover:text-amber-500" />
                                     </Link>
                                 </li>
                             ))}
@@ -450,7 +450,7 @@ export function FullDashboard({ data }: { data: FullDashboardData }) {
                                                     className="h-full w-full object-cover"
                                                 />
                                             ) : (
-                                                <div className="flex h-full w-full items-center justify-center text-lg font-black text-slate-200 dark:text-slate-600">
+                                                <div className="flex h-full w-full items-center justify-center text-lg font-black text-slate-200 dark:text-muted-foreground">
                                                     {service.category?.[0] ?? service.title[0]}
                                                 </div>
                                             )}

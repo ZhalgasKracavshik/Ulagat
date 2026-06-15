@@ -29,13 +29,13 @@ export default async function NewEventPage() {
     const allowedRoles: readonly string[] = EVENT_CREATOR_ROLES;
     if (!profile || !allowedRoles.includes(profile.role)) {
         return (
-            <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50/50">
+            <div className="min-h-screen flex items-center justify-center p-4 bg-muted/50">
                 <Card className="max-w-md w-full border-0 shadow-2xl text-center p-8 space-y-4">
-                    <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                    <div className="mx-auto w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
                         <ShieldAlert className="w-10 h-10 text-red-600" />
                     </div>
-                    <CardTitle className="text-2xl font-bold text-slate-900">Access Denied</CardTitle>
-                    <p className="text-slate-600">Only Teachers, Admins, Moderators and Parliament members can create events/olympiads.</p>
+                    <CardTitle className="text-2xl font-bold text-foreground">Access Denied</CardTitle>
+                    <p className="text-muted-foreground">Only Teachers, Admins, Moderators and Parliament members can create events/olympiads.</p>
                     <Button variant="outline" className="w-full mt-4" asChild>
                         <a href="/events">Back to Events</a>
                     </Button>
@@ -45,11 +45,11 @@ export default async function NewEventPage() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50/50 py-12 px-4">
+        <div className="min-h-screen bg-muted/50 py-12 px-4">
             <div className="max-w-2xl mx-auto space-y-8">
                 <div className="text-center space-y-2">
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Host an Event / Olympiad</h1>
-                    <p className="text-slate-500">Organize a competition or workshop for the school community.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground">Host an Event / Olympiad</h1>
+                    <p className="text-muted-foreground">Organize a competition or workshop for the school community.</p>
                 </div>
 
                 <Card className="border-0 shadow-xl shadow-blue-100/50 overflow-hidden">
@@ -63,34 +63,34 @@ export default async function NewEventPage() {
                     <CardContent>
                         <form action={createEvent} className="space-y-6">
                             <div className="space-y-2">
-                                <Label htmlFor="title" className="text-sm font-semibold text-slate-700">Event Title</Label>
-                                <Input id="title" name="title" placeholder="e.g. Math Olympiad Spring 2026" required className="h-11 border-slate-200 focus:ring-blue-500 rounded-lg shadow-sm" />
+                                <Label htmlFor="title" className="text-sm font-semibold text-foreground">Event Title</Label>
+                                <Input id="title" name="title" placeholder="e.g. Math Olympiad Spring 2026" required className="h-11 border-border focus:ring-blue-500 rounded-lg shadow-sm" />
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <Label htmlFor="event_date" className="text-sm font-semibold text-slate-700">Date & Time</Label>
-                                    <Input id="event_date" name="event_date" type="datetime-local" required className="h-11 border-slate-200 focus:ring-blue-500 rounded-lg shadow-sm" />
+                                    <Label htmlFor="event_date" className="text-sm font-semibold text-foreground">Date & Time</Label>
+                                    <Input id="event_date" name="event_date" type="datetime-local" required className="h-11 border-border focus:ring-blue-500 rounded-lg shadow-sm" />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="location" className="text-sm font-semibold text-slate-700">Location</Label>
-                                    <Input id="location" name="location" placeholder="e.g. Auditorium" className="h-11 border-slate-200 focus:ring-blue-500 rounded-lg shadow-sm" />
+                                    <Label htmlFor="location" className="text-sm font-semibold text-foreground">Location</Label>
+                                    <Input id="location" name="location" placeholder="e.g. Auditorium" className="h-11 border-border focus:ring-blue-500 rounded-lg shadow-sm" />
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <Label htmlFor="registration_deadline" className="text-sm font-semibold text-slate-700">Registration Deadline (optional)</Label>
-                                    <Input id="registration_deadline" name="registration_deadline" type="date" className="h-11 border-slate-200 focus:ring-blue-500 rounded-lg shadow-sm" />
+                                    <Label htmlFor="registration_deadline" className="text-sm font-semibold text-foreground">Registration Deadline (optional)</Label>
+                                    <Input id="registration_deadline" name="registration_deadline" type="date" className="h-11 border-border focus:ring-blue-500 rounded-lg shadow-sm" />
                                     <p className="text-[11px] text-muted-foreground italic">Participants get an email reminder the day before the event.</p>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-sm font-semibold text-slate-700">Tags</Label>
+                                    <Label className="text-sm font-semibold text-foreground">Tags</Label>
                                     <div className="flex flex-wrap gap-2">
                                         {EVENT_TAGS.map((tag) => (
                                             <label key={tag} className="cursor-pointer">
                                                 <input type="checkbox" name="tags" value={tag} className="peer sr-only" />
-                                                <span className="inline-block px-3 py-1.5 rounded-full text-xs font-bold border border-slate-200 bg-slate-50 text-slate-600 transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 capitalize">
+                                                <span className="inline-block px-3 py-1.5 rounded-full text-xs font-bold border border-border bg-muted text-muted-foreground transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 capitalize">
                                                     {tag}
                                                 </span>
                                             </label>
@@ -101,21 +101,21 @@ export default async function NewEventPage() {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
                                 <div className="space-y-2">
-                                    <Label htmlFor="max_students" className="text-sm font-semibold text-slate-700">Max Students (optional)</Label>
-                                    <Input id="max_students" name="max_students" type="number" min="1" placeholder="e.g. 30" className="h-11 border-slate-200 focus:ring-blue-500 rounded-lg shadow-sm" />
+                                    <Label htmlFor="max_students" className="text-sm font-semibold text-foreground">Max Students (optional)</Label>
+                                    <Input id="max_students" name="max_students" type="number" min="1" placeholder="e.g. 30" className="h-11 border-border focus:ring-blue-500 rounded-lg shadow-sm" />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-sm font-semibold text-slate-700 text-center block">Cover Image</Label>
-                                    <div className="border border-dashed border-slate-300 rounded-lg p-2 bg-slate-50/50">
+                                    <Label className="text-sm font-semibold text-foreground text-center block">Cover Image</Label>
+                                    <div className="border border-dashed border-border rounded-lg p-2 bg-muted/50">
                                         <ImageUpload bucketName="event-images" />
                                     </div>
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="duration" className="text-sm font-semibold text-slate-700">Visibility Duration</Label>
+                                <Label htmlFor="duration" className="text-sm font-semibold text-foreground">Visibility Duration</Label>
                                 <Select name="duration" defaultValue="30">
-                                    <SelectTrigger className="h-11 border-slate-200 rounded-lg shadow-sm">
+                                    <SelectTrigger className="h-11 border-border rounded-lg shadow-sm">
                                         <SelectValue placeholder="How long should this be visible?" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -129,12 +129,12 @@ export default async function NewEventPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="description" className="text-sm font-semibold text-slate-700">Description & Rules</Label>
+                                <Label htmlFor="description" className="text-sm font-semibold text-foreground">Description & Rules</Label>
                                 <Textarea
                                     id="description"
                                     name="description"
                                     placeholder="Describe the event, rules, and prizes..."
-                                    className="min-h-[120px] border-slate-200 focus:ring-blue-500 resize-none rounded-lg shadow-sm"
+                                    className="min-h-[120px] border-border focus:ring-blue-500 resize-none rounded-lg shadow-sm"
                                     required
                                 />
                             </div>

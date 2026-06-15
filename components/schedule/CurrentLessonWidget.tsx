@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Clock, Coffee, DoorOpen, MapPin, Moon, Sunrise, User } from "lucide-react";
 import { getCurrentPeriod, getPeriodTime, type CurrentPeriodInfo } from "@/lib/schedule/bells";
 import { almatyNow } from "@/lib/schedule/almaty-time";
+import { useT } from "@/hooks/useT";
 import { SubstitutionBadge } from "./SubstitutionBadge";
 import { effectiveLesson, type DayCell } from "./types";
 
@@ -18,11 +19,12 @@ function findCell(cells: DayCell[], period: number): DayCell | null {
 }
 
 function LessonLine({ cell }: { cell: DayCell }) {
+    const { t } = useT();
     const effective = effectiveLesson(cell);
     if (effective.cancelled) {
         return (
             <div className="flex items-center gap-2">
-                <span className="text-lg font-bold text-red-600">Lesson cancelled</span>
+                <span className="text-lg font-bold text-red-600">{t('schedule.lessonCancelled')}</span>
                 {effective.subject && (
                     <span className="text-sm text-muted-foreground line-through">{effective.subject}</span>
                 )}
@@ -30,14 +32,14 @@ function LessonLine({ cell }: { cell: DayCell }) {
         );
     }
     if (!effective.subject) {
-        return <span className="text-lg font-bold text-foreground">Free period</span>;
+        return <span className="text-lg font-bold text-foreground">{t('schedule.freePeriod')}</span>;
     }
     return (
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
             <span className="text-lg font-bold text-foreground">{effective.subject}</span>
             {effective.room && (
                 <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <MapPin className="w-3.5 h-3.5" /> Room {effective.room}
+                    <MapPin className="w-3.5 h-3.5" /> {t('schedule.room')} {effective.room}
                 </span>
             )}
             {effective.teacher && (
@@ -53,6 +55,7 @@ function LessonLine({ cell }: { cell: DayCell }) {
 }
 
 export function CurrentLessonWidget({ todayCells }: CurrentLessonWidgetProps) {
+    const { t } = useT();
     const [info, setInfo] = useState<CurrentPeriodInfo | null>(null);
 
     useEffect(() => {
@@ -70,21 +73,21 @@ export function CurrentLessonWidget({ todayCells }: CurrentLessonWidgetProps) {
         body = (
             <div className="flex items-center gap-3 text-muted-foreground">
                 <Clock className="w-6 h-6 animate-pulse" />
-                <span className="text-sm">Loading current lesson…</span>
+                <span className="text-sm">{t('schedule.loadingLesson')}</span>
             </div>
         );
     } else if (todayCells.length === 0) {
         body = (
             <div className="flex items-center gap-3">
                 <Moon className="w-6 h-6 text-indigo-400" />
-                <span className="text-lg font-bold text-foreground">No lessons today</span>
+                <span className="text-lg font-bold text-foreground">{t('schedule.noLessonsToday')}</span>
             </div>
         );
     } else if (info.status === 'after') {
         body = (
             <div className="flex items-center gap-3">
                 <DoorOpen className="w-6 h-6 text-emerald-500" />
-                <span className="text-lg font-bold text-foreground">School day is over</span>
+                <span className="text-lg font-bold text-foreground">{t('schedule.schoolOver')}</span>
             </div>
         );
     } else if (info.status === 'before') {
@@ -94,7 +97,7 @@ export function CurrentLessonWidget({ todayCells }: CurrentLessonWidgetProps) {
             <div className="space-y-1">
                 <div className="flex items-center gap-2 text-sm font-semibold text-amber-600">
                     <Sunrise className="w-4 h-4" />
-                    School starts in {info.minutesLeft} min{time && <> ({time.start})</>}
+                    {t('schedule.schoolStartsIn', { min: info.minutesLeft })}{time && <> ({time.start})</>}
                 </div>
                 {firstCell && <LessonLine cell={firstCell} />}
             </div>
@@ -106,7 +109,7 @@ export function CurrentLessonWidget({ todayCells }: CurrentLessonWidgetProps) {
             <div className="space-y-1">
                 <div className="flex items-center gap-2 text-sm font-semibold text-emerald-600">
                     <Coffee className="w-4 h-4" />
-                    Break — next lesson in {info.minutesLeft} min{time && <> ({time.start})</>}
+                    {t('schedule.breakNext', { min: info.minutesLeft })}{time && <> ({time.start})</>}
                 </div>
                 {nextCell && <LessonLine cell={nextCell} />}
             </div>
@@ -118,9 +121,9 @@ export function CurrentLessonWidget({ todayCells }: CurrentLessonWidgetProps) {
             <div className="space-y-1">
                 <div className="flex items-center gap-2 text-sm font-semibold text-blue-600">
                     <Clock className="w-4 h-4" />
-                    Lesson {info.period}{time && <> ({time.start}–{time.end})</>} — bell in {info.minutesLeft} min
+                    {t('schedule.lessonN', { n: info.period })}{time && <> ({time.start}–{time.end})</>} — {t('schedule.bellIn', { min: info.minutesLeft })}
                 </div>
-                {cell ? <LessonLine cell={cell} /> : <span className="text-lg font-bold text-foreground">Free period</span>}
+                {cell ? <LessonLine cell={cell} /> : <span className="text-lg font-bold text-foreground">{t('schedule.freePeriod')}</span>}
             </div>
         );
     }

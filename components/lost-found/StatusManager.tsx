@@ -85,19 +85,19 @@ export function StatusManager({
             </div>
 
             {status !== "claimed" && (
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 space-y-3">
-                    <p className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 dark:bg-emerald-950/50 p-4 space-y-3">
+                    <p className="text-sm font-semibold text-foreground flex items-center gap-2">
                         <HandHeart className="w-4 h-4 text-emerald-600" />
                         Hand back to owner
                     </p>
                     {claimants.length > 0 ? (
                         <>
-                            <p className="text-xs text-slate-500">
+                            <p className="text-xs text-muted-foreground">
                                 Select which claimant physically received the item. Only registered claimants can be chosen.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-2">
                                 <Select value={selectedClaimant} onValueChange={setSelectedClaimant}>
-                                    <SelectTrigger className="h-11 bg-white w-full sm:flex-grow">
+                                    <SelectTrigger className="h-11 bg-card w-full sm:flex-grow">
                                         <SelectValue placeholder="Select the claimant…" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -119,7 +119,7 @@ export function StatusManager({
                             </div>
                         </>
                     ) : (
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-muted-foreground">
                             No one has claimed this item yet — there is nobody to hand it to.
                         </p>
                     )}

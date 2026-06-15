@@ -29,12 +29,12 @@ export function ForgotPasswordForm() {
     if (sent) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-                <div className="w-full max-w-md space-y-6 rounded-2xl bg-white p-8 shadow-xl border border-gray-100 text-center">
-                    <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                <div className="w-full max-w-md space-y-6 rounded-2xl bg-card p-8 shadow-xl border border-border text-center">
+                    <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
                         <CheckCircle2 className="w-8 h-8 text-green-600" />
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-900">Check your email</h2>
-                    <p className="text-gray-600">
+                    <h2 className="text-2xl font-bold text-foreground">Check your email</h2>
+                    <p className="text-muted-foreground">
                         We&apos;ve sent a password reset link to your email address.
                         Please check your inbox and click the link to set a new password.
                     </p>
@@ -52,22 +52,22 @@ export function ForgotPasswordForm() {
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-            <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-8 shadow-xl border border-gray-100">
+            <div className="w-full max-w-md space-y-8 rounded-2xl bg-card p-8 shadow-xl border border-border">
                 <div className="text-center">
                     <div className="mx-auto w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mb-4">
                         <Mail className="w-7 h-7 text-primary" />
                     </div>
-                    <h2 className="text-2xl font-bold tracking-tight text-gray-900">
+                    <h2 className="text-2xl font-bold tracking-tight text-foreground">
                         Forgot your password?
                     </h2>
-                    <p className="mt-2 text-sm text-gray-600">
+                    <p className="mt-2 text-sm text-muted-foreground">
                         Enter your email and we&apos;ll send you a reset link.
                     </p>
                 </div>
 
                 <form action={handleSubmit} className="mt-8 space-y-6">
                     <div>
-                        <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-900">
+                        <label htmlFor="email" className="mb-2 block text-sm font-medium text-foreground">
                             Email Address
                         </label>
                         <input
@@ -76,13 +76,13 @@ export function ForgotPasswordForm() {
                             type="email"
                             autoComplete="email"
                             required
-                            className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-gray-900 focus:border-primary focus:ring-primary"
+                            className="block w-full rounded-lg border border-border bg-gray-50 p-2.5 text-foreground focus:border-primary focus:ring-primary"
                             placeholder="name@example.com"
                         />
                     </div>
 
                     {error && (
-                        <div className="rounded-lg bg-red-50 p-4 text-sm text-red-800" role="alert">
+                        <div className="rounded-lg bg-red-50 dark:bg-red-950/40 p-4 text-sm text-red-800" role="alert">
                             <span className="font-medium">Error:</span> {error}
                         </div>
                     )}

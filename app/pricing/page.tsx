@@ -40,13 +40,13 @@ export default async function PricingPage({
             <CheckoutStatusToast status={status} />
 
             <div className="text-center space-y-3">
-                <div className="inline-flex items-center gap-2 rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-xs font-semibold text-amber-700">
+                <div className="inline-flex items-center gap-2 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 px-3 py-1 text-xs font-semibold text-amber-700">
                     <Sparkles className="w-3.5 h-3.5" /> Ulagat Premium
                 </div>
-                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900">
+                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
                     Choose your plan
                 </h1>
-                <p className="text-slate-500 max-w-xl mx-auto">
+                <p className="text-muted-foreground max-w-xl mx-auto">
                     The campus essentials are free forever. Premium unlocks the AI
                     mentor and priority perks as they roll out.
                 </p>
@@ -54,7 +54,7 @@ export default async function PricingPage({
 
             <PricingCards currentPlan={plan} periodEnd={periodEnd} />
 
-            <p className="text-center text-xs text-slate-400 max-w-lg mx-auto">
+            <p className="text-center text-xs text-muted-foreground max-w-lg mx-auto">
                 AI features are in development. Premium today reserves your access and
                 supports the platform. Billing is handled securely by Stripe.
             </p>

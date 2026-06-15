@@ -67,9 +67,9 @@ export function NewGroupForm({ friends }: NewGroupFormProps) {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white py-10 px-4">
+        <div className="min-h-screen bg-background py-10 px-4">
             <div className="mx-auto max-w-lg space-y-6">
-                <Link href="/messages" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-slate-700">
+                <Link href="/messages" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
                     <ArrowLeft className="w-4 h-4" /> Back to Messages
                 </Link>
 
@@ -102,8 +102,8 @@ export function NewGroupForm({ friends }: NewGroupFormProps) {
                                             key={friend.id}
                                             onClick={() => toggleFriend(friend.id)}
                                             className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${selectedFriends.includes(friend.id)
-                                                    ? 'bg-indigo-50 border-indigo-200'
-                                                    : 'bg-white hover:bg-slate-50 border-slate-100'
+                                                    ? 'bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200'
+                                                    : 'bg-card hover:bg-muted border-border'
                                                 }`}
                                         >
                                             <Checkbox checked={selectedFriends.includes(friend.id)} />
@@ -111,7 +111,7 @@ export function NewGroupForm({ friends }: NewGroupFormProps) {
                                                 <AvatarImage src={friend.avatar_url} />
                                                 <AvatarFallback>{friend.full_name?.[0]}</AvatarFallback>
                                             </Avatar>
-                                            <span className="font-medium text-sm text-slate-800">{friend.full_name}</span>
+                                            <span className="font-medium text-sm text-foreground">{friend.full_name}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -123,7 +123,7 @@ export function NewGroupForm({ friends }: NewGroupFormProps) {
                         </div>
 
                         {error && (
-                            <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                            <div className="rounded-lg bg-red-50 dark:bg-red-950/40 p-3 text-sm text-red-700">
                                 {error}
                             </div>
                         )}

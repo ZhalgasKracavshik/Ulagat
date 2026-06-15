@@ -71,9 +71,9 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
     const CATEGORIES = ["Math", "Physics", "Chemistry", "Biology", "Informatics", "English", "History"];
 
     const difficultyColors: Record<string, string> = {
-        easy: "bg-green-100 text-green-700 border-green-200",
-        medium: "bg-amber-100 text-amber-700 border-amber-200",
-        hard: "bg-red-100 text-red-700 border-red-200",
+        easy: "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-200 border-green-200",
+        medium: "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-200 border-amber-200",
+        hard: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-200 border-red-200",
     };
 
     // Build hrefs preserving the other active filters
@@ -100,7 +100,7 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-4 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 p-6 rounded-2xl border border-indigo-200/50">
                 <div className="space-y-2">
-                    <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 flex items-center gap-3">
+                    <h1 className="text-4xl font-extrabold tracking-tight text-foreground flex items-center gap-3">
                         <GraduationCap className="w-10 h-10 text-indigo-600" />
                         Olympiad Prep Center
                     </h1>
@@ -123,7 +123,7 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
 
             {/* Subject Filter Bar */}
             <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-                <Filter className="w-4 h-4 text-slate-400 shrink-0" />
+                <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
                 <Link href={buildHref({ category: null })}>
                     <Button
                         variant={!categoryFilter ? "secondary" : "ghost"}
@@ -148,7 +148,7 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
 
             {/* Difficulty chips + Year dropdown */}
             <div className="flex flex-wrap items-center gap-2 -mt-4">
-                <Gauge className="w-4 h-4 text-slate-400 shrink-0" />
+                <Gauge className="w-4 h-4 text-muted-foreground shrink-0" />
                 <Link href={buildHref({ difficulty: null })}>
                     <Button variant={!difficultyFilter ? "secondary" : "ghost"} size="sm" className="rounded-full px-4">
                         Any difficulty
@@ -176,7 +176,7 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {materials.length > 0 ? (
                     materials.map((material) => (
-                        <Card key={material.id} className="group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-indigo-100/50 overflow-hidden bg-white">
+                        <Card key={material.id} className="group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-indigo-100/50 overflow-hidden bg-card">
                             <div className="h-2 bg-gradient-to-r from-indigo-500 to-purple-500 opacity-80 group-hover:opacity-100 transition-opacity" />
                             <CardHeader className="space-y-4">
                                 <div className="flex items-start justify-between gap-2">
@@ -188,9 +188,9 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
                                     </Badge>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <Badge variant="outline" className="text-[10px] uppercase tracking-wider font-bold bg-slate-50">{material.category}</Badge>
+                                    <Badge variant="outline" className="text-[10px] uppercase tracking-wider font-bold bg-muted">{material.category}</Badge>
                                     {material.year && (
-                                        <Badge variant="outline" className="text-[10px] tracking-wider font-bold bg-indigo-50/50 border-indigo-200 text-indigo-700">
+                                        <Badge variant="outline" className="text-[10px] tracking-wider font-bold bg-indigo-50/50 dark:bg-indigo-950/50 border-indigo-200 text-indigo-700">
                                             {material.year}
                                         </Badge>
                                     )}
@@ -198,14 +198,14 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
                             </CardHeader>
                             <CardContent className="space-y-6">
                                 {material.description && (
-                                    <p className="text-sm text-slate-500 line-clamp-3 leading-relaxed">{material.description}</p>
+                                    <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">{material.description}</p>
                                 )}
                                 <div className="flex items-center justify-between pt-2 border-t border-slate-50">
                                     <div className="flex items-center gap-2">
-                                        <div className="w-6 h-6 rounded-full bg-indigo-50 flex items-center justify-center text-[10px] font-bold text-indigo-600">
+                                        <div className="w-6 h-6 rounded-full bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-[10px] font-bold text-indigo-600">
                                             {material.profiles?.full_name?.[0] || 'A'}
                                         </div>
-                                        <span className="text-[11px] font-medium text-slate-400">
+                                        <span className="text-[11px] font-medium text-muted-foreground">
                                             {material.profiles?.full_name || 'Admin'}
                                         </span>
                                     </div>
@@ -215,7 +215,7 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
                                                 <InteractiveButton
                                                     size="sm"
                                                     variant="outline"
-                                                    className="gap-1.5 text-purple-600 border-purple-200 bg-purple-50/30 hover:bg-purple-600 hover:text-white transition-all font-bold"
+                                                    className="gap-1.5 text-purple-600 border-purple-200 bg-purple-50/30 dark:bg-purple-950/30 hover:bg-purple-600 hover:text-white transition-all font-bold"
                                                 >
                                                     <FileDown className="w-3.5 h-3.5" />
                                                     PDF
@@ -227,7 +227,7 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
                                                 <InteractiveButton
                                                     size="sm"
                                                     variant="outline"
-                                                    className="gap-1.5 text-indigo-600 border-indigo-200 bg-indigo-50/30 hover:bg-indigo-600 hover:text-white transition-all font-bold"
+                                                    className="gap-1.5 text-indigo-600 border-indigo-200 bg-indigo-50/30 dark:bg-indigo-950/30 hover:bg-indigo-600 hover:text-white transition-all font-bold"
                                                 >
                                                     <ExternalLink className="w-3.5 h-3.5" />
                                                     Open
@@ -241,10 +241,10 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
                     ))
                 ) : (
                     <div className="col-span-full py-20 text-center space-y-4">
-                        <div className="mx-auto w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center">
+                        <div className="mx-auto w-24 h-24 bg-indigo-50 dark:bg-indigo-950/40 rounded-full flex items-center justify-center">
                             <BookOpen className="w-12 h-12 text-indigo-300" />
                         </div>
-                        <h3 className="text-xl font-bold text-slate-800">No Materials Found</h3>
+                        <h3 className="text-xl font-bold text-foreground">No Materials Found</h3>
                         <p className="text-muted-foreground">
                             {hasFilter
                                 ? "No resources match the selected filters yet."

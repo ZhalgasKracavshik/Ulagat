@@ -56,10 +56,10 @@ export function UserSearch() {
     return (
         <div className="relative w-full" ref={containerRef}>
             <div className="relative group">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary transition-colors" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
                     placeholder="Find people by name..."
-                    className="pl-10 h-11 bg-white border-slate-200 focus:ring-primary/20 rounded-xl font-medium"
+                    className="pl-10 h-11 bg-card border-border focus:ring-primary/20 rounded-xl font-medium"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onFocus={() => query.length >= 2 && setIsOpen(true)}
@@ -80,7 +80,7 @@ export function UserSearch() {
                                     <Link
                                         key={user.id}
                                         href={`/profile/${user.id}`}
-                                        className="flex items-center gap-3 p-3 hover:bg-slate-50 rounded-lg transition-colors group"
+                                        className="flex items-center gap-3 p-3 hover:bg-muted rounded-lg transition-colors group"
                                         onClick={() => setIsOpen(false)}
                                     >
                                         <Avatar className="w-10 h-10 border shadow-sm">
@@ -88,14 +88,14 @@ export function UserSearch() {
                                             <AvatarFallback>{user.full_name?.[0]}</AvatarFallback>
                                         </Avatar>
                                         <div className="flex-grow min-w-0">
-                                            <p className="font-bold text-slate-900 group-hover:text-primary transition-colors truncate">
+                                            <p className="font-bold text-foreground group-hover:text-primary transition-colors truncate">
                                                 {user.full_name}
                                             </p>
                                             <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest leading-none mt-0.5">
                                                 {user.role}
                                             </p>
                                         </div>
-                                        <ExternalLink className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-all" />
+                                        <ExternalLink className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-all" />
                                     </Link>
                                 ))}
                             </div>

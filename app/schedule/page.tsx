@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -7,12 +8,17 @@ import { CalendarDays, ClipboardEdit, Repeat, UserCog } from "lucide-react";
 import { WeekGrid } from "@/components/schedule/WeekGrid";
 import { addDaysIso, almatyTodayIso, almatyWeekMondayIso } from "@/lib/schedule/almaty-time";
 import { ClassSelector, type ClassOption } from "@/components/schedule/ClassSelector";
+import {
+    DEFAULT_LOCALE,
+    LOCALE_COOKIE,
+    getDictionary,
+    isLocale,
+    resolveKey,
+} from "@/lib/i18n";
 import type { DayCell, DayColumn } from "@/components/schedule/types";
 import type { ScheduleEntry, Substitution } from "@/types";
 
 export const dynamic = 'force-dynamic';
-
-const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 type ScheduleSearchParams = Promise<{ grade?: string; letter?: string }>;
 
@@ -25,6 +31,22 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sch
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect('/login');
+
+    // Server component: resolve locale from cookie and translate via dictionary.
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t = (key: string, vars?: Record<string, string | number>) => {
+        let value = resolveKey(dict, key);
+        if (vars) {
+            for (const [name, replacement] of Object.entries(vars)) {
+                value = value.replace(`{${name}}`, String(replacement));
+            }
+        }
+        return value;
+    };
+    const DAY_LABELS = [t('schedule.day1'), t('schedule.day2'), t('schedule.day3'), t('schedule.day4'), t('schedule.day5'), t('schedule.day6')];
 
     const { data: profile } = await supabase
         .from('profiles')
@@ -100,12 +122,12 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sch
             <div className="space-y-1">
                 <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground flex items-center gap-3">
                     <CalendarDays className="w-8 h-8 text-sky-500" />
-                    Schedule
+                    {t('schedule.title')}
                 </h1>
                 <p className="text-muted-foreground">
                     {targetGrade !== null && targetLetter
-                        ? `Class ${targetGrade}${targetLetter} — current week`
-                        : 'Weekly timetable with live substitutions'}
+                        ? t('schedule.subtitleClass', { label: `${targetGrade}${targetLetter}` })
+                        : t('schedule.subtitleDefault')}
                 </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -121,13 +143,13 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sch
                         <Link href="/schedule/manage">
                             <Button variant="outline" className="gap-2">
                                 <ClipboardEdit className="w-4 h-4" />
-                                Manage Timetable
+                                {t('schedule.manageTimetable')}
                             </Button>
                         </Link>
                         <Link href="/schedule/substitutions">
                             <Button className="gap-2 bg-orange-500 hover:bg-orange-600">
                                 <Repeat className="w-4 h-4" />
-                                Substitutions
+                                {t('schedule.substitutions')}
                             </Button>
                         </Link>
                     </>
@@ -147,29 +169,29 @@ export default async function SchedulePage({ searchParams }: { searchParams: Sch
                     </div>
                     {parentWithoutChild ? (
                         <>
-                            <CardTitle className="text-xl">No linked child found</CardTitle>
+                            <CardTitle className="text-xl">{t('schedule.noChildTitle')}</CardTitle>
                             <p className="text-muted-foreground text-sm">
-                                Ask your child to send you a parent invite so we can show you their class schedule.
+                                {t('schedule.noChildBody')}
                             </p>
                         </>
                     ) : isStaff ? (
                         <>
-                            <CardTitle className="text-xl">No timetables published yet</CardTitle>
+                            <CardTitle className="text-xl">{t('schedule.noTimetablesTitle')}</CardTitle>
                             <p className="text-muted-foreground text-sm">
-                                Create the first class timetable to get started.
+                                {t('schedule.noTimetablesBody')}
                             </p>
                             <Button asChild className="mt-2">
-                                <Link href="/schedule/manage">Manage Timetable</Link>
+                                <Link href="/schedule/manage">{t('schedule.manageTimetable')}</Link>
                             </Button>
                         </>
                     ) : (
                         <>
-                            <CardTitle className="text-xl">Set your class first</CardTitle>
+                            <CardTitle className="text-xl">{t('schedule.setClassTitle')}</CardTitle>
                             <p className="text-muted-foreground text-sm">
-                                Set your grade and class letter in profile settings to see your schedule.
+                                {t('schedule.setClassBody')}
                             </p>
                             <Button asChild className="mt-2">
-                                <Link href="/profile/edit">Open Profile Settings</Link>
+                                <Link href="/profile/edit">{t('schedule.openProfileSettings')}</Link>
                             </Button>
                         </>
                     )}

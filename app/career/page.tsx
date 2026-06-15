@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,18 +18,27 @@ import { almatyTodayIso } from "@/lib/schedule/almaty-time";
 import {
     entTotal,
     hasAnyScore,
-    entScoreLabel,
     comparisonStatus,
     ENT_SCORE_KEYS,
     type ComparisonStatus,
 } from "@/lib/career";
 import { unlockedSpecialties, ENT_MAX_TOTAL } from "@/data/universities";
+import {
+    DEFAULT_LOCALE,
+    LOCALE_COOKIE,
+    getDictionary,
+    isLocale,
+    resolveKey,
+    type Locale,
+} from "@/lib/i18n";
 import type { CareerTracker, CareerTarget, EntScores } from "@/types";
 import { AddTargetDialog } from "./AddTargetDialog";
 import { UniversityExplorer } from "./UniversityExplorer";
 import { deleteCareerTarget } from "./actions";
 
 export const dynamic = "force-dynamic";
+
+type CareerT = (key: string, vars?: Record<string, string | number>) => string;
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -39,21 +49,21 @@ function daysUntil(iso: string): number {
     return Math.round((target - today) / 86_400_000);
 }
 
-const STATUS_STYLE: Record<ComparisonStatus, { badge: string; bar: string; label: string }> = {
+const STATUS_STYLE: Record<ComparisonStatus, { badge: string; bar: string; labelKey: string }> = {
     reached: {
-        badge: "border-emerald-300 text-emerald-700 bg-emerald-50",
+        badge: "border-emerald-300 text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40",
         bar: "bg-emerald-500",
-        label: "Reached",
+        labelKey: "career.statusReached",
     },
     close: {
-        badge: "border-amber-300 text-amber-700 bg-amber-50",
+        badge: "border-amber-300 text-amber-700 bg-amber-50 dark:bg-amber-950/40",
         bar: "bg-amber-500",
-        label: "Close",
+        labelKey: "career.statusClose",
     },
     below: {
-        badge: "border-red-300 text-red-700 bg-red-50",
+        badge: "border-red-300 text-red-700 bg-red-50 dark:bg-red-950/40",
         bar: "bg-red-500",
-        label: "Below",
+        labelKey: "career.statusBelow",
     },
 };
 
@@ -65,6 +75,21 @@ export default async function CareerPage({
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect("/login");
+
+    // Server component: resolve locale from cookie and translate via dictionary.
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale: Locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t: CareerT = (key, vars) => {
+        let value = resolveKey(dict, key);
+        if (vars) {
+            for (const [name, replacement] of Object.entries(vars)) {
+                value = value.replace(`{${name}}`, String(replacement));
+            }
+        }
+        return value;
+    };
 
     const { data: viewerProfile } = await supabase
         .from("profiles")
@@ -99,7 +124,12 @@ export default async function CareerPage({
             children = (childProfiles ?? []) as { id: string; full_name: string }[];
         }
         if (children.length === 0) {
-            return <ParentNoChildren />;
+            return (
+                <ParentNoChildren
+                    title={t("career.noLinkedStudent")}
+                    body={t("career.noLinkedStudentBody")}
+                />
+            );
         }
         const requested = params.child && UUID_RE.test(params.child) ? params.child : null;
         const chosen = children.find((c) => c.id === requested) ?? children[0];
@@ -158,19 +188,19 @@ export default async function CareerPage({
                 <div className="space-y-1">
                     <h1 className="text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
                         <GraduationCap className="w-8 h-8 text-rose-500" />
-                        Career &amp; ЕНТ Tracker
+                        {t("career.title")}
                     </h1>
                     <p className="text-muted-foreground">
                         {viewingOther
-                            ? `Viewing ${viewedName ?? "student"}'s ЕНТ progress and university targets.`
-                            : "Track your ЕНТ scores, see what your subject combo unlocks, and aim for grant admission."}
+                            ? t("career.subtitleOther", { name: viewedName ?? "" })
+                            : t("career.subtitleOwn")}
                     </p>
                 </div>
                 {!readOnly && (
                     <Link href="/career/edit">
                         <Button className="gap-2">
                             <Pencil className="w-4 h-4" />
-                            Edit ЕНТ scores
+                            {t("career.editScores")}
                         </Button>
                     </Link>
                 )}
@@ -179,7 +209,7 @@ export default async function CareerPage({
             {/* Parent child selector */}
             {isParent && children.length > 1 && (
                 <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm text-muted-foreground">Child:</span>
+                    <span className="text-sm text-muted-foreground">{t("career.child")}</span>
                     {children.map((c) => (
                         <Link key={c.id} href={`/career?child=${c.id}`}>
                             <Button
@@ -200,10 +230,10 @@ export default async function CareerPage({
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-lg">
                             <Sparkles className="w-5 h-5 text-rose-500" />
-                            {viewingOther ? "ЕНТ Scores" : "My ЕНТ Scores"}
+                            {viewingOther ? t("career.scores") : t("career.myScores")}
                         </CardTitle>
                         <CardDescription>
-                            5 subjects · scored out of {ENT_MAX_TOTAL} total
+                            {t("career.scoresDescription", { max: ENT_MAX_TOTAL })}
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -216,7 +246,7 @@ export default async function CareerPage({
                                             className="flex items-center justify-between text-sm"
                                         >
                                             <span className="text-muted-foreground">
-                                                {entScoreLabel(key, subject1, subject2)}
+                                                {localizedScoreLabel(t, key, subject1, subject2)}
                                             </span>
                                             <span className="font-semibold tabular-nums">
                                                 {scores[key] ?? "—"}
@@ -226,7 +256,7 @@ export default async function CareerPage({
                                     ))}
                                 </div>
                                 <div className="border-t pt-3 flex items-center justify-between">
-                                    <span className="font-bold text-foreground">Total</span>
+                                    <span className="font-bold text-foreground">{t("career.total")}</span>
                                     <span className="text-2xl font-extrabold text-rose-600 tabular-nums">
                                         {total}
                                         <span className="text-sm text-muted-foreground font-medium">
@@ -237,7 +267,7 @@ export default async function CareerPage({
                                 {targetScore !== null && (
                                     <div className="space-y-1.5">
                                         <div className="flex items-center justify-between text-xs text-muted-foreground">
-                                            <span>Progress toward goal ({targetScore})</span>
+                                            <span>{t("career.progressTowardGoal", { score: targetScore })}</span>
                                             <span>{targetProgress}%</span>
                                         </div>
                                         <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
@@ -252,8 +282,8 @@ export default async function CareerPage({
                         ) : (
                             <EmptyHint
                                 readOnly={readOnly}
-                                text="No ЕНТ scores yet."
-                                cta="Add your scores"
+                                text={t("career.noScores")}
+                                cta={t("career.addScores")}
                             />
                         )}
                     </CardContent>
@@ -264,9 +294,9 @@ export default async function CareerPage({
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-lg">
                             <Target className="w-5 h-5 text-indigo-500" />
-                            Subject Combination
+                            {t("career.subjectCombination")}
                         </CardTitle>
-                        <CardDescription>Profile subjects unlock specialty groups</CardDescription>
+                        <CardDescription>{t("career.subjectCombinationDescription")}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {subject1 && subject2 ? (
@@ -282,7 +312,7 @@ export default async function CareerPage({
                                 </div>
                                 <div>
                                     <p className="text-sm font-medium text-foreground mb-2">
-                                        Unlocks:
+                                        {t("career.unlocks")}
                                     </p>
                                     {groups.length > 0 ? (
                                         <div className="flex flex-wrap gap-1.5">
@@ -298,8 +328,7 @@ export default async function CareerPage({
                                         </div>
                                     ) : (
                                         <p className="text-sm text-muted-foreground">
-                                            This combination isn&apos;t in our reference table yet —
-                                            check university requirements directly.
+                                            {t("career.noUnlocks")}
                                         </p>
                                     )}
                                 </div>
@@ -307,8 +336,8 @@ export default async function CareerPage({
                         ) : (
                             <EmptyHint
                                 readOnly={readOnly}
-                                text="No profile subjects chosen yet."
-                                cta="Choose subjects"
+                                text={t("career.noSubjects")}
+                                cta={t("career.chooseSubjects")}
                             />
                         )}
                     </CardContent>
@@ -318,30 +347,30 @@ export default async function CareerPage({
             {/* Score Comparison */}
             <Card className="border-rose-100">
                 <CardHeader>
-                    <CardTitle className="text-lg">Score Comparison</CardTitle>
+                    <CardTitle className="text-lg">{t("career.scoreComparison")}</CardTitle>
                     <CardDescription>
-                        Your current total ({total}) vs. each target&apos;s grant cutoff
+                        {t("career.scoreComparisonDescription", { total })}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                    {targets.filter((t) => t.cutoff_score !== null).length > 0 ? (
+                    {targets.filter((target) => target.cutoff_score !== null).length > 0 ? (
                         targets
-                            .filter((t) => t.cutoff_score !== null)
-                            .map((t) => {
-                                const status = comparisonStatus(total, t.cutoff_score);
-                                const cutoff = t.cutoff_score as number;
+                            .filter((target) => target.cutoff_score !== null)
+                            .map((target) => {
+                                const status = comparisonStatus(total, target.cutoff_score);
+                                const cutoff = target.cutoff_score as number;
                                 const pct = Math.min(100, Math.round((total / Math.max(cutoff, 1)) * 100));
                                 const style = status ? STATUS_STYLE[status] : null;
                                 return (
-                                    <div key={t.id} className="space-y-1.5">
+                                    <div key={target.id} className="space-y-1.5">
                                         <div className="flex items-center justify-between text-sm">
                                             <span className="font-medium text-foreground truncate">
-                                                {t.university} · {t.specialty}
+                                                {target.university} · {target.specialty}
                                             </span>
                                             <span className="flex items-center gap-2 shrink-0">
                                                 {style && (
                                                     <Badge variant="outline" className={style.badge}>
-                                                        {style.label}
+                                                        {t(style.labelKey)}
                                                     </Badge>
                                                 )}
                                                 <span className="tabular-nums text-muted-foreground">
@@ -360,7 +389,7 @@ export default async function CareerPage({
                             })
                     ) : (
                         <p className="text-sm text-muted-foreground">
-                            Add target universities with a known cutoff to compare your score.
+                            {t("career.addTargetsToCompare")}
                         </p>
                     )}
                 </CardContent>
@@ -372,36 +401,36 @@ export default async function CareerPage({
                     <div>
                         <CardTitle className="flex items-center gap-2 text-lg">
                             <Building2 className="w-5 h-5 text-rose-500" />
-                            {viewingOther ? "Target Universities" : "My Target Universities"}
+                            {viewingOther ? t("career.targets") : t("career.myTargets")}
                         </CardTitle>
-                        <CardDescription>Sorted by nearest grant deadline</CardDescription>
+                        <CardDescription>{t("career.sortedByDeadline")}</CardDescription>
                     </div>
                     {!readOnly && <AddTargetDialog />}
                 </CardHeader>
                 <CardContent className="space-y-3">
                     {targets.length > 0 ? (
-                        targets.map((t) => {
-                            const days = t.grant_deadline ? daysUntil(t.grant_deadline) : null;
+                        targets.map((target) => {
+                            const days = target.grant_deadline ? daysUntil(target.grant_deadline) : null;
                             return (
                                 <div
-                                    key={t.id}
+                                    key={target.id}
                                     className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted px-4 py-3"
                                 >
                                     <div className="min-w-0">
                                         <p className="font-semibold text-foreground truncate">
-                                            {t.university}
+                                            {target.university}
                                         </p>
                                         <p className="text-sm text-muted-foreground truncate">
-                                            {t.specialty}
-                                            {t.cutoff_score !== null && (
-                                                <> · cutoff ~{t.cutoff_score}/140</>
+                                            {target.specialty}
+                                            {target.cutoff_score !== null && (
+                                                <> · {t("career.cutoff", { score: target.cutoff_score })}</>
                                             )}
                                         </p>
-                                        {t.grant_deadline && (
+                                        {target.grant_deadline && (
                                             <p className="mt-1 flex items-center gap-1 text-xs">
                                                 <CalendarClock className="w-3.5 h-3.5 text-rose-400" />
                                                 <span className="text-muted-foreground">
-                                                    {t.grant_deadline}
+                                                    {target.grant_deadline}
                                                 </span>
                                                 <span
                                                     className={
@@ -413,23 +442,23 @@ export default async function CareerPage({
                                                     }
                                                 >
                                                     {days !== null && days < 0
-                                                        ? `(${Math.abs(days)} days ago)`
+                                                        ? t("career.daysAgo", { n: Math.abs(days) })
                                                         : days === 0
-                                                          ? "(today)"
-                                                          : `(${days} days left)`}
+                                                          ? t("career.dueToday")
+                                                          : t("career.daysLeft", { n: days ?? 0 })}
                                                 </span>
                                             </p>
                                         )}
                                     </div>
                                     {!readOnly && (
                                         <form action={deleteCareerTarget}>
-                                            <input type="hidden" name="target_id" value={t.id} />
+                                            <input type="hidden" name="target_id" value={target.id} />
                                             <Button
                                                 type="submit"
                                                 variant="ghost"
                                                 size="icon"
                                                 className="text-muted-foreground hover:text-red-600 shrink-0"
-                                                aria-label="Remove target"
+                                                aria-label={t("career.removeTarget")}
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                             </Button>
@@ -440,8 +469,8 @@ export default async function CareerPage({
                         })
                     ) : (
                         <p className="text-sm text-muted-foreground">
-                            No target universities yet.
-                            {!readOnly && " Add one above or from the explorer below."}
+                            {t("career.noTargets")}
+                            {!readOnly && t("career.noTargetsHint")}
                         </p>
                     )}
                 </CardContent>
@@ -450,9 +479,9 @@ export default async function CareerPage({
             {/* University Explorer */}
             <Card className="border-rose-100">
                 <CardHeader>
-                    <CardTitle className="text-lg">University Explorer</CardTitle>
+                    <CardTitle className="text-lg">{t("career.universityExplorer")}</CardTitle>
                     <CardDescription>
-                        Browse major Kazakhstan universities and add specialties as targets.
+                        {t("career.universityExplorerDescription")}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -461,6 +490,31 @@ export default async function CareerPage({
             </Card>
         </div>
     );
+}
+
+/**
+ * Localized label for a ЕНТ score key. Mandatory subjects come from the
+ * dictionary; the two profile subjects are user-entered free text (shown as-is,
+ * with a localized placeholder when unset).
+ */
+function localizedScoreLabel(
+    t: CareerT,
+    key: (typeof ENT_SCORE_KEYS)[number],
+    subject1: string | null,
+    subject2: string | null,
+): string {
+    switch (key) {
+        case "math_literacy":
+            return t("career.entMathLiteracy");
+        case "reading":
+            return t("career.entReadingLiteracy");
+        case "history":
+            return t("career.entHistory");
+        case "subject_1":
+            return subject1 || t("career.profileSubject1");
+        case "subject_2":
+            return subject2 || t("career.profileSubject2");
+    }
 }
 
 function EmptyHint({
@@ -486,17 +540,14 @@ function EmptyHint({
     );
 }
 
-function ParentNoChildren() {
+function ParentNoChildren({ title, body }: { title: string; body: string }) {
     return (
         <div className="container mx-auto py-16 px-4 max-w-xl text-center space-y-4">
             <div className="mx-auto w-20 h-20 bg-rose-50 dark:bg-rose-950/40 rounded-full flex items-center justify-center">
                 <GraduationCap className="w-10 h-10 text-rose-300 dark:text-rose-600" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">No linked student</h1>
-            <p className="text-muted-foreground">
-                You aren&apos;t linked to any student yet. Once your child links your account, you
-                will see their ЕНТ tracker and university targets here.
-            </p>
+            <h1 className="text-2xl font-bold text-foreground">{title}</h1>
+            <p className="text-muted-foreground">{body}</p>
         </div>
     );
 }

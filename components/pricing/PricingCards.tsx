@@ -77,29 +77,29 @@ export function PricingCards({
             <Card className={isPremium ? "" : "border-2 border-indigo-200 shadow-lg"}>
                 <CardHeader className="space-y-2">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-bold text-slate-900">Free</h2>
+                        <h2 className="text-xl font-bold text-foreground">Free</h2>
                         {!isPremium && (
-                            <Badge className="bg-indigo-100 text-indigo-700 border-0">
+                            <Badge className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-200 border-0">
                                 Current plan
                             </Badge>
                         )}
                     </div>
-                    <p className="text-3xl font-extrabold text-slate-900">
-                        0 ₸<span className="text-base font-medium text-slate-400"> / month</span>
+                    <p className="text-3xl font-extrabold text-foreground">
+                        0 ₸<span className="text-base font-medium text-muted-foreground"> / month</span>
                     </p>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-muted-foreground">
                         Everything BINOM students need, every day.
                     </p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <ul className="space-y-2.5">
                         {FREE_FEATURES.map((f) => (
-                            <li key={f.label} className="flex items-start gap-2 text-sm text-slate-700">
+                            <li key={f.label} className="flex items-start gap-2 text-sm text-foreground">
                                 <Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
                                 <span>
                                     {f.label}
                                     {f.soon && (
-                                        <span className="ml-2 text-[10px] font-semibold uppercase text-slate-400">
+                                        <span className="ml-2 text-[10px] font-semibold uppercase text-muted-foreground">
                                             coming soon
                                         </span>
                                     )}
@@ -118,34 +118,34 @@ export function PricingCards({
                 <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-amber-200/40 rounded-full blur-2xl" />
                 <CardHeader className="space-y-2 relative">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                        <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
                             <Crown className="w-5 h-5 text-amber-500" /> Premium
                         </h2>
                         {isPremium ? (
-                            <Badge className="bg-amber-100 text-amber-800 border-0">Active</Badge>
+                            <Badge className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 border-0">Active</Badge>
                         ) : (
                             <Badge className="bg-amber-500 text-white border-0 flex items-center gap-1">
                                 <Sparkles className="w-3 h-3" /> Recommended
                             </Badge>
                         )}
                     </div>
-                    <p className="text-3xl font-extrabold text-slate-900">
+                    <p className="text-3xl font-extrabold text-foreground">
                         {PREMIUM_PRICE}
-                        <span className="text-base font-medium text-slate-400"> / month</span>
+                        <span className="text-base font-medium text-muted-foreground"> / month</span>
                     </p>
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-muted-foreground">
                         Unlock the AI mentor and priority perks when they launch.
                     </p>
                 </CardHeader>
                 <CardContent className="space-y-4 relative">
                     <ul className="space-y-2.5">
                         {PREMIUM_FEATURES.map((f) => (
-                            <li key={f.label} className="flex items-start gap-2 text-sm text-slate-700">
+                            <li key={f.label} className="flex items-start gap-2 text-sm text-foreground">
                                 <Check className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
                                 <span>
                                     {f.label}
                                     {f.soon && (
-                                        <span className="ml-2 text-[10px] font-semibold uppercase text-slate-400">
+                                        <span className="ml-2 text-[10px] font-semibold uppercase text-muted-foreground">
                                             coming soon
                                         </span>
                                     )}
@@ -157,7 +157,7 @@ export function PricingCards({
                     {isPremium ? (
                         <div className="space-y-2">
                             {periodEnd && (
-                                <p className="text-xs text-slate-500 text-center">
+                                <p className="text-xs text-muted-foreground text-center">
                                     Renews on{" "}
                                     {new Date(periodEnd).toLocaleDateString("en-US", {
                                         month: "short",

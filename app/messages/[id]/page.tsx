@@ -59,17 +59,17 @@ export default async function ChatPage({ params }: PageProps) {
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto space-y-4 p-4 bg-slate-50 rounded-lg mb-4">
+            <div className="flex-1 overflow-y-auto space-y-4 p-4 bg-muted rounded-lg mb-4">
                 {messages && messages.map((msg: any) => {
                     const isMe = msg.sender_id === user.id;
                     return (
                         <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                             <div className={`max-w-[70%] rounded-2xl px-4 py-2 ${isMe
                                     ? 'bg-blue-600 text-white rounded-br-none'
-                                    : 'bg-white border text-slate-800 rounded-bl-none shadow-sm'
+                                    : 'bg-card border text-foreground rounded-bl-none shadow-sm'
                                 }`}>
                                 <p>{msg.content}</p>
-                                <span className={`text-[10px] block mt-1 ${isMe ? 'text-blue-100' : 'text-slate-400'}`}>
+                                <span className={`text-[10px] block mt-1 ${isMe ? 'text-blue-100' : 'text-muted-foreground'}`}>
                                     {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                             </div>

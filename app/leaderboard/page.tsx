@@ -1,11 +1,19 @@
 
 import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Crown, Medal, Trophy, ShieldCheck, VenetianMask, GraduationCap } from "lucide-react";
 import Link from "next/link";
 import { anonymousPseudonym } from "@/lib/leaderboard";
+import {
+    DEFAULT_LOCALE,
+    LOCALE_COOKIE,
+    getDictionary,
+    isLocale,
+    resolveKey,
+} from "@/lib/i18n";
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +33,21 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
     const params = await searchParams;
     const rawGrade = typeof params?.grade === 'string' ? Number(params.grade) : NaN;
     const gradeFilter = Number.isInteger(rawGrade) && rawGrade >= 1 && rawGrade <= 11 ? rawGrade : null;
+
+    // Server component: resolve locale from cookie and translate via dictionary.
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t = (key: string, vars?: Record<string, string | number>) => {
+        let value = resolveKey(dict, key);
+        if (vars) {
+            for (const [name, replacement] of Object.entries(vars)) {
+                value = value.replace(`{${name}}`, String(replacement));
+            }
+        }
+        return value;
+    };
 
     // 1. Fetch profiles (optionally filtered by grade)
     let profilesQuery = supabase
@@ -70,11 +93,11 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
     return (
         <div className="container mx-auto py-8 space-y-8 px-4 md:px-6">
             <div className="text-center space-y-4">
-                <h1 className="text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-600">
-                    Smart Reputation Leaderboard
+                <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
+                    {t('leaderboard.title')}
                 </h1>
                 <p className="text-muted-foreground max-w-2xl mx-auto">
-                    Top students and teachers verifying their achievements on the Ulagat Blockchain.
+                    {t('leaderboard.subtitle')}
                 </p>
             </div>
 
@@ -83,7 +106,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
                 <GraduationCap className="w-4 h-4 text-muted-foreground shrink-0" />
                 <Link href="/leaderboard">
                     <Button variant={!gradeFilter ? "secondary" : "ghost"} size="sm" className="rounded-full px-4">
-                        All
+                        {t('leaderboard.all')}
                     </Button>
                 </Link>
                 {GRADES.map((grade) => (
@@ -105,7 +128,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
                         const isAnonymous = Boolean(user.leaderboard_anonymous);
                         const displayName = isAnonymous
                             ? anonymousPseudonym(user.id)
-                            : user.full_name || 'Unknown';
+                            : user.full_name || t('leaderboard.unknown');
 
                         const identity = (
                             <>
@@ -124,7 +147,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
                                     <p className="text-sm text-muted-foreground capitalize font-medium">
                                         {user.role}
                                         {/* P2-4: grade narrows down who an anonymous entry is — show it only for named entries */}
-                                        {!isAnonymous && user.grade ? ` · Grade ${user.grade}` : ''}
+                                        {!isAnonymous && user.grade ? ` · ${t('leaderboard.grade', { grade: user.grade })}` : ''}
                                     </p>
                                 </div>
                             </>
@@ -134,14 +157,14 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
                             <Card key={user.id} className={`
                                 transform transition-all duration-300 hover:scale-[1.02] border-2
                                 ${index === 0 ? 'border-yellow-400 bg-yellow-50/50 dark:bg-yellow-950/20 shadow-yellow-200 shadow-xl' : ''}
-                                ${index === 1 ? 'border-slate-300 dark:border-slate-600 bg-slate-50/50 dark:bg-muted shadow-md' : ''}
+                                ${index === 1 ? 'border-border dark:border-slate-600 bg-muted/50 dark:bg-muted shadow-md' : ''}
                                 ${index === 2 ? 'border-orange-300 bg-orange-50/50 dark:bg-orange-950/20 shadow-md' : ''}
                                 ${index > 2 ? 'border-transparent hover:border-border' : ''}
                             `}>
                                 <CardContent className="flex items-center p-4 sm:p-6 gap-4 sm:gap-6">
                                     <div className="flex-shrink-0 w-10 text-center font-bold text-xl text-muted-foreground">
                                         {index === 0 && <Crown className="w-10 h-10 text-yellow-500 mx-auto animate-pulse drop-shadow-md" />}
-                                        {index === 1 && <Medal className="w-9 h-9 text-slate-400 mx-auto drop-shadow-sm" />}
+                                        {index === 1 && <Medal className="w-9 h-9 text-muted-foreground mx-auto drop-shadow-sm" />}
                                         {index === 2 && <Medal className="w-9 h-9 text-orange-500 mx-auto drop-shadow-sm" />}
                                         {index > 2 && <span className="text-muted-foreground/60">#{index + 1}</span>}
                                     </div>
@@ -162,7 +185,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
                                             {user.points}
                                         </div>
                                         <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest bg-muted px-2 py-0.5 rounded-full mt-1">
-                                            Points
+                                            {t('leaderboard.points')}
                                         </div>
                                     </div>
                                 </CardContent>
@@ -172,11 +195,11 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
                 ) : (
                     <div className="text-center py-20 space-y-4">
                         <Trophy className="w-16 h-16 mx-auto text-muted-foreground/40" />
-                        <h3 className="text-xl font-bold text-muted-foreground">No Champions Yet</h3>
+                        <h3 className="text-xl font-bold text-muted-foreground">{t('leaderboard.emptyTitle')}</h3>
                         <p className="text-muted-foreground">
                             {gradeFilter
-                                ? `No grade ${gradeFilter} students on the board yet.`
-                                : "Be the first to earn reputation!"}
+                                ? t('leaderboard.emptyGrade', { grade: gradeFilter })
+                                : t('leaderboard.emptyDefault')}
                         </p>
                     </div>
                 )}

@@ -41,13 +41,13 @@ export default async function NewClubPage() {
     const allowedRoles: readonly string[] = CLUB_CREATOR_ROLES;
     if (!profile || !allowedRoles.includes(profile.role)) {
         return (
-            <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50/50">
+            <div className="min-h-screen flex items-center justify-center p-4 bg-muted/50">
                 <Card className="max-w-md w-full border-0 shadow-2xl text-center p-8 space-y-4">
-                    <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                    <div className="mx-auto w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
                         <ShieldAlert className="w-10 h-10 text-red-600" />
                     </div>
-                    <CardTitle className="text-2xl font-bold text-slate-900">Access Denied</CardTitle>
-                    <p className="text-slate-600">Only Parliament members, Moderators and Admins can create clubs.</p>
+                    <CardTitle className="text-2xl font-bold text-foreground">Access Denied</CardTitle>
+                    <p className="text-muted-foreground">Only Parliament members, Moderators and Admins can create clubs.</p>
                     <Button variant="outline" className="w-full mt-4" asChild>
                         <Link href="/clubs">Back to Clubs</Link>
                     </Button>
@@ -72,11 +72,11 @@ export default async function NewClubPage() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50/50 py-12 px-4">
+        <div className="min-h-screen bg-muted/50 py-12 px-4">
             <div className="max-w-2xl mx-auto space-y-8">
                 <div className="text-center space-y-2">
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Create a Club</h1>
-                    <p className="text-slate-500">Start a new community at BINOM and earn points for every meeting.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground">Create a Club</h1>
+                    <p className="text-muted-foreground">Start a new community at BINOM and earn points for every meeting.</p>
                 </div>
 
                 <Card className="border-0 shadow-xl shadow-violet-100/50 overflow-hidden">
@@ -92,15 +92,15 @@ export default async function NewClubPage() {
                     <CardContent>
                         <form action={createClub} className="space-y-6">
                             <div className="space-y-2">
-                                <Label htmlFor="name" className="text-sm font-semibold text-slate-700">Club Name</Label>
-                                <Input id="name" name="name" placeholder="e.g. BINOM Debate Society" required maxLength={120} className="h-11 border-slate-200 focus:ring-violet-500 rounded-lg shadow-sm" />
+                                <Label htmlFor="name" className="text-sm font-semibold text-foreground">Club Name</Label>
+                                <Input id="name" name="name" placeholder="e.g. BINOM Debate Society" required maxLength={120} className="h-11 border-border focus:ring-violet-500 rounded-lg shadow-sm" />
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <Label htmlFor="category" className="text-sm font-semibold text-slate-700">Category</Label>
+                                    <Label htmlFor="category" className="text-sm font-semibold text-foreground">Category</Label>
                                     <Select name="category" required>
-                                        <SelectTrigger id="category" className="h-11 border-slate-200 rounded-lg shadow-sm w-full">
+                                        <SelectTrigger id="category" className="h-11 border-border rounded-lg shadow-sm w-full">
                                             <SelectValue placeholder="Pick a category" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -114,9 +114,9 @@ export default async function NewClubPage() {
                                 </div>
                                 {isStaff && (
                                     <div className="space-y-2">
-                                        <Label htmlFor="leader_id" className="text-sm font-semibold text-slate-700">Club Leader</Label>
+                                        <Label htmlFor="leader_id" className="text-sm font-semibold text-foreground">Club Leader</Label>
                                         <Select name="leader_id">
-                                            <SelectTrigger id="leader_id" className="h-11 border-slate-200 rounded-lg shadow-sm w-full">
+                                            <SelectTrigger id="leader_id" className="h-11 border-border rounded-lg shadow-sm w-full">
                                                 <SelectValue placeholder="Select a leader (default: you)" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -138,18 +138,18 @@ export default async function NewClubPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="description" className="text-sm font-semibold text-slate-700">Description</Label>
+                                <Label htmlFor="description" className="text-sm font-semibold text-foreground">Description</Label>
                                 <Textarea
                                     id="description"
                                     name="description"
                                     placeholder="What does your club do? When do you meet? Who should join?"
-                                    className="min-h-[120px] border-slate-200 focus:ring-violet-500 resize-none rounded-lg shadow-sm"
+                                    className="min-h-[120px] border-border focus:ring-violet-500 resize-none rounded-lg shadow-sm"
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <Label className="text-sm font-semibold text-slate-700">Club Logo (optional)</Label>
-                                <div className="border border-dashed border-slate-300 rounded-lg p-2 bg-slate-50/50">
+                                <Label className="text-sm font-semibold text-foreground">Club Logo (optional)</Label>
+                                <div className="border border-dashed border-border rounded-lg p-2 bg-muted/50">
                                     <ImageUpload bucketName="club-logos" />
                                 </div>
                             </div>

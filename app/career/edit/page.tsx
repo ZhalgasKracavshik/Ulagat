@@ -43,10 +43,10 @@ export default async function CareerEditPage() {
     const subject2 = tracker?.profile_subject_2 ?? "";
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white py-10 px-4">
+        <div className="min-h-screen bg-background py-10 px-4">
             <div className="mx-auto max-w-2xl space-y-6">
                 <div className="text-center mb-4">
-                    <h1 className="text-3xl font-bold text-slate-900">Edit ЕНТ Scores</h1>
+                    <h1 className="text-3xl font-bold text-foreground">Edit ЕНТ Scores</h1>
                     <p className="text-muted-foreground mt-2">
                         Record your subject scores and choose the two profile subjects you sit.
                     </p>
@@ -191,7 +191,7 @@ function ScoreField({
 }) {
     return (
         <div className="flex items-center justify-between gap-4">
-            <Label htmlFor={name} className="text-sm font-medium text-slate-700">
+            <Label htmlFor={name} className="text-sm font-medium text-foreground">
                 {label}
             </Label>
             <Input

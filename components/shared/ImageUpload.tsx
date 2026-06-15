@@ -62,7 +62,7 @@ export function ImageUpload({ value, onChange, bucketName = "service-images" }: 
     return (
         <div className="w-full">
             {imageUrl ? (
-                <div className="relative w-full h-64 rounded-xl overflow-hidden border bg-slate-100 group">
+                <div className="relative w-full h-64 rounded-xl overflow-hidden border bg-muted group">
                     <Image
                         src={imageUrl}
                         alt="Uploaded content"
@@ -78,7 +78,7 @@ export function ImageUpload({ value, onChange, bucketName = "service-images" }: 
                     </button>
                 </div>
             ) : (
-                <div className="relative w-full h-40 border-2 border-dashed border-slate-300 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors flex flex-col items-center justify-center text-slate-400 group cursor-pointer">
+                <div className="relative w-full h-40 border-2 border-dashed border-border rounded-xl bg-muted hover:bg-muted transition-colors flex flex-col items-center justify-center text-muted-foreground group cursor-pointer">
                     <input
                         type="file"
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"

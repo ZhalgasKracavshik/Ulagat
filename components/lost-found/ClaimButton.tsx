@@ -46,8 +46,8 @@ export function ClaimButton({ itemId }: { itemId: string }) {
     }
 
     return (
-        <div className="space-y-3 rounded-xl border border-teal-200 bg-teal-50/50 p-4">
-            <p className="text-sm text-slate-600">
+        <div className="space-y-3 rounded-xl border border-teal-200 bg-teal-50/50 dark:bg-teal-950/50 p-4">
+            <p className="text-sm text-muted-foreground">
                 Add a detail only the real owner would know (optional) — it helps staff verify your claim.
             </p>
             <Textarea
@@ -55,7 +55,7 @@ export function ClaimButton({ itemId }: { itemId: string }) {
                 onChange={(e) => setNote(e.target.value)}
                 maxLength={500}
                 placeholder="e.g. There's a blue sticker on the back and a math notebook inside."
-                className="min-h-[80px] resize-none bg-white"
+                className="min-h-[80px] resize-none bg-card"
             />
             <div className="flex gap-2">
                 <Button
