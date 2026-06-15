@@ -31,9 +31,9 @@ type PendingAchievement = {
 };
 
 const TIER_BADGES: Record<AchievementTier, string> = {
-    school: 'bg-slate-100 text-slate-700 border-slate-200',
-    city: 'bg-blue-100 text-blue-700 border-blue-200',
-    national: 'bg-purple-100 text-purple-700 border-purple-200',
+    school: 'bg-muted text-foreground border-border',
+    city: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200 border-blue-200',
+    national: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-200 border-purple-200',
 };
 
 export default async function AchievementReviewPage() {
@@ -68,7 +68,7 @@ export default async function AchievementReviewPage() {
     return (
         <div className="container mx-auto py-8 space-y-8 px-4 md:px-6 min-h-screen max-w-4xl">
             <div className="flex items-center gap-4">
-                <div className="p-3 bg-amber-100 rounded-full">
+                <div className="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-full">
                     <Award className="w-8 h-8 text-amber-600" />
                 </div>
                 <div>
@@ -83,7 +83,7 @@ export default async function AchievementReviewPage() {
             {pending.length === 0 ? (
                 <div className="text-center py-20 space-y-4 border border-dashed rounded-2xl">
                     <BadgeCheck className="w-16 h-16 mx-auto text-green-200" />
-                    <h3 className="text-xl font-bold text-slate-400">All caught up!</h3>
+                    <h3 className="text-xl font-bold text-muted-foreground">All caught up!</h3>
                     <p className="text-muted-foreground">There are no pending achievements to review.</p>
                 </div>
             ) : (
@@ -103,14 +103,14 @@ export default async function AchievementReviewPage() {
                                     )}
                                     <div className="flex-grow min-w-0 space-y-2">
                                         <div className="flex flex-wrap items-center gap-2">
-                                            <h3 className="font-bold text-lg text-slate-900">{a.title}</h3>
+                                            <h3 className="font-bold text-lg text-foreground">{a.title}</h3>
                                             {a.tier && (
                                                 <Badge className={`border shadow-none capitalize ${TIER_BADGES[a.tier]}`}>
                                                     {a.tier} · +{TIER_POINTS[a.tier]} pts
                                                 </Badge>
                                             )}
                                         </div>
-                                        {a.description && <p className="text-sm text-slate-600">{a.description}</p>}
+                                        {a.description && <p className="text-sm text-muted-foreground">{a.description}</p>}
                                         {a.achievement_date && (
                                             <p className="text-xs text-muted-foreground">
                                                 Achieved: {new Date(a.achievement_date).toLocaleDateString()}
@@ -122,7 +122,7 @@ export default async function AchievementReviewPage() {
                                                     <AvatarImage src={a.profiles.avatar_url ?? undefined} />
                                                     <AvatarFallback>{a.profiles.full_name?.[0] || 'U'}</AvatarFallback>
                                                 </Avatar>
-                                                <span className="text-sm font-medium text-slate-700 group-hover:text-primary transition-colors">
+                                                <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
                                                     {a.profiles.full_name || 'Unknown'}
                                                     {a.profiles.grade ? ` · ${a.profiles.grade}${a.profiles.class_letter || ''}` : ''}
                                                 </span>

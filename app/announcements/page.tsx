@@ -60,15 +60,15 @@ export default async function AnnouncementsPage() {
     const announcements = (rows ?? []) as Announcement[];
 
     return (
-        <div className="min-h-screen bg-slate-50/50 py-12 px-4">
+        <div className="min-h-screen bg-muted/50 py-12 px-4">
             <div className="max-w-3xl mx-auto space-y-8">
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                     <div className="space-y-2">
-                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
+                        <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
                             <Megaphone className="w-8 h-8 text-indigo-600" />
                             Announcements
                         </h1>
-                        <p className="text-slate-500">
+                        <p className="text-muted-foreground">
                             Official announcements from the school administration.
                         </p>
                     </div>
@@ -83,7 +83,7 @@ export default async function AnnouncementsPage() {
                 </div>
 
                 {announcements.length === 0 ? (
-                    <div className="bg-white rounded-xl p-12 text-center text-slate-400 border border-dashed">
+                    <div className="bg-card rounded-xl p-12 text-center text-muted-foreground border border-dashed">
                         <Megaphone className="w-10 h-10 mx-auto mb-3 opacity-30" />
                         No announcements yet.
                     </div>
@@ -98,12 +98,12 @@ export default async function AnnouncementsPage() {
                                     <div className="flex items-start justify-between gap-3">
                                         <div className="flex flex-wrap items-center gap-2">
                                             {announcement.pinned && (
-                                                <span className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-full">
+                                                <span className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-1 rounded-full">
                                                     <Pin className="w-3 h-3" /> Pinned
                                                 </span>
                                             )}
                                             <CategoryBadge category={announcement.category} />
-                                            <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-500">
+                                            <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground">
                                                 <Users className="w-3 h-3" />
                                                 {gradesLabel(announcement.target_grades)}
                                             </span>
@@ -111,12 +111,12 @@ export default async function AnnouncementsPage() {
                                         {isStaff && <DeleteAnnouncementButton id={announcement.id} />}
                                     </div>
 
-                                    <h2 className="text-xl font-bold text-slate-900">{announcement.title}</h2>
-                                    <p className="text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">
+                                    <h2 className="text-xl font-bold text-foreground">{announcement.title}</h2>
+                                    <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
                                         {announcement.body}
                                     </p>
 
-                                    <div className="flex items-center justify-between pt-1 text-xs text-slate-400">
+                                    <div className="flex items-center justify-between pt-1 text-xs text-muted-foreground">
                                         <span>{format(new Date(announcement.created_at), 'MMM d, yyyy')}</span>
                                         {announcement.expires_at && (
                                             <span>Visible until {format(new Date(announcement.expires_at), 'MMM d, yyyy')}</span>

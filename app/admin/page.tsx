@@ -186,7 +186,7 @@ export default async function AdminPage() {
                                         </thead>
                                         <tbody>
                                             {allServices.map((service: any) => (
-                                                <tr key={service.id} className="border-b hover:bg-slate-50">
+                                                <tr key={service.id} className="border-b hover:bg-muted">
                                                     <td className="py-3 px-2 font-medium">
                                                         <Link href={`/services/${service.id}`} className="hover:text-primary">
                                                             {service.title}

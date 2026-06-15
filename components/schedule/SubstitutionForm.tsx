@@ -132,7 +132,7 @@ export function SubstitutionForm() {
         <div className="space-y-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="space-y-2">
-                    <Label htmlFor="sub_date" className="text-sm font-semibold text-slate-700">Date</Label>
+                    <Label htmlFor="sub_date" className="text-sm font-semibold text-foreground">Date</Label>
                     <Input
                         id="sub_date"
                         type="date"
@@ -141,7 +141,7 @@ export function SubstitutionForm() {
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Grade</Label>
+                    <Label className="text-sm font-semibold text-foreground">Grade</Label>
                     <Select value={grade} onValueChange={setGrade}>
                         <SelectTrigger className="w-full">
                             <SelectValue placeholder="Grade" />
@@ -154,7 +154,7 @@ export function SubstitutionForm() {
                     </Select>
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="sub_letter" className="text-sm font-semibold text-slate-700">Class letter</Label>
+                    <Label htmlFor="sub_letter" className="text-sm font-semibold text-foreground">Class letter</Label>
                     <Input
                         id="sub_letter"
                         value={classLetter}
@@ -164,7 +164,7 @@ export function SubstitutionForm() {
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Period</Label>
+                    <Label className="text-sm font-semibold text-foreground">Period</Label>
                     <Select value={period} onValueChange={setPeriod}>
                         <SelectTrigger className="w-full">
                             <SelectValue placeholder="Period" />
@@ -181,10 +181,10 @@ export function SubstitutionForm() {
             </div>
 
             {lessonChecked && (
-                <div className={`flex items-start gap-3 rounded-lg border p-3 text-sm ${scheduledLesson ? 'bg-sky-50 border-sky-200' : 'bg-amber-50 border-amber-200'}`}>
+                <div className={`flex items-start gap-3 rounded-lg border p-3 text-sm ${scheduledLesson ? 'bg-sky-50 dark:bg-sky-950/40 border-sky-200' : 'bg-amber-50 dark:bg-amber-950/40 border-amber-200'}`}>
                     <BookOpen className={`w-4 h-4 mt-0.5 shrink-0 ${scheduledLesson ? 'text-sky-600' : 'text-amber-600'}`} />
                     {scheduledLesson ? (
-                        <p className="text-slate-700">
+                        <p className="text-foreground">
                             Scheduled lesson: <strong>{scheduledLesson.subject}</strong>
                             {scheduledLesson.teacher_name && <> — {scheduledLesson.teacher_name}</>}
                             {scheduledLesson.room && <>, Room {scheduledLesson.room}</>}
@@ -198,7 +198,7 @@ export function SubstitutionForm() {
             )}
 
             <div className="space-y-2">
-                <Label className="text-sm font-semibold text-slate-700">Type</Label>
+                <Label className="text-sm font-semibold text-foreground">Type</Label>
                 <Select value={type} onValueChange={(v) => setType(v as SubstitutionType)}>
                     <SelectTrigger className="w-full">
                         <SelectValue />
@@ -216,7 +216,7 @@ export function SubstitutionForm() {
                     {type === 'substitution' && (
                         <>
                             <div className="space-y-2">
-                                <Label htmlFor="new_subject" className="text-sm font-semibold text-slate-700">New subject</Label>
+                                <Label htmlFor="new_subject" className="text-sm font-semibold text-foreground">New subject</Label>
                                 <Input
                                     id="new_subject"
                                     value={newSubject}
@@ -225,7 +225,7 @@ export function SubstitutionForm() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="new_teacher" className="text-sm font-semibold text-slate-700">New teacher</Label>
+                                <Label htmlFor="new_teacher" className="text-sm font-semibold text-foreground">New teacher</Label>
                                 <Input
                                     id="new_teacher"
                                     value={newTeacher}
@@ -236,7 +236,7 @@ export function SubstitutionForm() {
                         </>
                     )}
                     <div className="space-y-2">
-                        <Label htmlFor="new_room" className="text-sm font-semibold text-slate-700">New room</Label>
+                        <Label htmlFor="new_room" className="text-sm font-semibold text-foreground">New room</Label>
                         <Input
                             id="new_room"
                             value={newRoom}
@@ -248,7 +248,7 @@ export function SubstitutionForm() {
             )}
 
             <div className="space-y-2">
-                <Label htmlFor="sub_note" className="text-sm font-semibold text-slate-700">Note (optional)</Label>
+                <Label htmlFor="sub_note" className="text-sm font-semibold text-foreground">Note (optional)</Label>
                 <Textarea
                     id="sub_note"
                     value={note}

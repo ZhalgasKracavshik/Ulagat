@@ -66,7 +66,7 @@ export function InviteParentSection({ studentId, existingTokens }: InviteParentS
             : null;
 
     return (
-        <Card className="border-dashed border-blue-200 bg-blue-50/40">
+        <Card className="border-dashed border-blue-200 bg-blue-50/40 dark:bg-blue-950/40">
             <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-base text-blue-800">
                     <Users className="w-4 h-4" />
@@ -79,12 +79,12 @@ export function InviteParentSection({ studentId, existingTokens }: InviteParentS
                 </p>
 
                 {error && (
-                    <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
+                    <p className="text-sm text-red-600 bg-red-50 dark:bg-red-950/40 rounded-lg px-3 py-2">{error}</p>
                 )}
 
                 {activeCode ? (
                     <div className="space-y-3">
-                        <div className="flex items-center gap-3 bg-white border border-blue-200 rounded-xl p-4">
+                        <div className="flex items-center gap-3 bg-card border border-blue-200 rounded-xl p-4">
                             <span className="text-3xl font-mono font-bold tracking-widest text-blue-700 flex-1 text-center">
                                 {activeCode}
                             </span>

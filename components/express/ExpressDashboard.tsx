@@ -38,7 +38,7 @@ function SubstitutionPill({ cell }: { cell: DayCell }) {
         room_change: "Room change",
     };
     return (
-        <Badge className="bg-orange-100 text-orange-700 border-0 text-[10px] gap-1">
+        <Badge className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-200 border-0 text-[10px] gap-1">
             <Repeat className="w-3 h-3" />
             {labels[cell.substitution.type] ?? "Change"}
         </Badge>
@@ -59,10 +59,10 @@ export function ExpressDashboard({ data }: { data: ExpressData }) {
         <div className="mx-auto w-full max-w-md px-4 py-5 space-y-5">
             {/* Greeting */}
             <div className="space-y-1">
-                <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">
+                <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
                     Good morning, {firstName}
                 </h1>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-muted-foreground">
                     {classLabel ? `Class ${classLabel} · Today at a glance` : "Today at a glance"}
                 </p>
             </div>
@@ -73,7 +73,7 @@ export function ExpressDashboard({ data }: { data: ExpressData }) {
             {/* Substitutions banner */}
             {substitutionCount > 0 && (
                 <Link href="/schedule">
-                    <div className="flex items-center gap-2 rounded-xl bg-orange-50 border border-orange-200 px-4 py-3 text-orange-800 active:scale-[0.99] transition-transform">
+                    <div className="flex items-center gap-2 rounded-xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 px-4 py-3 text-orange-800 active:scale-[0.99] transition-transform">
                         <Repeat className="w-5 h-5 shrink-0" />
                         <span className="text-sm font-semibold">
                             {substitutionCount} change{substitutionCount > 1 ? "s" : ""} to today&apos;s schedule
@@ -86,7 +86,7 @@ export function ExpressDashboard({ data }: { data: ExpressData }) {
             {/* Today's schedule */}
             <section className="space-y-2">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500 flex items-center gap-2">
+                    <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground flex items-center gap-2">
                         <CalendarDays className="w-4 h-4 text-sky-500" />
                         Today
                     </h2>
@@ -100,7 +100,7 @@ export function ExpressDashboard({ data }: { data: ExpressData }) {
 
                 {!hasSchoolToday || activeCells.length === 0 ? (
                     <Card className="border-dashed">
-                        <CardContent className="py-8 flex flex-col items-center gap-2 text-slate-400">
+                        <CardContent className="py-8 flex flex-col items-center gap-2 text-muted-foreground">
                             <Moon className="w-7 h-7" />
                             <span className="text-sm font-medium">No lessons today</span>
                         </CardContent>
@@ -114,11 +114,11 @@ export function ExpressDashboard({ data }: { data: ExpressData }) {
                                 <Card key={cell.period} className="shadow-sm">
                                     <CardContent className="p-3 flex items-center gap-3">
                                         <div className="flex flex-col items-center justify-center w-12 shrink-0 text-center">
-                                            <span className="text-[10px] font-bold uppercase text-slate-400">
+                                            <span className="text-[10px] font-bold uppercase text-muted-foreground">
                                                 #{cell.period}
                                             </span>
                                             {time && (
-                                                <span className="text-xs font-semibold text-slate-600">
+                                                <span className="text-xs font-semibold text-muted-foreground">
                                                     {time.start}
                                                 </span>
                                             )}
@@ -130,10 +130,10 @@ export function ExpressDashboard({ data }: { data: ExpressData }) {
                                                 </span>
                                             ) : (
                                                 <>
-                                                    <p className="font-bold text-slate-900 truncate">
+                                                    <p className="font-bold text-foreground truncate">
                                                         {eff.subject ?? "Free period"}
                                                     </p>
-                                                    <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-slate-500">
+                                                    <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
                                                         {eff.room && (
                                                             <span className="flex items-center gap-1">
                                                                 <MapPin className="w-3 h-3" /> {eff.room}
@@ -160,7 +160,7 @@ export function ExpressDashboard({ data }: { data: ExpressData }) {
             {/* Pinned / latest announcements */}
             <section className="space-y-2">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500 flex items-center gap-2">
+                    <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground flex items-center gap-2">
                         <Megaphone className="w-4 h-4 text-indigo-500" />
                         Announcements
                     </h2>
@@ -182,10 +182,10 @@ export function ExpressDashboard({ data }: { data: ExpressData }) {
                                             <Pin className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
                                         )}
                                         <div className="min-w-0">
-                                            <p className="font-semibold text-slate-900 text-sm leading-snug line-clamp-2">
+                                            <p className="font-semibold text-foreground text-sm leading-snug line-clamp-2">
                                                 {a.title}
                                             </p>
-                                            <p className="text-xs text-slate-400 mt-0.5 capitalize">
+                                            <p className="text-xs text-muted-foreground mt-0.5 capitalize">
                                                 {a.category}
                                             </p>
                                         </div>
@@ -196,14 +196,14 @@ export function ExpressDashboard({ data }: { data: ExpressData }) {
                     </div>
                 ) : (
                     <Card className="border-dashed">
-                        <CardContent className="py-6 text-center text-sm text-slate-400">
+                        <CardContent className="py-6 text-center text-sm text-muted-foreground">
                             Nothing new.
                         </CardContent>
                     </Card>
                 )}
             </section>
 
-            <p className="text-center text-[11px] text-slate-400 pt-1">
+            <p className="text-center text-[11px] text-muted-foreground pt-1">
                 Switch to Full mode (moon icon) for everything else.
             </p>
         </div>

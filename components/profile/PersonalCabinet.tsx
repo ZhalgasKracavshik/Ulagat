@@ -126,7 +126,7 @@ export function PersonalCabinet({
         label: t("cabinet.settings"),
         hint: t("cabinet.settingsHint"),
         icon: Settings,
-        color: "text-slate-500",
+        color: "text-muted-foreground",
         bg: "bg-muted",
     });
 
@@ -136,7 +136,7 @@ export function PersonalCabinet({
         label: t("cabinet.editProfile"),
         hint: t("cabinet.editProfileHint"),
         icon: Edit,
-        color: "text-slate-500",
+        color: "text-muted-foreground",
         bg: "bg-muted",
     });
 
@@ -169,19 +169,19 @@ export function PersonalCabinet({
                                     </Badge>
                                 )}
                                 {isPremium && (
-                                    <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100 border-amber-200 gap-1">
+                                    <Badge className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-200 hover:bg-amber-100 border-amber-200 gap-1">
                                         <Sparkles className="w-3 h-3" />
                                         {t("cabinet.premium")}
                                     </Badge>
                                 )}
                                 {isChainValid ? (
-                                    <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-green-200 gap-1">
+                                    <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-200 hover:bg-green-100 border-green-200 gap-1">
                                         <ShieldCheck className="w-3 h-3" />
                                         {t("cabinet.verifiedLedger")}
                                     </Badge>
                                 ) : (
                                     <Badge
-                                        className="bg-red-100 text-red-700 hover:bg-red-100 border-red-200 gap-1"
+                                        className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-200 hover:bg-red-100 border-red-200 gap-1"
                                         title="Reputation ledger has been tampered with"
                                     >
                                         <ShieldCheck className="w-3 h-3" />

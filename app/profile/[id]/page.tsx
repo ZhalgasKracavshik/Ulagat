@@ -210,12 +210,12 @@ export default async function ProfilePage({ params }: PageProps) {
                                         {profile.role}
                                     </Badge>
                                     {isChainValid ? (
-                                        <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-green-200 gap-1">
+                                        <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-200 hover:bg-green-100 border-green-200 gap-1">
                                             <ShieldCheck className="w-3 h-3" />
                                             Verified
                                         </Badge>
                                     ) : (
-                                        <Badge className="bg-red-100 text-red-700 hover:bg-red-100 border-red-200 gap-1" title="Reputation ledger has been tampered with">
+                                        <Badge className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-200 hover:bg-red-100 border-red-200 gap-1" title="Reputation ledger has been tampered with">
                                             <ShieldCheck className="w-3 h-3" />
                                             Invalid Ledger
                                         </Badge>

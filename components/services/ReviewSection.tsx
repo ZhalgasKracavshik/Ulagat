@@ -27,7 +27,7 @@ export async function ReviewSection({ serviceId }: { serviceId: string }) {
             <div className="space-y-4">
                 {reviews && reviews.length > 0 ? (
                     reviews.map((review: any) => (
-                        <div key={review.id} className="flex gap-4 p-4 bg-slate-50 rounded-lg border">
+                        <div key={review.id} className="flex gap-4 p-4 bg-muted rounded-lg border">
                             <Avatar>
                                 <AvatarImage src={review.profiles?.avatar_url} />
                                 <AvatarFallback>{review.profiles?.full_name?.[0]}</AvatarFallback>
@@ -37,11 +37,11 @@ export async function ReviewSection({ serviceId }: { serviceId: string }) {
                                     <span className="font-bold">{review.profiles?.full_name}</span>
                                     <div className="flex text-yellow-500">
                                         {[...Array(5)].map((_, i) => (
-                                            <Star key={i} className={`w-3 h-3 ${i < review.rating ? 'fill-current' : 'text-slate-300'}`} />
+                                            <Star key={i} className={`w-3 h-3 ${i < review.rating ? 'fill-current' : 'text-muted-foreground'}`} />
                                         ))}
                                     </div>
                                 </div>
-                                <p className="text-slate-600 text-sm">{review.comment}</p>
+                                <p className="text-muted-foreground text-sm">{review.comment}</p>
                             </div>
                         </div>
                     ))
@@ -52,7 +52,7 @@ export async function ReviewSection({ serviceId }: { serviceId: string }) {
 
             {/* Add Review Form */}
             {user ? (
-                <div className="bg-white p-6 rounded-xl border shadow-sm">
+                <div className="bg-card p-6 rounded-xl border shadow-sm">
                     <h4 className="font-bold mb-4">Leave a Review</h4>
                     <form action={addReview.bind(null, serviceId)} className="space-y-4">
                         <div>
@@ -70,7 +70,7 @@ export async function ReviewSection({ serviceId }: { serviceId: string }) {
                     </form>
                 </div>
             ) : (
-                <div className="p-6 bg-slate-50 rounded-xl text-center">
+                <div className="p-6 bg-muted rounded-xl text-center">
                     <p>Please <a href="/login" className="text-blue-600 underline">log in</a> to leave a review.</p>
                 </div>
             )}

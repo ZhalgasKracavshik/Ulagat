@@ -117,7 +117,7 @@ function Segmented<T extends string>({
                         className={[
                             "flex flex-col items-start gap-1 rounded-lg border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                             active
-                                ? "border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300"
+                                ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300"
                                 : "border-border bg-background text-foreground hover:bg-muted",
                         ].join(" ")}
                     >
@@ -291,7 +291,7 @@ function PrivacySection({ initialAnonymous }: { initialAnonymous: boolean }) {
                 >
                     <span
                         className={[
-                            "inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform",
+                            "inline-block h-5 w-5 transform rounded-full bg-card shadow transition-transform",
                             anonymous ? "translate-x-5" : "translate-x-0.5",
                         ].join(" ")}
                     />

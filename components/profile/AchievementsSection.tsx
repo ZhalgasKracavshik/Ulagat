@@ -31,20 +31,20 @@ const TIER_LABELS: Record<AchievementTier, string> = {
 function StatusBadge({ status }: { status: Achievement['status'] }) {
     if (status === 'verified') {
         return (
-            <Badge className="gap-1 bg-green-100 text-green-700 border border-green-200 shadow-none hover:bg-green-100">
+            <Badge className="gap-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-200 border border-green-200 shadow-none hover:bg-green-100">
                 <BadgeCheck className="w-3 h-3" /> Verified
             </Badge>
         );
     }
     if (status === 'rejected') {
         return (
-            <Badge className="gap-1 bg-red-100 text-red-700 border border-red-200 shadow-none hover:bg-red-100">
+            <Badge className="gap-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-200 border border-red-200 shadow-none hover:bg-red-100">
                 <Ban className="w-3 h-3" /> Rejected
             </Badge>
         );
     }
     return (
-        <Badge className="gap-1 bg-amber-100 text-amber-700 border border-amber-200 shadow-none hover:bg-amber-100">
+        <Badge className="gap-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-200 border border-amber-200 shadow-none hover:bg-amber-100">
             <Clock className="w-3 h-3" /> Pending
         </Badge>
     );
@@ -126,7 +126,7 @@ export function AchievementsSection({ achievements, isOwner }: AchievementsProps
 
             {/* Add Form */}
             {showForm && (
-                <Card className="border-amber-200 bg-amber-50/50">
+                <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-950/50">
                     <CardHeader className="pb-2 flex flex-row items-center justify-between">
                         <CardTitle className="text-sm">New Achievement</CardTitle>
                         <Button variant="ghost" size="icon" onClick={() => { setShowForm(false); setPreview(null); }}>
@@ -141,11 +141,11 @@ export function AchievementsSection({ achievements, isOwner }: AchievementsProps
 
                             {/* Tier (Phase 6) — determines points awarded after verification */}
                             <div className="space-y-1">
-                                <Label className="text-xs text-slate-600">Level</Label>
+                                <Label className="text-xs text-muted-foreground">Level</Label>
                                 <select
                                     name="tier"
                                     defaultValue="school"
-                                    className="w-full h-9 rounded-md border border-input bg-white px-3 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
+                                    className="w-full h-9 rounded-md border border-input bg-card px-3 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-amber-500"
                                 >
                                     {ACHIEVEMENT_TIERS.map((tier) => (
                                         <option key={tier} value={tier}>
@@ -160,7 +160,7 @@ export function AchievementsSection({ achievements, isOwner }: AchievementsProps
 
                             {/* Image Upload */}
                             <div className="space-y-2">
-                                <Label className="text-xs text-slate-600 flex items-center gap-1">
+                                <Label className="text-xs text-muted-foreground flex items-center gap-1">
                                     <ImageIcon className="w-3 h-3" />
                                     Certificate / Photo (optional)
                                 </Label>
@@ -211,16 +211,16 @@ export function AchievementsSection({ achievements, isOwner }: AchievementsProps
                                 <div className="flex items-start justify-between gap-2">
                                     <div>
                                         <div className="flex flex-wrap items-center gap-2">
-                                            <h4 className="font-bold text-slate-900">{a.title}</h4>
+                                            <h4 className="font-bold text-foreground">{a.title}</h4>
                                             <StatusBadge status={a.status} />
                                             {a.tier && (
-                                                <Badge variant="outline" className="text-[10px] uppercase tracking-wide bg-slate-50">
+                                                <Badge variant="outline" className="text-[10px] uppercase tracking-wide bg-muted">
                                                     {TIER_LABELS[a.tier]}
                                                 </Badge>
                                             )}
                                         </div>
                                         {a.description && (
-                                            <p className="text-sm text-slate-600 mt-1">{a.description}</p>
+                                            <p className="text-sm text-muted-foreground mt-1">{a.description}</p>
                                         )}
                                         {a.status === 'rejected' && a.rejection_reason && (
                                             <p className="text-xs text-red-600 mt-1">Reason: {a.rejection_reason}</p>
@@ -246,8 +246,8 @@ export function AchievementsSection({ achievements, isOwner }: AchievementsProps
                         </Card>
                     ))
                 ) : (
-                    <div className="col-span-full text-center py-8 bg-slate-50 rounded-xl border border-dashed">
-                        <Award className="w-10 h-10 mx-auto text-slate-300 mb-2" />
+                    <div className="col-span-full text-center py-8 bg-muted rounded-xl border border-dashed">
+                        <Award className="w-10 h-10 mx-auto text-muted-foreground mb-2" />
                         <p className="text-muted-foreground text-sm">
                             {isOwner ? "Share your achievements with the community!" : "No achievements yet."}
                         </p>

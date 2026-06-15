@@ -56,7 +56,7 @@ export function CountdownWidget({ entDateIso, holiday, nearestEvent }: Countdown
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <Card className="border-violet-200 bg-gradient-to-br from-violet-50 to-indigo-50 overflow-hidden">
                 <CardContent className="p-4 flex items-center gap-4">
-                    <div className="p-3 bg-violet-100 rounded-full text-violet-700 shrink-0">
+                    <div className="p-3 bg-violet-100 dark:bg-violet-900/30 rounded-full text-violet-700 dark:text-violet-200 shrink-0">
                         <GraduationCap className="w-6 h-6" />
                     </div>
                     <div className="min-w-0">
@@ -71,7 +71,7 @@ export function CountdownWidget({ entDateIso, holiday, nearestEvent }: Countdown
 
             <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 overflow-hidden">
                 <CardContent className="p-4 flex items-center gap-4">
-                    <div className="p-3 bg-emerald-100 rounded-full text-emerald-700 shrink-0">
+                    <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-full text-emerald-700 dark:text-emerald-200 shrink-0">
                         <PartyPopper className="w-6 h-6" />
                     </div>
                     <div className="min-w-0">
@@ -88,7 +88,7 @@ export function CountdownWidget({ entDateIso, holiday, nearestEvent }: Countdown
 
             <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-cyan-50 overflow-hidden sm:col-span-2 lg:col-span-1">
                 <CardContent className="p-4 flex items-center gap-4">
-                    <div className="p-3 bg-blue-100 rounded-full text-blue-700 shrink-0">
+                    <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full text-blue-700 dark:text-blue-200 shrink-0">
                         <Timer className="w-6 h-6" />
                     </div>
                     {nearestEvent ? (

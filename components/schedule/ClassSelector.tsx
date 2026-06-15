@@ -37,7 +37,7 @@ export function ClassSelector({ classes, selectedGrade, selectedLetter }: ClassS
                 router.push(`/schedule?grade=${grade}&letter=${encodeURIComponent(letter)}`);
             }}
         >
-            <SelectTrigger className="w-[180px] bg-white">
+            <SelectTrigger className="w-[180px] bg-card">
                 <SelectValue placeholder="Select class" />
             </SelectTrigger>
             <SelectContent>

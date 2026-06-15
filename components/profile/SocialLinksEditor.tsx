@@ -61,14 +61,14 @@ export function SocialLinksEditor({ initialLinks }: SocialLinksEditorProps) {
             {links.map((link, index) => {
                 const networkInfo = SOCIAL_NETWORKS.find((n) => n.value === link.network);
                 return (
-                    <div key={index} className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border">
-                        <GripVertical className="w-4 h-4 text-slate-300 shrink-0" />
+                    <div key={index} className="flex items-center gap-2 p-3 bg-muted rounded-lg border">
+                        <GripVertical className="w-4 h-4 text-muted-foreground shrink-0" />
 
                         <Select
                             value={link.network}
                             onValueChange={(v) => updateLink(index, "network", v)}
                         >
-                            <SelectTrigger className="w-[140px] shrink-0 bg-white">
+                            <SelectTrigger className="w-[140px] shrink-0 bg-card">
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -84,7 +84,7 @@ export function SocialLinksEditor({ initialLinks }: SocialLinksEditorProps) {
                             value={link.url}
                             onChange={(e) => updateLink(index, "url", e.target.value)}
                             placeholder={networkInfo?.placeholder || "https://..."}
-                            className="flex-1 bg-white"
+                            className="flex-1 bg-card"
                         />
 
                         <Button

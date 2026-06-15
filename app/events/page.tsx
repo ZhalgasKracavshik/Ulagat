@@ -78,7 +78,7 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
         <div className="container mx-auto py-8 space-y-8 px-4 md:px-6">
             <div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-4 bg-gradient-to-r from-blue-500/10 to-transparent p-6 rounded-2xl border border-blue-500/10">
                 <div className="space-y-2">
-                    <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">
+                    <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
                         School Olympiads & Events
                     </h1>
                     <p className="text-muted-foreground text-lg max-w-xl">
@@ -113,7 +113,7 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
 
             {/* Tag filter chips */}
             <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-                <Tag className="w-4 h-4 text-slate-400 shrink-0" />
+                <Tag className="w-4 h-4 text-muted-foreground shrink-0" />
                 <Link href="/events">
                     <Button variant={!tagFilter ? "secondary" : "ghost"} size="sm" className="rounded-full px-4">
                         All
@@ -138,15 +138,15 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
                         const enrolled = registrationCounts[event.id] || 0;
                         return (
                             <Card key={event.id} className="group hover:shadow-xl transition-all border-blue-100 overflow-hidden">
-                                <div className="aspect-video w-full bg-slate-100 relative">
+                                <div className="aspect-video w-full bg-muted relative">
                                     {event.image_url ? (
                                         <img src={event.image_url} alt={event.title} className="object-cover w-full h-full" />
                                     ) : (
-                                        <div className="flex items-center justify-center w-full h-full bg-blue-50 text-blue-200">
+                                        <div className="flex items-center justify-center w-full h-full bg-blue-50 dark:bg-blue-950/40 text-blue-200">
                                             <Trophy className="w-16 h-16" />
                                         </div>
                                     )}
-                                    <div className="absolute top-2 left-2 bg-white/90 px-3 py-1 rounded-full text-xs font-bold shadow-sm">
+                                    <div className="absolute top-2 left-2 bg-card/90 px-3 py-1 rounded-full text-xs font-bold shadow-sm">
                                         {format(new Date(event.event_date), 'MMM d, yyyy')}
                                     </div>
                                 </div>
@@ -160,7 +160,7 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
                                         {event.max_students && (
                                             <div className="flex items-center text-xs gap-1">
                                                 <Users className="w-3 h-3 text-blue-500" />
-                                                <span className={enrolled >= event.max_students ? "text-red-500 font-bold" : "text-slate-600"}>
+                                                <span className={enrolled >= event.max_students ? "text-red-500 font-bold" : "text-muted-foreground"}>
                                                     {enrolled}/{event.max_students}
                                                 </span>
                                             </div>
@@ -169,7 +169,7 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
                                     {event.tags && event.tags.length > 0 && (
                                         <div className="flex flex-wrap gap-1 pt-1">
                                             {event.tags.map((tag) => (
-                                                <Badge key={tag} variant="outline" className="text-[10px] uppercase tracking-wide bg-blue-50/50 border-blue-200 text-blue-700">
+                                                <Badge key={tag} variant="outline" className="text-[10px] uppercase tracking-wide bg-blue-50/50 dark:bg-blue-950/50 border-blue-200 text-blue-700">
                                                     {tag}
                                                 </Badge>
                                             ))}
@@ -177,7 +177,7 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
                                     )}
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="line-clamp-3 text-sm text-slate-600">
+                                    <p className="line-clamp-3 text-sm text-muted-foreground">
                                         {event.description}
                                     </p>
                                 </CardContent>
@@ -193,10 +193,10 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
                     })
                 ) : (
                     <div className="col-span-full py-20 text-center space-y-4">
-                        <div className="mx-auto w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center">
+                        <div className="mx-auto w-24 h-24 bg-blue-50 dark:bg-blue-950/40 rounded-full flex items-center justify-center">
                             <Trophy className="w-12 h-12 text-blue-300" />
                         </div>
-                        <h3 className="text-xl font-bold text-slate-800">No Events Scheduled</h3>
+                        <h3 className="text-xl font-bold text-foreground">No Events Scheduled</h3>
                         <p className="text-muted-foreground">
                             {tagFilter
                                 ? `No events tagged "${tagFilter}" yet. Try another tag!`

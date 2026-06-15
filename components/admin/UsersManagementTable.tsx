@@ -71,11 +71,11 @@ export function UsersManagementTable({ users, currentUserId }: UsersManagementTa
 
     const roleBadgeClass = (role: string) => {
         switch (role) {
-            case 'admin': return 'bg-red-50 text-red-700 border-red-200';
-            case 'moderator': return 'bg-blue-50 text-blue-700 border-blue-200';
-            case 'teacher': return 'bg-green-50 text-green-700 border-green-200';
-            case 'parent': return 'bg-amber-50 text-amber-700 border-amber-200';
-            case 'parliament': return 'bg-purple-50 text-purple-700 border-purple-200';
+            case 'admin': return 'bg-red-50 dark:bg-red-950/40 text-red-700 border-red-200';
+            case 'moderator': return 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 border-blue-200';
+            case 'teacher': return 'bg-green-50 dark:bg-green-950/40 text-green-700 border-green-200';
+            case 'parent': return 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 border-amber-200';
+            case 'parliament': return 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 border-purple-200';
             default: return '';
         }
     };

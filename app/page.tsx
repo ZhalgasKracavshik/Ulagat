@@ -45,7 +45,7 @@ export default async function Home() {
         <div className="mx-auto grid justify-center gap-6 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-3">
           <div className="relative overflow-hidden rounded-xl border bg-background/50 backdrop-blur-sm p-2 transition-all hover:shadow-xl hover:-translate-y-1 duration-300">
             <div className="flex h-[200px] flex-col justify-between rounded-md p-6">
-              <div className="p-3 bg-blue-100 w-fit rounded-full text-blue-600">
+              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 w-fit rounded-full text-blue-600 dark:text-blue-200">
                 <BookOpen className="h-8 w-8" />
               </div>
               <div className="space-y-2">
@@ -58,7 +58,7 @@ export default async function Home() {
           </div>
           <div className="relative overflow-hidden rounded-xl border bg-background/50 backdrop-blur-sm p-2 transition-all hover:shadow-xl hover:-translate-y-1 duration-300">
             <div className="flex h-[200px] flex-col justify-between rounded-md p-6">
-              <div className="p-3 bg-yellow-100 w-fit rounded-full text-yellow-600">
+              <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 w-fit rounded-full text-yellow-600 dark:text-yellow-200">
                 <Trophy className="h-8 w-8" />
               </div>
               <div className="space-y-2">
@@ -71,7 +71,7 @@ export default async function Home() {
           </div>
           <div className="relative overflow-hidden rounded-xl border bg-background/50 backdrop-blur-sm p-2 transition-all hover:shadow-xl hover:-translate-y-1 duration-300">
             <div className="flex h-[200px] flex-col justify-between rounded-md p-6">
-              <div className="p-3 bg-pink-100 w-fit rounded-full text-pink-600">
+              <div className="p-3 bg-pink-100 dark:bg-pink-900/30 w-fit rounded-full text-pink-600 dark:text-pink-200">
                 <Users className="h-8 w-8" />
               </div>
               <div className="space-y-2">

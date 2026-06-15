@@ -92,7 +92,7 @@ export function AnnouncementForm() {
     return (
         <div className="space-y-6">
             <div className="space-y-2">
-                <Label htmlFor="ann_title" className="text-sm font-semibold text-slate-700">Title</Label>
+                <Label htmlFor="ann_title" className="text-sm font-semibold text-foreground">Title</Label>
                 <Input
                     id="ann_title"
                     value={title}
@@ -103,7 +103,7 @@ export function AnnouncementForm() {
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="ann_body" className="text-sm font-semibold text-slate-700">Text</Label>
+                <Label htmlFor="ann_body" className="text-sm font-semibold text-foreground">Text</Label>
                 <Textarea
                     id="ann_body"
                     value={body}
@@ -116,7 +116,7 @@ export function AnnouncementForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-slate-700">Category</Label>
+                    <Label className="text-sm font-semibold text-foreground">Category</Label>
                     <Select value={category} onValueChange={(v) => setCategory(v as AnnouncementCategory)}>
                         <SelectTrigger className="w-full">
                             <SelectValue />
@@ -129,7 +129,7 @@ export function AnnouncementForm() {
                     </Select>
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="ann_expires" className="text-sm font-semibold text-slate-700">
+                    <Label htmlFor="ann_expires" className="text-sm font-semibold text-foreground">
                         Visible until (optional)
                     </Label>
                     <Input
@@ -138,19 +138,19 @@ export function AnnouncementForm() {
                         value={expiresAt}
                         onChange={(e) => setExpiresAt(e.target.value)}
                     />
-                    <p className="text-xs text-slate-500">Leave empty to keep the announcement up indefinitely.</p>
+                    <p className="text-xs text-muted-foreground">Leave empty to keep the announcement up indefinitely.</p>
                 </div>
             </div>
 
             <div className="space-y-3">
-                <Label className="text-sm font-semibold text-slate-700">Target grades</Label>
+                <Label className="text-sm font-semibold text-foreground">Target grades</Label>
                 <div className="flex items-center gap-2">
                     <Checkbox
                         id="ann_all_grades"
                         checked={allGrades}
                         onCheckedChange={(checked) => setAllGrades(checked === true)}
                     />
-                    <Label htmlFor="ann_all_grades" className="font-medium text-slate-700 cursor-pointer">
+                    <Label htmlFor="ann_all_grades" className="font-medium text-foreground cursor-pointer">
                         All grades (whole school)
                     </Label>
                 </div>
@@ -182,7 +182,7 @@ export function AnnouncementForm() {
                     checked={pinned}
                     onCheckedChange={(checked) => setPinned(checked === true)}
                 />
-                <Label htmlFor="ann_pinned" className="font-medium text-slate-700 cursor-pointer">
+                <Label htmlFor="ann_pinned" className="font-medium text-foreground cursor-pointer">
                     Pin to the top of the feed
                 </Label>
             </div>

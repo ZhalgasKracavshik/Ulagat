@@ -76,7 +76,7 @@ export function ServiceReviewTable({ services }: ServiceReviewTableProps) {
 
                                         <div className="grid gap-4 py-4">
                                             {service.image_url && (
-                                                <div className="relative h-64 w-full rounded-lg overflow-hidden bg-slate-100">
+                                                <div className="relative h-64 w-full rounded-lg overflow-hidden bg-muted">
                                                     <Image src={service.image_url} alt={service.title} fill className="object-cover" />
                                                 </div>
                                             )}
@@ -85,14 +85,14 @@ export function ServiceReviewTable({ services }: ServiceReviewTableProps) {
                                                 <h4 className="font-medium flex items-center gap-2">
                                                     <FileText className="w-4 h-4" /> Description
                                                 </h4>
-                                                <p className="text-sm text-slate-600 dark:text-slate-300 whitespace-pre-wrap bg-slate-50 p-4 rounded-md">
+                                                <p className="text-sm text-muted-foreground dark:text-slate-300 whitespace-pre-wrap bg-muted p-4 rounded-md">
                                                     {service.description}
                                                 </p>
                                             </div>
 
                                             <div className="flex gap-4 text-sm">
-                                                <div className="bg-slate-100 px-3 py-1 rounded">Price: <strong>{service.price} ₸</strong></div>
-                                                <div className="bg-slate-100 px-3 py-1 rounded">Category: <strong>{service.category}</strong></div>
+                                                <div className="bg-muted px-3 py-1 rounded">Price: <strong>{service.price} ₸</strong></div>
+                                                <div className="bg-muted px-3 py-1 rounded">Category: <strong>{service.category}</strong></div>
                                             </div>
                                         </div>
 

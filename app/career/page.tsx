@@ -41,17 +41,17 @@ function daysUntil(iso: string): number {
 
 const STATUS_STYLE: Record<ComparisonStatus, { badge: string; bar: string; label: string }> = {
     reached: {
-        badge: "border-emerald-300 text-emerald-700 bg-emerald-50",
+        badge: "border-emerald-300 text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40",
         bar: "bg-emerald-500",
         label: "Reached",
     },
     close: {
-        badge: "border-amber-300 text-amber-700 bg-amber-50",
+        badge: "border-amber-300 text-amber-700 bg-amber-50 dark:bg-amber-950/40",
         bar: "bg-amber-500",
         label: "Close",
     },
     below: {
-        badge: "border-red-300 text-red-700 bg-red-50",
+        badge: "border-red-300 text-red-700 bg-red-50 dark:bg-red-950/40",
         bar: "bg-red-500",
         label: "Below",
     },

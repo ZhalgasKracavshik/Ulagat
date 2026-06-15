@@ -54,9 +54,9 @@ export function UserManagementTable({ users, currentUserId }: UserManagementTabl
                         <TableCell className="text-muted-foreground text-sm">***</TableCell>
                         <TableCell>
                             <Badge variant="outline" className={
-                                user.role === 'admin' ? 'bg-red-50 text-red-700 border-red-200' :
-                                    user.role === 'moderator' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                        user.role === 'teacher' ? 'bg-green-50 text-green-700 border-green-200' : ''
+                                user.role === 'admin' ? 'bg-red-50 dark:bg-red-950/40 text-red-700 border-red-200' :
+                                    user.role === 'moderator' ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 border-blue-200' :
+                                        user.role === 'teacher' ? 'bg-green-50 dark:bg-green-950/40 text-green-700 border-green-200' : ''
                             }>
                                 {user.role}
                             </Badge>

@@ -186,7 +186,7 @@ export function Navbar() {
                                         </DropdownMenuItem>
                                         <DropdownMenuItem asChild>
                                             <Link href="/settings" className="cursor-pointer">
-                                                <Settings className="mr-2 h-4 w-4 text-slate-500" />
+                                                <Settings className="mr-2 h-4 w-4 text-muted-foreground" />
                                                 <span>{t("nav.settings")}</span>
                                             </Link>
                                         </DropdownMenuItem>
@@ -226,8 +226,8 @@ export function Navbar() {
                                 href={NAV.premium.href}
                                 className={
                                     isPremium
-                                        ? "hidden lg:flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700"
-                                        : "hidden lg:flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-100"
+                                        ? "hidden lg:flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 dark:bg-amber-950/40 px-3 py-1 text-xs font-semibold text-amber-700"
+                                        : "hidden lg:flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 dark:bg-amber-950/40 px-3 py-1 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-100"
                                 }
                             >
                                 <Sparkles className="w-3.5 h-3.5" />
@@ -235,7 +235,7 @@ export function Navbar() {
                             </Link>
 
                             {/* Reputation pill */}
-                            <div className="hidden sm:flex items-center gap-1 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+                            <div className="hidden sm:flex items-center gap-1 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 rounded-full border border-amber-200">
                                 <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
                                 <span className="text-sm font-bold text-amber-700">{profile?.reputation || 0}</span>
                             </div>

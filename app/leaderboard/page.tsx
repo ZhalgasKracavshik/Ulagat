@@ -70,7 +70,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
     return (
         <div className="container mx-auto py-8 space-y-8 px-4 md:px-6">
             <div className="text-center space-y-4">
-                <h1 className="text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-600">
+                <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
                     Smart Reputation Leaderboard
                 </h1>
                 <p className="text-muted-foreground max-w-2xl mx-auto">
@@ -134,14 +134,14 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
                             <Card key={user.id} className={`
                                 transform transition-all duration-300 hover:scale-[1.02] border-2
                                 ${index === 0 ? 'border-yellow-400 bg-yellow-50/50 dark:bg-yellow-950/20 shadow-yellow-200 shadow-xl' : ''}
-                                ${index === 1 ? 'border-slate-300 dark:border-slate-600 bg-slate-50/50 dark:bg-muted shadow-md' : ''}
+                                ${index === 1 ? 'border-border dark:border-slate-600 bg-muted/50 dark:bg-muted shadow-md' : ''}
                                 ${index === 2 ? 'border-orange-300 bg-orange-50/50 dark:bg-orange-950/20 shadow-md' : ''}
                                 ${index > 2 ? 'border-transparent hover:border-border' : ''}
                             `}>
                                 <CardContent className="flex items-center p-4 sm:p-6 gap-4 sm:gap-6">
                                     <div className="flex-shrink-0 w-10 text-center font-bold text-xl text-muted-foreground">
                                         {index === 0 && <Crown className="w-10 h-10 text-yellow-500 mx-auto animate-pulse drop-shadow-md" />}
-                                        {index === 1 && <Medal className="w-9 h-9 text-slate-400 mx-auto drop-shadow-sm" />}
+                                        {index === 1 && <Medal className="w-9 h-9 text-muted-foreground mx-auto drop-shadow-sm" />}
                                         {index === 2 && <Medal className="w-9 h-9 text-orange-500 mx-auto drop-shadow-sm" />}
                                         {index > 2 && <span className="text-muted-foreground/60">#{index + 1}</span>}
                                     </div>

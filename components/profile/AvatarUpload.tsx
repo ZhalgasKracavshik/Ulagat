@@ -60,7 +60,7 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete }: AvatarUploa
 
     return (
         <div className="flex flex-col items-center gap-4">
-            <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-slate-100 dark:border-slate-800 shadow-sm group">
+            <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-border dark:border-slate-800 shadow-sm group">
                 {avatarUrl ? (
                     <>
                         <Image
@@ -79,7 +79,7 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete }: AvatarUploa
                     </>
                 ) : (
                     <div className="w-full h-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
-                        <Upload className="w-8 h-8 text-slate-400" />
+                        <Upload className="w-8 h-8 text-muted-foreground" />
                     </div>
                 )}
             </div>

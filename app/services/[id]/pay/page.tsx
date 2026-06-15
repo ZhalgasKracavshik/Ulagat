@@ -38,16 +38,16 @@ export default async function PaymentPage({ params }: PageProps) {
         <div className="container flex items-center justify-center min-h-[60vh]">
             <Card className="max-w-md w-full border-green-200">
                 <CardHeader className="text-center pb-2">
-                    <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4 text-green-600">
+                    <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4 text-green-600 dark:text-green-200">
                         <CreditCard className="w-8 h-8" />
                     </div>
                     <CardTitle className="text-2xl">Confirm Payment</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 text-center">
                     <p className="text-muted-foreground">
-                        You are about to pay <span className="font-bold text-black">100 ₸</span> to list your service:
+                        You are about to pay <span className="font-bold text-foreground">100 ₸</span> to list your service:
                     </p>
-                    <div className="bg-slate-50 p-4 rounded font-bold text-lg">
+                    <div className="bg-muted p-4 rounded font-bold text-lg">
                         "{service.title}"
                     </div>
                     <p className="text-xs text-muted-foreground">

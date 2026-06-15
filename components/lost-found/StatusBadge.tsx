@@ -5,15 +5,15 @@ import type { LostItemStatus } from "@/types";
 
 const STATUS_STYLES: Record<LostItemStatus, { className: string; icon: typeof Search }> = {
     lost: {
-        className: "bg-amber-100 border-amber-300 text-amber-800",
+        className: "bg-amber-100 dark:bg-amber-900/30 border-amber-300 text-amber-800 dark:text-amber-200",
         icon: Search,
     },
     found: {
-        className: "bg-blue-100 border-blue-300 text-blue-800",
+        className: "bg-blue-100 dark:bg-blue-900/30 border-blue-300 text-blue-800 dark:text-blue-200",
         icon: PackageCheck,
     },
     claimed: {
-        className: "bg-emerald-100 border-emerald-300 text-emerald-800",
+        className: "bg-emerald-100 dark:bg-emerald-900/30 border-emerald-300 text-emerald-800 dark:text-emerald-200",
         icon: HandHeart,
     },
 };

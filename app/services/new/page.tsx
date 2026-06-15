@@ -31,13 +31,13 @@ export default async function NewServicePage() {
     const allowedRoles: readonly string[] = SERVICE_CREATOR_ROLES;
     if (!profile || !allowedRoles.includes(profile.role)) {
         return (
-            <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50/50">
+            <div className="min-h-screen flex items-center justify-center p-4 bg-muted/50">
                 <Card className="max-w-md w-full border-0 shadow-2xl text-center p-8 space-y-4">
-                    <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                    <div className="mx-auto w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
                         <ShieldAlert className="w-10 h-10 text-red-600" />
                     </div>
-                    <CardTitle className="text-2xl font-bold text-slate-900">Access Denied</CardTitle>
-                    <p className="text-slate-600">Students cannot post listings directly. This feature is for teachers, staff and parliament members.</p>
+                    <CardTitle className="text-2xl font-bold text-foreground">Access Denied</CardTitle>
+                    <p className="text-muted-foreground">Students cannot post listings directly. This feature is for teachers, staff and parliament members.</p>
                     <Button variant="outline" className="w-full mt-4" asChild>
                         <a href="/services">Back to Bulletin Board</a>
                     </Button>
@@ -47,11 +47,11 @@ export default async function NewServicePage() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50/50 py-12 px-4">
+        <div className="min-h-screen bg-muted/50 py-12 px-4">
             <div className="max-w-2xl mx-auto space-y-8">
                 <div className="text-center space-y-2">
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900">Post to the Bulletin Board</h1>
-                    <p className="text-slate-500">Offer courses, tutoring, internships or mentorship to the school community.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground">Post to the Bulletin Board</h1>
+                    <p className="text-muted-foreground">Offer courses, tutoring, internships or mentorship to the school community.</p>
                 </div>
 
                 <Card className="border-0 shadow-xl shadow-indigo-100/50 overflow-hidden">
@@ -65,15 +65,15 @@ export default async function NewServicePage() {
                     <CardContent>
                         <form action={createService} className="space-y-6">
                             <div className="space-y-2">
-                                <Label htmlFor="title" className="text-sm font-semibold text-slate-700">Title</Label>
-                                <Input id="title" name="title" placeholder="e.g. Algebra Tutoring Grade 9" required className="h-11 border-slate-200 focus:ring-indigo-500 rounded-lg shadow-sm" />
+                                <Label htmlFor="title" className="text-sm font-semibold text-foreground">Title</Label>
+                                <Input id="title" name="title" placeholder="e.g. Algebra Tutoring Grade 9" required className="h-11 border-border focus:ring-indigo-500 rounded-lg shadow-sm" />
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <Label htmlFor="category" className="text-sm font-semibold text-slate-700">Category</Label>
+                                    <Label htmlFor="category" className="text-sm font-semibold text-foreground">Category</Label>
                                     <Select name="category" required>
-                                        <SelectTrigger className="h-11 border-slate-200 rounded-lg shadow-sm">
+                                        <SelectTrigger className="h-11 border-border rounded-lg shadow-sm">
                                             <SelectValue placeholder="Select functionality" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -85,9 +85,9 @@ export default async function NewServicePage() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="duration" className="text-sm font-semibold text-slate-700">Duration</Label>
+                                    <Label htmlFor="duration" className="text-sm font-semibold text-foreground">Duration</Label>
                                     <Select name="duration" defaultValue="7">
-                                        <SelectTrigger className="h-11 border-slate-200 rounded-lg shadow-sm">
+                                        <SelectTrigger className="h-11 border-border rounded-lg shadow-sm">
                                             <SelectValue placeholder="Listing active for..." />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -101,22 +101,22 @@ export default async function NewServicePage() {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
                                 <div className="space-y-2">
-                                    <Label htmlFor="price" className="text-sm font-semibold text-slate-700">Price (₸)</Label>
-                                    <Input id="price" name="price" type="number" placeholder="2000" min="0" required className="h-11 border-slate-200 rounded-lg shadow-sm" />
+                                    <Label htmlFor="price" className="text-sm font-semibold text-foreground">Price (₸)</Label>
+                                    <Input id="price" name="price" type="number" placeholder="2000" min="0" required className="h-11 border-border rounded-lg shadow-sm" />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-sm font-semibold text-slate-700">Cover Image</Label>
+                                    <Label className="text-sm font-semibold text-foreground">Cover Image</Label>
                                     <ImageUpload bucketName="service-images" />
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="description" className="text-sm font-semibold text-slate-700">Description</Label>
+                                <Label htmlFor="description" className="text-sm font-semibold text-foreground">Description</Label>
                                 <Textarea
                                     id="description"
                                     name="description"
                                     placeholder="I can help with homework and exam prep. Available Mon-Wed after 3 PM."
-                                    className="min-h-[120px] border-slate-200 focus:ring-indigo-500 resize-none rounded-lg shadow-sm"
+                                    className="min-h-[120px] border-border focus:ring-indigo-500 resize-none rounded-lg shadow-sm"
                                     required
                                 />
                                 <p className="text-xs text-muted-foreground text-right italic">Include schedule, experience, and what's included.</p>

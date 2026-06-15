@@ -43,12 +43,12 @@ export default async function GroupChatPage({ params }: PageProps) {
         <div className="container py-6 max-w-3xl h-[calc(100vh-4rem)] flex flex-col mx-auto px-4">
             {/* Header */}
             <div className="flex items-center gap-4 border-b pb-4 mb-4">
-                <Link href="/messages" className="text-muted-foreground hover:text-slate-700">
+                <Link href="/messages" className="text-muted-foreground hover:text-foreground">
                     <ArrowLeft className="w-5 h-5" />
                 </Link>
-                <Avatar className="bg-indigo-100">
+                <Avatar className="bg-indigo-100 dark:bg-indigo-900/30">
                     <AvatarImage src={group.avatar_url} />
-                    <AvatarFallback className="bg-indigo-100 text-indigo-700 font-bold">{group.name?.[0]}</AvatarFallback>
+                    <AvatarFallback className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-200 font-bold">{group.name?.[0]}</AvatarFallback>
                 </Avatar>
                 <div>
                     <h2 className="font-bold text-xl">{group.name}</h2>
@@ -59,7 +59,7 @@ export default async function GroupChatPage({ params }: PageProps) {
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto space-y-4 p-4 bg-slate-50 rounded-lg mb-4">
+            <div className="flex-1 overflow-y-auto space-y-4 p-4 bg-muted rounded-lg mb-4">
                 {messages && messages.map((msg: any) => {
                     const isMe = msg.sender_id === user.id;
                     const sender = Array.isArray(msg.sender) ? msg.sender[0] : msg.sender;
@@ -74,13 +74,13 @@ export default async function GroupChatPage({ params }: PageProps) {
                                 )}
                                 <div className={`rounded-2xl px-4 py-2 ${isMe
                                     ? 'bg-indigo-600 text-white rounded-br-none'
-                                    : 'bg-white border text-slate-800 rounded-bl-none shadow-sm'
+                                    : 'bg-card border text-foreground rounded-bl-none shadow-sm'
                                     }`}>
                                     {!isMe && (
                                         <span className="text-[10px] font-bold text-indigo-500 block">{sender?.full_name}</span>
                                     )}
                                     <p>{msg.content}</p>
-                                    <span className={`text-[10px] block mt-1 ${isMe ? 'text-indigo-200' : 'text-slate-400'}`}>
+                                    <span className={`text-[10px] block mt-1 ${isMe ? 'text-indigo-200' : 'text-muted-foreground'}`}>
                                         {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </span>
                                 </div>

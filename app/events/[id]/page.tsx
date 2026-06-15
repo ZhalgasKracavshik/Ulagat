@@ -111,7 +111,7 @@ export default async function EventDetailsPage({ params }: PageProps) {
                     {(user?.id === event.organizer_id || ['admin', 'moderator'].includes(userRole)) && (
                         <div className="flex flex-col gap-2 items-end">
                             {event.expires_at && (
-                                <div className="text-xs text-orange-200 font-medium bg-white/10 px-2 py-1 rounded backdrop-blur-sm">
+                                <div className="text-xs text-orange-200 font-medium bg-card/10 px-2 py-1 rounded backdrop-blur-sm">
                                     Expires: {new Date(event.expires_at).toLocaleDateString()}
                                 </div>
                             )}
@@ -132,13 +132,13 @@ export default async function EventDetailsPage({ params }: PageProps) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="md:col-span-2 space-y-8">
                     <div className="prose max-w-none">
-                        <h2 className="text-2xl font-bold text-slate-900 mb-4">Event Details</h2>
-                        <p className="whitespace-pre-wrap text-lg leading-relaxed text-slate-700">{event.description}</p>
+                        <h2 className="text-2xl font-bold text-foreground mb-4">Event Details</h2>
+                        <p className="whitespace-pre-wrap text-lg leading-relaxed text-foreground">{event.description}</p>
                     </div>
 
-                    <Card className="bg-yellow-50 border-yellow-200">
+                    <Card className="bg-yellow-50 dark:bg-yellow-950/40 border-yellow-200">
                         <CardContent className="p-6 flex items-start gap-4">
-                            <div className="p-3 bg-yellow-100 rounded-full text-yellow-700">
+                            <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-full text-yellow-700 dark:text-yellow-200">
                                 <Trophy className="w-6 h-6" />
                             </div>
                             <div>
@@ -152,10 +152,10 @@ export default async function EventDetailsPage({ params }: PageProps) {
 
                     {/* Delegation / participants list */}
                     <div className="space-y-4">
-                        <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                        <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
                             <Users className="w-6 h-6 text-blue-600" />
                             Participants
-                            <span className="text-base font-semibold text-slate-400">({registrationCount})</span>
+                            <span className="text-base font-semibold text-muted-foreground">({registrationCount})</span>
                         </h2>
                         {regs.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -163,13 +163,13 @@ export default async function EventDetailsPage({ params }: PageProps) {
                                     <Link
                                         key={reg.user_id}
                                         href={`/profile/${reg.user_id}`}
-                                        className="flex items-center gap-3 p-3 rounded-xl border bg-white hover:bg-blue-50/50 hover:border-blue-200 transition-colors"
+                                        className="flex items-center gap-3 p-3 rounded-xl border bg-card hover:bg-blue-50/50 hover:border-blue-200 transition-colors"
                                     >
                                         <Avatar className="w-10 h-10">
                                             <AvatarImage src={reg.profiles?.avatar_url ?? undefined} />
                                             <AvatarFallback>{reg.profiles?.full_name?.[0] || 'U'}</AvatarFallback>
                                         </Avatar>
-                                        <span className="font-semibold text-slate-800 truncate">
+                                        <span className="font-semibold text-foreground truncate">
                                             {reg.profiles?.full_name || 'Unknown user'}
                                         </span>
                                     </Link>
@@ -207,15 +207,15 @@ export default async function EventDetailsPage({ params }: PageProps) {
                         </CardContent>
                     </Card>
 
-                    <div className="p-4 border rounded-xl bg-slate-50">
-                        <h4 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3">Organizer</h4>
+                    <div className="p-4 border rounded-xl bg-muted">
+                        <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3">Organizer</h4>
                         <Link href={`/profile/${event.organizer_id}`} className="flex items-center gap-3">
                             <Avatar>
                                 <AvatarImage src={event.profiles?.avatar_url} />
                                 <AvatarFallback>{event.profiles?.full_name?.[0]}</AvatarFallback>
                             </Avatar>
                             <div>
-                                <p className="font-bold text-slate-900">{event.profiles?.full_name}</p>
+                                <p className="font-bold text-foreground">{event.profiles?.full_name}</p>
                                 <p className="text-xs text-muted-foreground capitalize">{event.profiles?.role}</p>
                             </div>
                         </Link>

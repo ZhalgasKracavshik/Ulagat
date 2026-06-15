@@ -42,16 +42,16 @@ export default async function ServiceDetailsPage({ params }: PageProps) {
             <div className="space-y-10">
                 {/* Header & Hero */}
                 <div className="space-y-6">
-                    <div className="relative aspect-video bg-slate-100 rounded-2xl overflow-hidden border shadow-sm">
+                    <div className="relative aspect-video bg-muted rounded-2xl overflow-hidden border shadow-sm">
                         {service.image_url ? (
                             <img src={service.image_url} alt={service.title} className="object-cover w-full h-full" />
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center text-slate-300">
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                                 <span className="text-8xl font-bold opacity-10">{service.category?.[0]}</span>
                             </div>
                         )}
                         <div className="absolute top-4 right-4">
-                            <Badge variant="secondary" className="bg-white/90 backdrop-blur shadow-sm px-4 py-1 text-sm font-bold">
+                            <Badge variant="secondary" className="bg-card/90 backdrop-blur shadow-sm px-4 py-1 text-sm font-bold">
                                 {service.category}
                             </Badge>
                         </div>
@@ -59,13 +59,13 @@ export default async function ServiceDetailsPage({ params }: PageProps) {
 
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div className="space-y-1">
-                            <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">{service.title}</h1>
+                            <h1 className="text-4xl font-extrabold text-foreground tracking-tight">{service.title}</h1>
                             <div className="flex items-center gap-3">
                                 <div className="flex items-center text-amber-500 font-bold gap-1">
                                     <Star className="w-5 h-5 fill-amber-500" />
                                     <span>5.0</span>
                                 </div>
-                                <span className="text-slate-400">•</span>
+                                <span className="text-muted-foreground">•</span>
                                 <span className="text-muted-foreground">0 reviews</span>
                             </div>
                         </div>
@@ -91,14 +91,14 @@ export default async function ServiceDetailsPage({ params }: PageProps) {
                 {/* Main Content Sections */}
                 <div className="grid grid-cols-1 gap-12">
                     <div className="space-y-4">
-                        <h3 className="text-xl font-bold text-slate-900">About this service</h3>
-                        <p className="text-slate-600 leading-relaxed text-lg whitespace-pre-wrap">
+                        <h3 className="text-xl font-bold text-foreground">About this service</h3>
+                        <p className="text-muted-foreground leading-relaxed text-lg whitespace-pre-wrap">
                             {service.description}
                         </p>
                     </div>
 
                     {/* Integrated Provider Card */}
-                    <Card className="border-0 bg-slate-50/50 overflow-hidden">
+                    <Card className="border-0 bg-muted/50 overflow-hidden">
                         <CardContent className="p-8">
                             <div className="flex flex-col md:flex-row items-center justify-between gap-8">
                                 <div className="flex items-center gap-6">
@@ -108,9 +108,9 @@ export default async function ServiceDetailsPage({ params }: PageProps) {
                                     </Avatar>
                                     <div>
                                         <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">Provided By</p>
-                                        <h4 className="text-2xl font-bold text-slate-900">{service.profiles?.full_name}</h4>
-                                        <div className="flex items-center gap-4 mt-1 text-sm text-slate-500">
-                                            <span className="capitalize bg-white px-2 py-0.5 rounded border text-[10px] font-bold">
+                                        <h4 className="text-2xl font-bold text-foreground">{service.profiles?.full_name}</h4>
+                                        <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                                            <span className="capitalize bg-card px-2 py-0.5 rounded border text-[10px] font-bold">
                                                 {service.profiles?.role || 'Student'}
                                             </span>
                                             <span className="flex items-center gap-1">
@@ -125,7 +125,7 @@ export default async function ServiceDetailsPage({ params }: PageProps) {
                                         otherUserId={service.owner_id}
                                         currentUserId={user?.id || null}
                                     />
-                                    <div className="flex items-center justify-center md:justify-start gap-2 text-xs text-slate-400 font-medium">
+                                    <div className="flex items-center justify-center md:justify-start gap-2 text-xs text-muted-foreground font-medium">
                                         <Clock className="w-3 h-3" />
                                         Avg. Response: ~1 hour
                                     </div>

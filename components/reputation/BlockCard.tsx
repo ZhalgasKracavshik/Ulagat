@@ -29,7 +29,7 @@ export function BlockCard({ block, index }: BlockCardProps) {
             {/* Connector Dot */}
             <div className={`absolute -left-[9px] top-0 w-4 h-4 rounded-full border-4 border-background ${isGenesis ? 'bg-yellow-500' : 'bg-primary'}`} />
 
-            <Card className={`overflow-hidden transition-all hover:shadow-lg ${isGenesis ? 'border-yellow-400 bg-yellow-50/10' : ''}`}>
+            <Card className={`overflow-hidden transition-all hover:shadow-lg ${isGenesis ? 'border-yellow-400 bg-yellow-50/10 dark:bg-yellow-950/10' : ''}`}>
                 <div className="absolute top-0 right-0 p-2 opacity-10">
                     <Hash className="w-24 h-24" />
                 </div>

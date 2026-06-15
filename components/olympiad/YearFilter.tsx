@@ -29,7 +29,7 @@ export function YearFilter({ years, value, baseParams }: YearFilterProps) {
             aria-label="Filter by year"
             value={value ?? ""}
             onChange={handleChange}
-            className="h-9 rounded-full border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
+            className="h-9 rounded-full border border-border bg-card px-4 text-sm font-medium text-muted-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400/50"
         >
             <option value="">All years</option>
             {years.map((year) => (
