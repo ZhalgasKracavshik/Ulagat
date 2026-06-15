@@ -69,17 +69,17 @@ export default async function GuidePage() {
     const sections: DirSection[] = [
         {
             label: t("guide.everyDay"),
-            intro: "The essentials you'll open most mornings and evenings.",
+            intro: t("guide.everyDayIntro"),
             items: [NAV.schedule, NAV.announcements, NAV.home],
         },
         {
             label: t("guide.community"),
-            intro: "Find your people and celebrate what the school achieves together.",
+            intro: t("guide.communityIntro"),
             items: [NAV.events, NAV.clubs, NAV.leaderboard, NAV.friends, NAV.chats],
         },
         {
             label: t("guide.grow"),
-            intro: "Tools to prepare for what comes next.",
+            intro: t("guide.growIntro"),
             items: [
                 ...(showCareer ? [NAV.career] : []),
                 NAV.prep,
@@ -88,12 +88,12 @@ export default async function GuidePage() {
         },
         {
             label: t("guide.services"),
-            intro: "Practical help around campus.",
+            intro: t("guide.servicesIntro"),
             items: [NAV.bulletin, NAV.lostFound],
         },
         {
             label: t("guide.account"),
-            intro: "Your home base and ways to get more out of Ulagat.",
+            intro: t("guide.accountIntro"),
             items: [NAV.cabinet, NAV.premium],
         },
     ];
@@ -118,14 +118,14 @@ export default async function GuidePage() {
                             href="/home"
                             className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300"
                         >
-                            Go to my dashboard
+                            {t("guide.heroDashboard")}
                             <ArrowRight className="w-4 h-4" />
                         </Link>
                         <Link
                             href="/profile/me"
                             className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300"
                         >
-                            Open my cabinet
+                            {t("guide.heroCabinet")}
                         </Link>
                     </div>
                 </section>
@@ -138,30 +138,30 @@ export default async function GuidePage() {
                             icon={UserCog}
                             color="text-violet-500"
                             bg="bg-violet-50 dark:bg-violet-950/40"
-                            title="Roles shape your view"
-                            body="What you can do depends on your role — student, teacher, parent, parliament or staff. Ulagat only shows you what's relevant."
+                            title={t("guide.rolesTitle")}
+                            body={t("guide.rolesBody")}
                         />
                         <HowItWorks
                             icon={Award}
                             color="text-amber-500"
                             bg="bg-amber-50 dark:bg-amber-950/40"
-                            title="Reputation & achievements"
-                            body="Earn reputation points for verified accomplishments. Your achievements are recorded on a tamper-proof ledger you can show off."
+                            title={t("guide.reputationTitle")}
+                            body={t("guide.reputationBody")}
                         />
                         <HowItWorks
                             icon={Sun}
                             color="text-amber-500"
                             bg="bg-amber-50 dark:bg-amber-950/40"
-                            title="Morning / evening toggle"
-                            body="Use the Sun/Moon switch in the top bar to flip between Express (just schedule and news) and Full (everything)."
+                            title={t("guide.toggleTitle")}
+                            body={t("guide.toggleBody")}
                             secondaryIcon={Moon}
                         />
                         <HowItWorks
                             icon={UsersRound}
                             color="text-blue-500"
                             bg="bg-blue-50 dark:bg-blue-950/40"
-                            title="Parents join by invite"
-                            body="Students generate a one-time code from their cabinet. Parents enter it when registering to securely link to their child."
+                            title={t("guide.parentsTitle")}
+                            body={t("guide.parentsBody")}
                         />
                     </div>
                 </section>
@@ -189,6 +189,7 @@ export default async function GuidePage() {
                                             key={item.key}
                                             item={item}
                                             label={t(`nav.${item.key}`)}
+                                            hint={t(`nav.hints.${item.key}`)}
                                             openLabel={t("common.open")}
                                         />
                                     ))}
@@ -203,7 +204,7 @@ export default async function GuidePage() {
                             <div>
                                 <h3 className="text-base font-semibold text-foreground">{t("guide.forStaff")}</h3>
                                 <p className="text-sm text-muted-foreground">
-                                    Tools available to moderators and admins.
+                                    {t("guide.forStaffIntro")}
                                 </p>
                             </div>
                             <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
@@ -214,7 +215,7 @@ export default async function GuidePage() {
                                     <div className="min-w-0 flex-1">
                                         <p className="font-semibold text-foreground">{t("nav.moderation")}</p>
                                         <p className="text-sm text-muted-foreground leading-snug">
-                                            Review and approve submitted services, events and materials.
+                                            {t("guide.moderationHint")}
                                         </p>
                                         <Link
                                             href="/admin"
@@ -265,10 +266,12 @@ function HowItWorks({
 function FeatureCard({
     item,
     label,
+    hint,
     openLabel,
 }: {
     item: NavDestination;
     label: string;
+    hint: string;
     openLabel: string;
 }) {
     const Icon = item.icon;
@@ -279,7 +282,7 @@ function FeatureCard({
             </span>
             <div className="min-w-0 flex-1">
                 <p className="font-semibold text-foreground">{label}</p>
-                <p className="text-sm text-muted-foreground leading-snug">{item.hint}</p>
+                <p className="text-sm text-muted-foreground leading-snug">{hint}</p>
                 <Link
                     href={item.href}
                     className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-700"

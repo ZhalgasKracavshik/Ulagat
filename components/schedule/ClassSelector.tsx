@@ -8,6 +8,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { useT } from "@/hooks/useT";
 
 export type ClassOption = {
     grade: number;
@@ -23,6 +24,7 @@ type ClassSelectorProps = {
 /** Staff-only dropdown to view the schedule of any class. */
 export function ClassSelector({ classes, selectedGrade, selectedLetter }: ClassSelectorProps) {
     const router = useRouter();
+    const { t } = useT();
 
     const value =
         selectedGrade !== null && selectedLetter !== null
@@ -38,12 +40,12 @@ export function ClassSelector({ classes, selectedGrade, selectedLetter }: ClassS
             }}
         >
             <SelectTrigger className="w-[180px] bg-card">
-                <SelectValue placeholder="Select class" />
+                <SelectValue placeholder={t('schedule.selectClass')} />
             </SelectTrigger>
             <SelectContent>
                 {classes.map((c) => (
                     <SelectItem key={`${c.grade}|${c.letter}`} value={`${c.grade}|${c.letter}`}>
-                        Class {c.grade}{c.letter}
+                        {t('schedule.classLabel', { label: `${c.grade}${c.letter}` })}
                     </SelectItem>
                 ))}
             </SelectContent>

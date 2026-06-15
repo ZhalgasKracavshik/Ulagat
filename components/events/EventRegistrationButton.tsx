@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useT } from "@/hooks/useT";
 
 interface EventRegistrationButtonProps {
     eventId: string;
@@ -22,6 +23,7 @@ export function EventRegistrationButton({
     isExpired,
     deadlinePassed = false
 }: EventRegistrationButtonProps) {
+    const { t } = useT();
     const [loading, setLoading] = useState(false);
     const [isRegistered, setIsRegistered] = useState(initialIsRegistered);
     const router = useRouter();
@@ -39,15 +41,15 @@ export function EventRegistrationButton({
             const data = await res.json();
 
             if (!res.ok) {
-                toast.error(data.error || "Something went wrong");
+                toast.error(data.error || t("events.toastGenericError"));
                 return;
             }
 
             setIsRegistered(!isRegistered);
-            toast.success(isRegistered ? "Unregistered successfully" : "Registered successfully!");
+            toast.success(isRegistered ? t("events.toastUnregistered") : t("events.toastRegistered"));
             router.refresh();
         } catch (err) {
-            toast.error("Failed to update registration");
+            toast.error(t("events.toastUpdateFailed"));
         } finally {
             setLoading(false);
         }
@@ -56,7 +58,7 @@ export function EventRegistrationButton({
     if (isExpired && !isRegistered) {
         return (
             <Button disabled className="w-full text-lg h-12 font-bold mb-2">
-                Event Expired
+                {t("events.eventExpired")}
             </Button>
         );
     }
@@ -64,7 +66,7 @@ export function EventRegistrationButton({
     if (deadlinePassed && !isRegistered) {
         return (
             <Button disabled variant="secondary" className="w-full text-lg h-12 font-bold mb-2">
-                Registration Closed
+                {t("events.registrationClosed")}
             </Button>
         );
     }
@@ -72,7 +74,7 @@ export function EventRegistrationButton({
     if (isFull && !isRegistered) {
         return (
             <Button disabled variant="secondary" className="w-full text-lg h-12 font-bold mb-2">
-                Event Full
+                {t("events.eventFull")}
             </Button>
         );
     }
@@ -90,10 +92,10 @@ export function EventRegistrationButton({
             ) : isRegistered ? (
                 <>
                     <CheckCircle2 className="w-5 h-5 mr-2 text-green-500" />
-                    Unregister
+                    {t("events.unregister")}
                 </>
             ) : (
-                "Register Now"
+                t("events.registerNow")
             )}
         </Button>
     );

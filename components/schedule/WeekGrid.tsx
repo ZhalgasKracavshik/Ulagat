@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CalendarDays } from "lucide-react";
 import { BELL_SCHEDULE } from "@/lib/schedule/bells";
+import { useT } from "@/hooks/useT";
 import { CurrentLessonWidget } from "./CurrentLessonWidget";
 import { SubstitutionBadge } from "./SubstitutionBadge";
 import type { DayCell, DayColumn } from "./types";
@@ -15,6 +16,7 @@ type WeekGridProps = {
 };
 
 function CellContent({ cell }: { cell: DayCell }) {
+    const { t } = useT();
     const { lesson, substitution } = cell;
 
     if (!lesson && !substitution) {
@@ -26,7 +28,7 @@ function CellContent({ cell }: { cell: DayCell }) {
             <div className="space-y-0.5">
                 <p className="font-semibold text-foreground leading-tight">{lesson!.subject}</p>
                 <p className="text-xs text-muted-foreground">
-                    {lesson!.room && <span>Room {lesson!.room}</span>}
+                    {lesson!.room && <span>{t('schedule.room')} {lesson!.room}</span>}
                     {lesson!.room && lesson!.teacher && <span> · </span>}
                     {lesson!.teacher && <span>{lesson!.teacher}</span>}
                 </p>
@@ -41,7 +43,7 @@ function CellContent({ cell }: { cell: DayCell }) {
             {substitution.type === 'cancellation' && (
                 <div className="space-y-0.5">
                     {lesson && <p className="font-semibold text-muted-foreground line-through leading-tight">{lesson.subject}</p>}
-                    <p className="text-xs font-semibold text-red-600">Lesson cancelled</p>
+                    <p className="text-xs font-semibold text-red-600">{t('schedule.lessonCancelled')}</p>
                 </div>
             )}
 
@@ -49,8 +51,8 @@ function CellContent({ cell }: { cell: DayCell }) {
                 <div className="space-y-0.5">
                     {lesson && <p className="font-semibold text-foreground leading-tight">{lesson.subject}</p>}
                     <p className="text-xs text-muted-foreground">
-                        {lesson?.room && <span className="line-through mr-1">Room {lesson.room}</span>}
-                        <span className="font-semibold text-blue-700">Room {substitution.newRoom ?? '?'}</span>
+                        {lesson?.room && <span className="line-through mr-1">{t('schedule.room')} {lesson.room}</span>}
+                        <span className="font-semibold text-blue-700">{t('schedule.room')} {substitution.newRoom ?? '?'}</span>
                     </p>
                     {lesson?.teacher && <p className="text-xs text-muted-foreground">{lesson.teacher}</p>}
                 </div>
@@ -67,7 +69,7 @@ function CellContent({ cell }: { cell: DayCell }) {
                         {substitution.newSubject ?? lesson?.subject ?? '—'}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                        {(substitution.newRoom ?? lesson?.room) && <span>Room {substitution.newRoom ?? lesson?.room}</span>}
+                        {(substitution.newRoom ?? lesson?.room) && <span>{t('schedule.room')} {substitution.newRoom ?? lesson?.room}</span>}
                         {(substitution.newRoom ?? lesson?.room) && substitution.newTeacher && <span> · </span>}
                         {substitution.newTeacher && <span>{substitution.newTeacher}</span>}
                     </p>
@@ -87,6 +89,7 @@ function formatDayDate(iso: string): string {
 }
 
 export function WeekGrid({ days, todayIso }: WeekGridProps) {
+    const { t } = useT();
     const todayColumn = days.find((d) => d.date === todayIso) ?? null;
     const [mobileDay, setMobileDay] = useState<number>(todayColumn?.dayOfWeek ?? 1);
 
@@ -103,9 +106,9 @@ export function WeekGrid({ days, todayIso }: WeekGridProps) {
                         <div className="mx-auto w-16 h-16 bg-blue-50 dark:bg-blue-950/40 rounded-full flex items-center justify-center">
                             <CalendarDays className="w-8 h-8 text-blue-300" />
                         </div>
-                        <h3 className="text-lg font-bold text-foreground">No timetable published yet</h3>
+                        <h3 className="text-lg font-bold text-foreground">{t('schedule.notPublishedTitle')}</h3>
                         <p className="text-sm text-muted-foreground">
-                            The schedule for this class and week has not been published.
+                            {t('schedule.notPublishedBody')}
                         </p>
                     </CardContent>
                 </Card>
@@ -157,7 +160,7 @@ export function WeekGrid({ days, todayIso }: WeekGridProps) {
                         <table className="w-full text-sm border-collapse">
                             <thead>
                                 <tr className="bg-muted">
-                                    <th className="px-3 py-2 text-left font-semibold text-muted-foreground w-24 border-b">Period</th>
+                                    <th className="px-3 py-2 text-left font-semibold text-muted-foreground w-24 border-b">{t('schedule.period')}</th>
                                     {days.map((d) => (
                                         <th
                                             key={d.dayOfWeek}

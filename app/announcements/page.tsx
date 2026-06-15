@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -8,20 +9,41 @@ import { Megaphone, Pin, PlusCircle, Users } from "lucide-react";
 import { CategoryBadge } from "@/components/announcements/CategoryBadge";
 import { DeleteAnnouncementButton } from "@/components/announcements/DeleteAnnouncementButton";
 import { getViewerGrades, announcementGradeFilter } from "@/lib/announcements/visibility";
+import {
+    DEFAULT_LOCALE,
+    LOCALE_COOKIE,
+    getDictionary,
+    isLocale,
+    resolveKey,
+} from "@/lib/i18n";
 import type { Announcement } from "@/types";
 
 export const dynamic = 'force-dynamic';
-
-function gradesLabel(targetGrades: number[] | null): string {
-    if (!targetGrades || targetGrades.length === 0) return 'All grades';
-    return `Grades ${targetGrades.join(', ')}`;
-}
 
 export default async function AnnouncementsPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) redirect('/login');
+
+    // Server component: resolve locale from cookie and translate via dictionary.
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t = (key: string, vars?: Record<string, string | number>) => {
+        let value = resolveKey(dict, key);
+        if (vars) {
+            for (const [name, replacement] of Object.entries(vars)) {
+                value = value.replace(`{${name}}`, String(replacement));
+            }
+        }
+        return value;
+    };
+    const gradesLabel = (targetGrades: number[] | null): string => {
+        if (!targetGrades || targetGrades.length === 0) return t('announcements.allGrades');
+        return t('announcements.grades', { grades: targetGrades.join(', ') });
+    };
 
     const { data: profile } = await supabase
         .from('profiles')
@@ -66,17 +88,17 @@ export default async function AnnouncementsPage() {
                     <div className="space-y-2">
                         <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
                             <Megaphone className="w-8 h-8 text-indigo-600" />
-                            Announcements
+                            {t('announcements.title')}
                         </h1>
                         <p className="text-muted-foreground">
-                            Official announcements from the school administration.
+                            {t('announcements.subtitle')}
                         </p>
                     </div>
                     {isStaff && (
                         <Button asChild className="bg-indigo-600 hover:bg-indigo-700 gap-2">
                             <Link href="/announcements/new">
                                 <PlusCircle className="w-4 h-4" />
-                                New Announcement
+                                {t('announcements.newAnnouncement')}
                             </Link>
                         </Button>
                     )}
@@ -85,7 +107,7 @@ export default async function AnnouncementsPage() {
                 {announcements.length === 0 ? (
                     <div className="bg-card rounded-xl p-12 text-center text-muted-foreground border border-dashed">
                         <Megaphone className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                        No announcements yet.
+                        {t('announcements.empty')}
                     </div>
                 ) : (
                     <div className="space-y-4">
@@ -99,7 +121,7 @@ export default async function AnnouncementsPage() {
                                         <div className="flex flex-wrap items-center gap-2">
                                             {announcement.pinned && (
                                                 <span className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-1 rounded-full">
-                                                    <Pin className="w-3 h-3" /> Pinned
+                                                    <Pin className="w-3 h-3" /> {t('announcements.pinned')}
                                                 </span>
                                             )}
                                             <CategoryBadge category={announcement.category} />
@@ -119,7 +141,7 @@ export default async function AnnouncementsPage() {
                                     <div className="flex items-center justify-between pt-1 text-xs text-muted-foreground">
                                         <span>{format(new Date(announcement.created_at), 'MMM d, yyyy')}</span>
                                         {announcement.expires_at && (
-                                            <span>Visible until {format(new Date(announcement.expires_at), 'MMM d, yyyy')}</span>
+                                            <span>{t('announcements.visibleUntil', { date: format(new Date(announcement.expires_at), 'MMM d, yyyy') })}</span>
                                         )}
                                     </div>
                                 </CardContent>

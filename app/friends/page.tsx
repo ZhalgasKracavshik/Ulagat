@@ -1,5 +1,6 @@
 
 import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,12 +10,26 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { FriendButton } from "@/components/shared/FriendButton";
 import { UserSearch } from "@/components/social/UserSearch";
+import {
+    DEFAULT_LOCALE,
+    LOCALE_COOKIE,
+    getDictionary,
+    isLocale,
+    resolveKey,
+} from "@/lib/i18n";
 
 export default async function FriendsPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) redirect('/login');
+
+    // Server component: resolve locale from cookie and translate via dictionary.
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t = (key: string) => resolveKey(dict, key);
 
     // 1. Fetch All Friendships for the current user
     const { data: friendships } = await supabase
@@ -38,9 +53,9 @@ export default async function FriendsPage() {
                 <div className="space-y-1">
                     <h1 className="text-4xl font-black text-foreground flex items-center gap-3">
                         <Users className="w-10 h-10 text-primary" />
-                        Community Hub
+                        {t('friends.title')}
                     </h1>
-                    <p className="text-muted-foreground text-lg">Manage your friends and find new people in the Ulagat community.</p>
+                    <p className="text-muted-foreground text-lg">{t('friends.subtitle')}</p>
                 </div>
                 <div className="w-full md:w-80">
                     <UserSearch />
@@ -52,7 +67,7 @@ export default async function FriendsPage() {
                 <div className="lg:col-span-2 space-y-8">
                     <section>
                         <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-                            My Friends
+                            {t('friends.myFriends')}
                             <Badge variant="secondary" className="rounded-full">{friends.length}</Badge>
                         </h2>
                         {friends.length > 0 ? (
@@ -82,8 +97,8 @@ export default async function FriendsPage() {
                         ) : (
                             <div className="text-center py-12 bg-muted rounded-2xl border border-dashed">
                                 <Users className="w-12 h-12 text-slate-200 mx-auto mb-3" />
-                                <p className="text-muted-foreground">You haven't added any friends yet.</p>
-                                <p className="text-xs text-muted-foreground mt-1">Search for people or visit their profiles to connect.</p>
+                                <p className="text-muted-foreground">{t('friends.noFriendsTitle')}</p>
+                                <p className="text-xs text-muted-foreground mt-1">{t('friends.noFriendsBody')}</p>
                             </div>
                         )}
                     </section>
@@ -93,7 +108,7 @@ export default async function FriendsPage() {
                 <div className="space-y-8">
                     <section className="space-y-4">
                         <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-                            Invitations
+                            {t('friends.invitations')}
                             {incomingRequests.length > 0 && <span className="h-2 w-2 rounded-full bg-red-500 animate-bounce" />}
                         </h2>
                         {incomingRequests.length > 0 ? (
@@ -108,7 +123,7 @@ export default async function FriendsPage() {
                                                 </Avatar>
                                                 <div>
                                                     <p className="font-bold text-sm text-foreground">{req.requester?.full_name}</p>
-                                                    <p className="text-[10px] text-indigo-600 font-bold uppercase tracking-tighter">Wants to be friends</p>
+                                                    <p className="text-[10px] text-indigo-600 font-bold uppercase tracking-tighter">{t('friends.wantsToBeFriends')}</p>
                                                 </div>
                                             </div>
                                             <FriendButton
@@ -125,14 +140,14 @@ export default async function FriendsPage() {
                             <Card className="border-dashed bg-transparent shadow-none">
                                 <CardContent className="p-8 text-center">
                                     <Clock className="w-8 h-8 text-slate-100 mx-auto mb-2" />
-                                    <p className="text-xs text-muted-foreground">No pending invitations.</p>
+                                    <p className="text-xs text-muted-foreground">{t('friends.noInvitations')}</p>
                                 </CardContent>
                             </Card>
                         )}
                     </section>
 
                     <section className="space-y-4">
-                        <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Outbound</h2>
+                        <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-widest">{t('friends.outbound')}</h2>
                         <div className="space-y-2">
                             {sentRequests.map((req: any) => (
                                 <Card key={req.id} className="border-slate-50 bg-muted/50 shadow-none">
@@ -144,12 +159,12 @@ export default async function FriendsPage() {
                                             </Avatar>
                                             <span className="text-sm font-medium text-muted-foreground truncate">{req.addressee?.full_name}</span>
                                         </div>
-                                        <Badge variant="outline" className="text-[9px] font-bold text-muted-foreground bg-card shadow-none">SENT</Badge>
+                                        <Badge variant="outline" className="text-[9px] font-bold text-muted-foreground bg-card shadow-none">{t('friends.sent')}</Badge>
                                     </CardContent>
                                 </Card>
                             ))}
                             {sentRequests.length === 0 && (
-                                <p className="text-[10px] text-muted-foreground italic text-center">No outbound requests.</p>
+                                <p className="text-[10px] text-muted-foreground italic text-center">{t('friends.noOutbound')}</p>
                             )}
                         </div>
                     </section>

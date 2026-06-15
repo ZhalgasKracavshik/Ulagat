@@ -1,5 +1,6 @@
 
 import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,13 @@ import { notFound } from "next/navigation";
 import { format } from "date-fns";
 import { EventRegistrationButton } from "@/components/events/EventRegistrationButton";
 import { almatyTodayIso } from "@/lib/schedule/almaty-time";
+import {
+    DEFAULT_LOCALE,
+    LOCALE_COOKIE,
+    getDictionary,
+    isLocale,
+    resolveKey,
+} from "@/lib/i18n";
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -18,6 +26,21 @@ interface PageProps {
 export default async function EventDetailsPage({ params }: PageProps) {
     const { id } = await params;
     const supabase = await createClient();
+
+    // Server component: resolve locale from cookie and translate via dictionary.
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t = (key: string, vars?: Record<string, string | number>) => {
+        let value = resolveKey(dict, key);
+        if (vars) {
+            for (const [name, replacement] of Object.entries(vars)) {
+                value = value.replace(`{${name}}`, String(replacement));
+            }
+        }
+        return value;
+    };
 
     // Fetch user and profile first
     const { data: { user } } = await supabase.auth.getUser();
@@ -76,7 +99,7 @@ export default async function EventDetailsPage({ params }: PageProps) {
     return (
         <div className="container py-8 max-w-4xl mx-auto px-4">
             <Link href="/events" className="flex items-center text-sm text-muted-foreground hover:text-blue-600 mb-6 transition-colors">
-                <ArrowLeft className="w-4 h-4 mr-1" /> Back to Events
+                <ArrowLeft className="w-4 h-4 mr-1" /> {t('events.backToEvents')}
             </Link>
 
             <div className="relative h-[300px] w-full rounded-2xl overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-600 mb-8">
@@ -97,12 +120,12 @@ export default async function EventDetailsPage({ params }: PageProps) {
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <MapPin className="w-4 h-4" />
-                                <span>{event.location || 'School Hall'}</span>
+                                <span>{event.location || t('events.schoolHall')}</span>
                             </div>
                             {event.max_students && (
                                 <div className="flex items-center gap-1.5">
                                     <Users className="w-4 h-4" />
-                                    <span>{registrationCount} / {event.max_students} Registered</span>
+                                    <span>{t('events.registeredCount', { count: registrationCount, max: event.max_students })}</span>
                                 </div>
                             )}
                         </div>
@@ -112,7 +135,7 @@ export default async function EventDetailsPage({ params }: PageProps) {
                         <div className="flex flex-col gap-2 items-end">
                             {event.expires_at && (
                                 <div className="text-xs text-orange-200 font-medium bg-card/10 px-2 py-1 rounded backdrop-blur-sm">
-                                    Expires: {new Date(event.expires_at).toLocaleDateString()}
+                                    {t('events.expires', { date: new Date(event.expires_at).toLocaleDateString() })}
                                 </div>
                             )}
                             <form action={async () => {
@@ -121,7 +144,7 @@ export default async function EventDetailsPage({ params }: PageProps) {
                                 await deleteEvent(id);
                             }}>
                                 <Button variant="destructive" size="sm" className="shadow-lg">
-                                    Delete Event
+                                    {t('events.deleteEvent')}
                                 </Button>
                             </form>
                         </div>
@@ -132,7 +155,7 @@ export default async function EventDetailsPage({ params }: PageProps) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="md:col-span-2 space-y-8">
                     <div className="prose max-w-none">
-                        <h2 className="text-2xl font-bold text-foreground mb-4">Event Details</h2>
+                        <h2 className="text-2xl font-bold text-foreground mb-4">{t('events.eventDetails')}</h2>
                         <p className="whitespace-pre-wrap text-lg leading-relaxed text-foreground">{event.description}</p>
                     </div>
 
@@ -142,9 +165,9 @@ export default async function EventDetailsPage({ params }: PageProps) {
                                 <Trophy className="w-6 h-6" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-yellow-900 mb-1">Reputation Rewards</h3>
+                                <h3 className="font-bold text-yellow-900 mb-1">{t('events.reputationRewards')}</h3>
                                 <p className="text-sm text-yellow-800">
-                                    Participating in this event awards verified reputation points on the Ulagat Blockchain. Winners receive special badges.
+                                    {t('events.reputationRewardsBody')}
                                 </p>
                             </div>
                         </CardContent>
@@ -154,7 +177,7 @@ export default async function EventDetailsPage({ params }: PageProps) {
                     <div className="space-y-4">
                         <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
                             <Users className="w-6 h-6 text-blue-600" />
-                            Participants
+                            {t('events.participants')}
                             <span className="text-base font-semibold text-muted-foreground">({registrationCount})</span>
                         </h2>
                         {regs.length > 0 ? (
@@ -170,14 +193,14 @@ export default async function EventDetailsPage({ params }: PageProps) {
                                             <AvatarFallback>{reg.profiles?.full_name?.[0] || 'U'}</AvatarFallback>
                                         </Avatar>
                                         <span className="font-semibold text-foreground truncate">
-                                            {reg.profiles?.full_name || 'Unknown user'}
+                                            {reg.profiles?.full_name || t('events.unknownUser')}
                                         </span>
                                     </Link>
                                 ))}
                             </div>
                         ) : (
                             <p className="text-sm text-muted-foreground border border-dashed rounded-xl p-6 text-center">
-                                No participants yet — be the first to register!
+                                {t('events.noParticipants')}
                             </p>
                         )}
                     </div>
@@ -197,18 +220,18 @@ export default async function EventDetailsPage({ params }: PageProps) {
                             ) : (
                                 <Link href="/login" className="block w-full">
                                     <Button className="w-full text-lg h-12 font-bold bg-blue-600 hover:bg-blue-700">
-                                        Login to Register
+                                        {t('events.loginToRegister')}
                                     </Button>
                                 </Link>
                             )}
                             <Button variant="outline" className="w-full">
-                                <Share2 className="w-4 h-4 mr-2" /> Share Event
+                                <Share2 className="w-4 h-4 mr-2" /> {t('events.shareEvent')}
                             </Button>
                         </CardContent>
                     </Card>
 
                     <div className="p-4 border rounded-xl bg-muted">
-                        <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3">Organizer</h4>
+                        <h4 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3">{t('events.organizer')}</h4>
                         <Link href={`/profile/${event.organizer_id}`} className="flex items-center gap-3">
                             <Avatar>
                                 <AvatarImage src={event.profiles?.avatar_url} />

@@ -1,6 +1,9 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import { Search, PackageCheck, HandHeart } from "lucide-react";
-import { LOST_ITEM_STATUS_LABELS } from "@/lib/lost-found";
+import { useT } from "@/hooks/useT";
+import { lostItemStatusKey } from "@/lib/lost-found-i18n";
 import type { LostItemStatus } from "@/types";
 
 const STATUS_STYLES: Record<LostItemStatus, { className: string; icon: typeof Search }> = {
@@ -19,11 +22,12 @@ const STATUS_STYLES: Record<LostItemStatus, { className: string; icon: typeof Se
 };
 
 export function StatusBadge({ status }: { status: LostItemStatus }) {
+    const { t } = useT();
     const { className, icon: Icon } = STATUS_STYLES[status];
     return (
         <Badge variant="outline" className={`font-bold gap-1 shadow-sm ${className}`}>
             <Icon className="w-3 h-3" />
-            {LOST_ITEM_STATUS_LABELS[status]}
+            {t(lostItemStatusKey(status))}
         </Badge>
     );
 }

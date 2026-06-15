@@ -1,19 +1,35 @@
 
 import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Plus, Users2 } from "lucide-react";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
+import {
+    DEFAULT_LOCALE,
+    LOCALE_COOKIE,
+    getDictionary,
+    isLocale,
+    resolveKey,
+} from "@/lib/i18n";
 
 export default async function MessagesPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
+    // Server component: resolve locale from cookie and translate via dictionary.
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t = (key: string) => resolveKey(dict, key);
+
     if (!user) {
         return (
             <div className="container py-10 text-center">
-                Please <Link href="/login" className="text-primary underline">log in</Link> to view messages.
+                <Link href="/login" className="text-primary underline">{t('messages.login')}</Link>{' '}
+                {t('messages.loginPrompt')}
             </div>
         );
     }
@@ -58,11 +74,11 @@ export default async function MessagesPage() {
         <div className="min-h-screen bg-background">
             <div className="container mx-auto py-8 max-w-3xl px-4">
                 <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-3xl font-bold text-foreground">Messages</h1>
+                    <h1 className="text-3xl font-bold text-foreground">{t('messages.title')}</h1>
                     <Link href="/messages/new-group">
                         <Button variant="outline" className="gap-2 rounded-full">
                             <Plus className="w-4 h-4" />
-                            New Group
+                            {t('messages.newGroup')}
                         </Button>
                     </Link>
                 </div>
@@ -71,7 +87,7 @@ export default async function MessagesPage() {
                 {groups.length > 0 && (
                     <div className="mb-8">
                         <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-                            <Users2 className="w-4 h-4" /> Groups
+                            <Users2 className="w-4 h-4" /> {t('messages.groups')}
                         </h2>
                         <div className="space-y-2">
                             {groups.map((group: any) => (
@@ -83,7 +99,7 @@ export default async function MessagesPage() {
                                         </Avatar>
                                         <div className="flex-1 min-w-0">
                                             <h3 className="font-bold text-foreground truncate">{group.name}</h3>
-                                            <p className="text-xs text-muted-foreground">Group chat</p>
+                                            <p className="text-xs text-muted-foreground">{t('messages.groupChat')}</p>
                                         </div>
                                     </div>
                                 </Link>
@@ -95,7 +111,7 @@ export default async function MessagesPage() {
                 {/* Direct Messages Section */}
                 <div>
                     <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-2">
-                        <MessageSquare className="w-4 h-4" /> Direct Messages
+                        <MessageSquare className="w-4 h-4" /> {t('messages.directMessages')}
                     </h2>
                     <div className="space-y-2">
                         {conversations && conversations.length > 0 ? (
@@ -112,13 +128,13 @@ export default async function MessagesPage() {
                                             </Avatar>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex justify-between items-start">
-                                                    <h3 className="font-bold text-foreground truncate">{participant?.full_name || 'Unknown User'}</h3>
+                                                    <h3 className="font-bold text-foreground truncate">{participant?.full_name || t('messages.unknownUser')}</h3>
                                                     <span className="text-[11px] text-muted-foreground whitespace-nowrap ml-2">
                                                         {formatDistanceToNow(new Date(conv.updated_at), { addSuffix: true })}
                                                     </span>
                                                 </div>
                                                 <p className="text-sm text-muted-foreground truncate">
-                                                    Click to view conversation...
+                                                    {t('messages.clickToView')}
                                                 </p>
                                             </div>
                                         </div>
@@ -128,12 +144,12 @@ export default async function MessagesPage() {
                         ) : (
                             <div className="text-center py-16 bg-card rounded-xl border border-dashed border-border">
                                 <MessageSquare className="h-10 w-10 mx-auto text-muted-foreground/50 mb-4" />
-                                <h3 className="text-lg font-semibold text-foreground">No messages yet</h3>
+                                <h3 className="text-lg font-semibold text-foreground">{t('messages.emptyTitle')}</h3>
                                 <p className="text-muted-foreground text-sm mt-1">
-                                    Start a conversation from a Service or Profile page!
+                                    {t('messages.emptyBody')}
                                 </p>
                                 <Link href="/services">
-                                    <Button className="mt-4" variant="outline">Browse Services</Button>
+                                    <Button className="mt-4" variant="outline">{t('messages.browseServices')}</Button>
                                 </Link>
                             </div>
                         )}

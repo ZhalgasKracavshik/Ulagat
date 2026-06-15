@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,11 +7,18 @@ import { Users, Trophy, Star, Tag, PlusCircle, Sparkles } from "lucide-react";
 import Link from "next/link";
 import {
     CLUB_CATEGORIES,
-    CLUB_CATEGORY_LABELS,
     CLUB_CREATOR_ROLES,
     isClubCategory,
 } from "@/lib/clubs";
+import { clubCategoryKey } from "@/lib/clubs-i18n";
 import { CLUB_CATEGORY_ICONS } from "@/components/clubs/category-icons";
+import {
+    DEFAULT_LOCALE,
+    LOCALE_COOKIE,
+    getDictionary,
+    isLocale,
+    resolveKey,
+} from "@/lib/i18n";
 import type { Club } from "@/types";
 
 export const dynamic = 'force-dynamic';
@@ -20,6 +28,21 @@ export default async function ClubsPage({ searchParams }: { searchParams: Promis
     const params = await searchParams;
     const rawCategory = typeof params?.category === 'string' ? params.category : null;
     const categoryFilter = rawCategory && isClubCategory(rawCategory) ? rawCategory : null;
+
+    // Server component: resolve locale from cookie and translate via dictionary.
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t = (key: string, vars?: Record<string, string | number>) => {
+        let value = resolveKey(dict, key);
+        if (vars) {
+            for (const [name, replacement] of Object.entries(vars)) {
+                value = value.replace(`{${name}}`, String(replacement));
+            }
+        }
+        return value;
+    };
 
     const { data: { user } } = await supabase.auth.getUser();
     let role: string | null = null;
@@ -65,24 +88,24 @@ export default async function ClubsPage({ searchParams }: { searchParams: Promis
             <div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-4 bg-gradient-to-r from-violet-500/10 to-transparent p-6 rounded-2xl border border-violet-500/10">
                 <div className="space-y-2">
                     <h1 className="text-4xl font-extrabold tracking-tight text-foreground">
-                        School Clubs
+                        {t('clubs.title')}
                     </h1>
                     <p className="text-muted-foreground text-lg max-w-xl">
-                        Find your people. Join a club, show up, and climb the club leaderboard.
+                        {t('clubs.subtitle')}
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
                     <Link href="/clubs/leaderboard">
                         <Button variant="outline" size="lg" className="rounded-full gap-2 font-bold px-6 border-amber-300 dark:border-amber-800 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40">
                             <Trophy className="w-5 h-5" />
-                            Leaderboard
+                            {t('clubs.leaderboard')}
                         </Button>
                     </Link>
                     {canCreateClub && (
                         <Link href="/clubs/new">
                             <Button size="lg" className="rounded-full shadow-lg gap-2 text-md font-bold px-6 bg-violet-600 hover:bg-violet-700">
                                 <PlusCircle className="w-5 h-5" />
-                                Create Club
+                                {t('clubs.createClub')}
                             </Button>
                         </Link>
                     )}
@@ -94,7 +117,7 @@ export default async function ClubsPage({ searchParams }: { searchParams: Promis
                 <Tag className="w-4 h-4 text-muted-foreground shrink-0" />
                 <Link href="/clubs">
                     <Button variant={!categoryFilter ? "secondary" : "ghost"} size="sm" className="rounded-full px-4">
-                        All
+                        {t('clubs.all')}
                     </Button>
                 </Link>
                 {CLUB_CATEGORIES.map((category) => (
@@ -104,7 +127,7 @@ export default async function ClubsPage({ searchParams }: { searchParams: Promis
                             size="sm"
                             className="rounded-full px-4"
                         >
-                            {CLUB_CATEGORY_LABELS[category]}
+                            {t(clubCategoryKey(category))}
                         </Button>
                     </Link>
                 ))}
@@ -127,7 +150,7 @@ export default async function ClubsPage({ searchParams }: { searchParams: Promis
                                     )}
                                     <div className="absolute top-2 left-2">
                                         <Badge variant="outline" className="bg-card/90 border-violet-200 dark:border-violet-800 text-violet-700 dark:text-violet-300 font-bold shadow-sm">
-                                            {CLUB_CATEGORY_LABELS[club.category]}
+                                            {t(clubCategoryKey(club.category))}
                                         </Badge>
                                     </div>
                                 </div>
@@ -138,23 +161,23 @@ export default async function ClubsPage({ searchParams }: { searchParams: Promis
                                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                                         <span className="flex items-center gap-1">
                                             <Users className="w-3.5 h-3.5 text-violet-500" />
-                                            {memberCounts[club.id] || 0} members
+                                            {t('clubs.members', { count: memberCounts[club.id] || 0 })}
                                         </span>
                                         <span className="flex items-center gap-1 font-bold text-amber-600">
                                             <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                                            {club.points} pts
+                                            {t('clubs.points', { count: club.points })}
                                         </span>
                                     </div>
                                 </CardHeader>
                                 <CardContent>
                                     <p className="line-clamp-3 text-sm text-muted-foreground min-h-[3.75rem]">
-                                        {club.description || 'No description yet.'}
+                                        {club.description || t('clubs.noDescription')}
                                     </p>
                                 </CardContent>
                                 <CardFooter>
                                     <Link href={`/clubs/${club.id}`} className="w-full">
                                         <Button className="w-full" variant="outline">
-                                            View Club
+                                            {t('clubs.viewClub')}
                                         </Button>
                                     </Link>
                                 </CardFooter>
@@ -166,11 +189,11 @@ export default async function ClubsPage({ searchParams }: { searchParams: Promis
                         <div className="mx-auto w-24 h-24 bg-violet-50 dark:bg-violet-950/40 rounded-full flex items-center justify-center">
                             <Users className="w-12 h-12 text-violet-300 dark:text-violet-600" />
                         </div>
-                        <h3 className="text-xl font-bold text-foreground">No Clubs Yet</h3>
+                        <h3 className="text-xl font-bold text-foreground">{t('clubs.noClubsTitle')}</h3>
                         <p className="text-muted-foreground">
                             {categoryFilter
-                                ? `No ${CLUB_CATEGORY_LABELS[categoryFilter]} clubs yet. Try another category!`
-                                : "Be the first to start a club at BINOM!"}
+                                ? t('clubs.noClubsCategory', { category: t(clubCategoryKey(categoryFilter)) })
+                                : t('clubs.noClubsDefault')}
                         </p>
                     </div>
                 )}
