@@ -7,8 +7,10 @@ import { Loader2, Hand } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { claimItem } from "@/app/lost-found/actions";
+import { useT } from "@/hooks/useT";
 
 export function ClaimButton({ itemId }: { itemId: string }) {
+    const { t } = useT();
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [note, setNote] = useState("");
@@ -21,12 +23,12 @@ export function ClaimButton({ itemId }: { itemId: string }) {
             formData.set("item_id", itemId);
             formData.set("note", note);
             await claimItem(formData);
-            toast.success("Claim registered. A moderator will verify and contact you.");
+            toast.success(t("lostFoundClaim.claimRegistered"));
             setOpen(false);
             setNote("");
             router.refresh();
         } catch (err) {
-            const message = err instanceof Error ? err.message : "Failed to register your claim.";
+            const message = err instanceof Error ? err.message : t("lostFoundClaim.claimFailed");
             toast.error(message);
         } finally {
             setLoading(false);
@@ -40,7 +42,7 @@ export function ClaimButton({ itemId }: { itemId: string }) {
                 className="w-full gap-2 bg-teal-600 hover:bg-teal-700 font-bold text-lg h-12"
             >
                 <Hand className="w-5 h-5" />
-                This is mine!
+                {t("lostFoundClaim.thisIsMine")}
             </Button>
         );
     }
@@ -48,13 +50,13 @@ export function ClaimButton({ itemId }: { itemId: string }) {
     return (
         <div className="space-y-3 rounded-xl border border-teal-200 bg-teal-50/50 dark:bg-teal-950/50 p-4">
             <p className="text-sm text-muted-foreground">
-                Add a detail only the real owner would know (optional) — it helps staff verify your claim.
+                {t("lostFoundClaim.hint")}
             </p>
             <Textarea
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 maxLength={500}
-                placeholder="e.g. There's a blue sticker on the back and a math notebook inside."
+                placeholder={t("lostFoundClaim.placeholder")}
                 className="min-h-[80px] resize-none bg-card"
             />
             <div className="flex gap-2">
@@ -64,14 +66,14 @@ export function ClaimButton({ itemId }: { itemId: string }) {
                     className="flex-grow gap-2 bg-teal-600 hover:bg-teal-700 font-bold"
                 >
                     {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Hand className="w-4 h-4" />}
-                    Confirm claim
+                    {t("lostFoundClaim.confirmClaim")}
                 </Button>
                 <Button
                     variant="ghost"
                     onClick={() => setOpen(false)}
                     disabled={loading}
                 >
-                    Cancel
+                    {t("lostFoundClaim.cancel")}
                 </Button>
             </div>
         </div>

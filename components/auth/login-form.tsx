@@ -6,8 +6,10 @@ import { SubmitButton } from '@/components/auth/submit-button'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useT } from '@/hooks/useT'
 
 export function LoginForm() {
+    const { t } = useT()
     const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
     const router = useRouter()
@@ -35,10 +37,10 @@ export function LoginForm() {
                         Ulagat
                     </Link>
                     <h2 className="text-2xl font-bold tracking-tight text-foreground dark:text-white">
-                        Welcome back
+                        {t('auth.welcomeBack')}
                     </h2>
                     <p className="mt-2 text-sm text-muted-foreground dark:text-muted-foreground">
-                        Sign in to access your dashboard
+                        {t('auth.signInSubtitle')}
                     </p>
                 </div>
 
@@ -46,7 +48,7 @@ export function LoginForm() {
                     <div className="space-y-4">
                         <div>
                             <label htmlFor="email" className="mb-2 block text-sm font-medium text-foreground dark:text-white">
-                                Email Address
+                                {t('auth.emailAddress')}
                             </label>
                             <input
                                 id="email"
@@ -61,7 +63,7 @@ export function LoginForm() {
 
                         <div>
                             <label htmlFor="password" className="mb-2 block text-sm font-medium text-foreground dark:text-white">
-                                Password
+                                {t('auth.password')}
                             </label>
                             <input
                                 id="password"
@@ -81,17 +83,17 @@ export function LoginForm() {
                             href="/forgot-password"
                             className="text-xs font-medium text-primary hover:underline"
                         >
-                            Forgot password?
+                            {t('auth.forgotPassword')}
                         </Link>
                     </div>
 
                     {error && (
                         <div className="rounded-lg bg-red-50 dark:bg-red-950/40 p-4 text-sm text-red-800 dark:text-red-400" role="alert">
-                            <span className="font-medium">Error:</span> {error}
+                            <span className="font-medium">{t('auth.errorPrefix')}</span> {error}
                         </div>
                     )}
 
-                    <SubmitButton>Sign In</SubmitButton>
+                    <SubmitButton>{t('auth.signIn')}</SubmitButton>
                 </form>
 
                 <div className="text-center">
@@ -99,7 +101,7 @@ export function LoginForm() {
                         href="/register"
                         className="text-sm font-medium text-primary hover:underline dark:text-primary-400"
                     >
-                        Don't have an account? Sign up
+                        {t('auth.noAccount')}
                     </Link>
                 </div>
             </div>

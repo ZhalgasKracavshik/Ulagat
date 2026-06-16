@@ -28,6 +28,8 @@ import {
 } from "lucide-react";
 import { archiveClub, postClubAnnouncement, recordMeeting } from "../../actions";
 import { almatyTodayIso } from "@/lib/schedule/almaty-time";
+import { cookies } from "next/headers";
+import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
 import type { Club, ClubMeeting } from "@/types";
 
 export const dynamic = 'force-dynamic';
@@ -53,6 +55,20 @@ export default async function ManageClubPage({ params }: { params: Promise<{ id:
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect(`/login?next=/clubs/${id}/manage`);
+
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t = (key: string, vars?: Record<string, string | number>) => {
+        let value = resolveKey(dict, key);
+        if (vars) {
+            for (const [name, replacement] of Object.entries(vars)) {
+                value = value.replace(`{${name}}`, String(replacement));
+            }
+        }
+        return value;
+    };
 
     const [{ data: clubRaw }, { data: profile }] = await Promise.all([
         supabase.from('clubs').select('*').eq('id', id).single(),
@@ -95,20 +111,20 @@ export default async function ManageClubPage({ params }: { params: Promise<{ id:
                     <Link href={`/clubs/${club.id}`} className="inline-flex">
                         <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground -ml-3">
                             <ArrowLeft className="w-4 h-4" />
-                            Back to club page
+                            {t('clubManage.backToClub')}
                         </Button>
                     </Link>
                     <h1 className="text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-3">
-                        Manage: {club.name}
+                        {t('clubManage.manageTitle', { name: club.name })}
                         {club.status === 'archived' && (
                             <Badge variant="outline" className="border-border text-muted-foreground font-bold gap-1">
                                 <Archive className="w-3 h-3" />
-                                Archived
+                                {t('clubManage.archived')}
                             </Badge>
                         )}
                     </h1>
                     <p className="text-muted-foreground">
-                        Record meetings, post announcements and track member attendance.
+                        {t('clubManage.subtitle')}
                     </p>
                 </div>
                 {isStaff && club.status === 'active' && (
@@ -116,7 +132,7 @@ export default async function ManageClubPage({ params }: { params: Promise<{ id:
                         <input type="hidden" name="club_id" value={club.id} />
                         <Button type="submit" variant="outline" className="gap-2 border-red-200 text-red-600 hover:bg-red-50 font-bold">
                             <Archive className="w-4 h-4" />
-                            Archive Club
+                            {t('clubManage.archiveClub')}
                         </Button>
                     </form>
                 )}
@@ -128,10 +144,10 @@ export default async function ManageClubPage({ params }: { params: Promise<{ id:
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-lg">
                             <ClipboardCheck className="w-5 h-5 text-violet-500" />
-                            Record Meeting
+                            {t('clubManage.recordMeeting')}
                         </CardTitle>
                         <CardDescription>
-                            Log a meeting after it happens. The club earns 5 points + 1 per attendee.
+                            {t('clubManage.recordMeetingHint')}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -139,7 +155,7 @@ export default async function ManageClubPage({ params }: { params: Promise<{ id:
                             <form action={recordMeeting} className="space-y-5">
                                 <input type="hidden" name="club_id" value={club.id} />
                                 <div className="space-y-2">
-                                    <Label htmlFor="date" className="text-sm font-semibold text-foreground">Meeting Date</Label>
+                                    <Label htmlFor="date" className="text-sm font-semibold text-foreground">{t('clubManage.meetingDate')}</Label>
                                     <Input
                                         id="date"
                                         name="date"
@@ -151,16 +167,16 @@ export default async function ManageClubPage({ params }: { params: Promise<{ id:
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="notes" className="text-sm font-semibold text-foreground">Notes (optional)</Label>
+                                    <Label htmlFor="notes" className="text-sm font-semibold text-foreground">{t('clubManage.notesOptional')}</Label>
                                     <Textarea
                                         id="notes"
                                         name="notes"
-                                        placeholder="What did the club do at this meeting?"
+                                        placeholder={t('clubManage.notesPlaceholder')}
                                         className="min-h-[80px] border-border resize-none rounded-lg shadow-sm"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="text-sm font-semibold text-foreground">Attendees</Label>
+                                    <Label className="text-sm font-semibold text-foreground">{t('clubManage.attendees')}</Label>
                                     {members.length > 0 ? (
                                         <div className="space-y-1 max-h-64 overflow-y-auto rounded-lg border border-border p-2">
                                             {members.map((member) => (
@@ -181,24 +197,24 @@ export default async function ManageClubPage({ params }: { params: Promise<{ id:
                                                         </AvatarFallback>
                                                     </Avatar>
                                                     <span className="text-sm font-medium text-foreground">
-                                                        {member.profiles?.full_name || 'Unknown'}
+                                                        {member.profiles?.full_name || t('clubDetail.unknown')}
                                                     </span>
                                                 </label>
                                             ))}
                                         </div>
                                     ) : (
                                         <p className="text-sm text-muted-foreground p-2">
-                                            No members yet — members must join before they can be marked as attendees.
+                                            {t('clubManage.noMembersAttendees')}
                                         </p>
                                     )}
                                 </div>
                                 <Button type="submit" className="w-full bg-violet-600 hover:bg-violet-700 font-bold h-11 rounded-lg">
-                                    Save Meeting
+                                    {t('clubManage.saveMeeting')}
                                 </Button>
                             </form>
                         ) : (
                             <p className="text-sm text-muted-foreground py-4 text-center">
-                                This club is archived — meetings can no longer be recorded.
+                                {t('clubManage.archivedNote')}
                             </p>
                         )}
                     </CardContent>
@@ -210,36 +226,36 @@ export default async function ManageClubPage({ params }: { params: Promise<{ id:
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2 text-lg">
                                 <Megaphone className="w-5 h-5 text-violet-500" />
-                                Post Announcement
+                                {t('clubManage.postAnnouncement')}
                             </CardTitle>
-                            <CardDescription>Visible to everyone on the club page.</CardDescription>
+                            <CardDescription>{t('clubManage.postAnnouncementHint')}</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <form action={postClubAnnouncement} className="space-y-4">
                                 <input type="hidden" name="club_id" value={club.id} />
                                 <div className="space-y-2">
-                                    <Label htmlFor="title" className="text-sm font-semibold text-foreground">Title</Label>
+                                    <Label htmlFor="title" className="text-sm font-semibold text-foreground">{t('clubManage.announcementTitle')}</Label>
                                     <Input
                                         id="title"
                                         name="title"
-                                        placeholder="e.g. Friday practice moved to Room 204"
+                                        placeholder={t('clubManage.announcementTitlePlaceholder')}
                                         required
                                         maxLength={200}
                                         className="h-11 border-border rounded-lg shadow-sm"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="body" className="text-sm font-semibold text-foreground">Message</Label>
+                                    <Label htmlFor="body" className="text-sm font-semibold text-foreground">{t('clubManage.message')}</Label>
                                     <Textarea
                                         id="body"
                                         name="body"
-                                        placeholder="Write the announcement..."
+                                        placeholder={t('clubManage.messagePlaceholder')}
                                         required
                                         className="min-h-[100px] border-border resize-none rounded-lg shadow-sm"
                                     />
                                 </div>
                                 <Button type="submit" className="w-full bg-violet-600 hover:bg-violet-700 font-bold h-11 rounded-lg">
-                                    Post Announcement
+                                    {t('clubManage.postAnnouncement')}
                                 </Button>
                             </form>
                         </CardContent>
@@ -250,7 +266,7 @@ export default async function ManageClubPage({ params }: { params: Promise<{ id:
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2 text-lg">
                                 <CalendarDays className="w-5 h-5 text-violet-500" />
-                                Meeting History
+                                {t('clubManage.meetingHistory')}
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-2">
@@ -261,7 +277,7 @@ export default async function ManageClubPage({ params }: { params: Promise<{ id:
                                             {format(new Date(meeting.date + 'T00:00:00'), 'MMM d, yyyy')}
                                         </span>
                                         <span className="flex-grow min-w-0 text-sm text-muted-foreground truncate">
-                                            {meeting.notes || 'Club meeting'}
+                                            {meeting.notes || t('clubManage.clubMeeting')}
                                         </span>
                                         <span className="flex items-center gap-1 text-xs font-bold text-muted-foreground bg-card border border-border px-2 py-0.5 rounded-full shrink-0">
                                             <Users className="w-3 h-3" />
@@ -270,7 +286,7 @@ export default async function ManageClubPage({ params }: { params: Promise<{ id:
                                     </div>
                                 ))
                             ) : (
-                                <p className="text-sm text-muted-foreground py-4 text-center">No meetings recorded yet.</p>
+                                <p className="text-sm text-muted-foreground py-4 text-center">{t('clubDetail.noMeetings')}</p>
                             )}
                         </CardContent>
                     </Card>
@@ -282,7 +298,7 @@ export default async function ManageClubPage({ params }: { params: Promise<{ id:
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
                         <Users className="w-5 h-5 text-violet-500" />
-                        Members ({members.length})
+                        {t('clubManage.membersCount', { count: members.length })}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -290,9 +306,9 @@ export default async function ManageClubPage({ params }: { params: Promise<{ id:
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Member</TableHead>
-                                    <TableHead>Joined</TableHead>
-                                    <TableHead className="text-right">Total Attendance</TableHead>
+                                    <TableHead>{t('clubManage.colMember')}</TableHead>
+                                    <TableHead>{t('clubManage.colJoined')}</TableHead>
+                                    <TableHead className="text-right">{t('clubManage.colAttendance')}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -307,7 +323,7 @@ export default async function ManageClubPage({ params }: { params: Promise<{ id:
                                                     </AvatarFallback>
                                                 </Avatar>
                                                 <span className="font-medium text-foreground group-hover:text-violet-700 transition-colors">
-                                                    {member.profiles?.full_name || 'Unknown'}
+                                                    {member.profiles?.full_name || t('clubDetail.unknown')}
                                                     {member.user_id === club.leader_id && (
                                                         <Crown className="inline w-3.5 h-3.5 text-yellow-500 ml-1.5 -mt-0.5" />
                                                     )}
@@ -325,7 +341,7 @@ export default async function ManageClubPage({ params }: { params: Promise<{ id:
                             </TableBody>
                         </Table>
                     ) : (
-                        <p className="text-sm text-muted-foreground py-4 text-center">No members yet.</p>
+                        <p className="text-sm text-muted-foreground py-4 text-center">{t('clubManage.noMembers')}</p>
                     )}
                 </CardContent>
             </Card>

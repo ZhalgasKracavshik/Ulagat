@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ACHIEVEMENT_TIERS, TIER_POINTS, type AchievementTier } from "@/lib/leaderboard";
+import { useT } from "@/hooks/useT";
 
 interface Achievement {
     id: string;
@@ -22,30 +23,30 @@ interface Achievement {
     rejection_reason: string | null;
 }
 
-const TIER_LABELS: Record<AchievementTier, string> = {
-    school: 'School',
-    city: 'City',
-    national: 'National',
+const TIER_LABEL_KEYS: Record<AchievementTier, string> = {
+    school: 'achievementsSection.tierSchool',
+    city: 'achievementsSection.tierCity',
+    national: 'achievementsSection.tierNational',
 };
 
-function StatusBadge({ status }: { status: Achievement['status'] }) {
+function StatusBadge({ status, t }: { status: Achievement['status']; t: (key: string) => string }) {
     if (status === 'verified') {
         return (
             <Badge className="gap-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-200 border border-green-200 shadow-none hover:bg-green-100">
-                <BadgeCheck className="w-3 h-3" /> Verified
+                <BadgeCheck className="w-3 h-3" /> {t('achievementsSection.statusVerified')}
             </Badge>
         );
     }
     if (status === 'rejected') {
         return (
             <Badge className="gap-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-200 border border-red-200 shadow-none hover:bg-red-100">
-                <Ban className="w-3 h-3" /> Rejected
+                <Ban className="w-3 h-3" /> {t('achievementsSection.statusRejected')}
             </Badge>
         );
     }
     return (
         <Badge className="gap-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-200 border border-amber-200 shadow-none hover:bg-amber-100">
-            <Clock className="w-3 h-3" /> Pending
+            <Clock className="w-3 h-3" /> {t('achievementsSection.statusPending')}
         </Badge>
     );
 }
@@ -56,6 +57,7 @@ interface AchievementsProps {
 }
 
 export function AchievementsSection({ achievements, isOwner }: AchievementsProps) {
+    const { t } = useT();
     const [showForm, setShowForm] = useState(false);
     const [loading, setLoading] = useState(false);
     const [preview, setPreview] = useState<string | null>(null);
@@ -91,7 +93,7 @@ export function AchievementsSection({ achievements, isOwner }: AchievementsProps
     }
 
     async function handleDelete(id: string) {
-        if (!confirm("Delete this achievement?")) return;
+        if (!confirm(t("achievementsSection.deleteConfirm"))) return;
         try {
             await fetch("/api/achievements", {
                 method: "DELETE",
@@ -109,7 +111,7 @@ export function AchievementsSection({ achievements, isOwner }: AchievementsProps
             <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold flex items-center gap-2">
                     <Award className="w-5 h-5 text-amber-500" />
-                    Achievements
+                    {t('achievementsSection.title')}
                 </h3>
                 {isOwner && !showForm && (
                     <Button
@@ -119,7 +121,7 @@ export function AchievementsSection({ achievements, isOwner }: AchievementsProps
                         onClick={() => setShowForm(true)}
                     >
                         <Plus className="w-4 h-4" />
-                        Add
+                        {t('achievementsSection.add')}
                     </Button>
                 )}
             </div>
@@ -128,20 +130,20 @@ export function AchievementsSection({ achievements, isOwner }: AchievementsProps
             {showForm && (
                 <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-950/50">
                     <CardHeader className="pb-2 flex flex-row items-center justify-between">
-                        <CardTitle className="text-sm">New Achievement</CardTitle>
+                        <CardTitle className="text-sm">{t('achievementsSection.newAchievement')}</CardTitle>
                         <Button variant="ghost" size="icon" onClick={() => { setShowForm(false); setPreview(null); }}>
                             <X className="w-4 h-4" />
                         </Button>
                     </CardHeader>
                     <CardContent>
                         <form action={handleSubmit} className="space-y-3">
-                            <Input name="title" placeholder="e.g. 1st Place — Math Olympiad" required />
-                            <Textarea name="description" placeholder="Description (optional)" className="min-h-[60px]" />
+                            <Input name="title" placeholder={t('achievementsSection.titlePlaceholder')} required />
+                            <Textarea name="description" placeholder={t('achievementsSection.descriptionPlaceholder')} className="min-h-[60px]" />
                             <Input name="achievement_date" type="date" />
 
                             {/* Tier (Phase 6) — determines points awarded after verification */}
                             <div className="space-y-1">
-                                <Label className="text-xs text-muted-foreground">Level</Label>
+                                <Label className="text-xs text-muted-foreground">{t('achievementsSection.level')}</Label>
                                 <select
                                     name="tier"
                                     defaultValue="school"
@@ -149,12 +151,12 @@ export function AchievementsSection({ achievements, isOwner }: AchievementsProps
                                 >
                                     {ACHIEVEMENT_TIERS.map((tier) => (
                                         <option key={tier} value={tier}>
-                                            {TIER_LABELS[tier]} (+{TIER_POINTS[tier]} pts)
+                                            {t('achievementsSection.levelTier', { tier: t(TIER_LABEL_KEYS[tier]), pts: TIER_POINTS[tier] })}
                                         </option>
                                     ))}
                                 </select>
                                 <p className="text-[11px] text-muted-foreground">
-                                    Points are awarded after a parliament member or moderator verifies the achievement.
+                                    {t('achievementsSection.levelHint')}
                                 </p>
                             </div>
 
@@ -162,7 +164,7 @@ export function AchievementsSection({ achievements, isOwner }: AchievementsProps
                             <div className="space-y-2">
                                 <Label className="text-xs text-muted-foreground flex items-center gap-1">
                                     <ImageIcon className="w-3 h-3" />
-                                    Certificate / Photo (optional)
+                                    {t('achievementsSection.certificatePhoto')}
                                 </Label>
                                 <Input
                                     ref={fileRef}
@@ -187,7 +189,7 @@ export function AchievementsSection({ achievements, isOwner }: AchievementsProps
                             </div>
 
                             <Button type="submit" size="sm" disabled={loading} className="w-full bg-amber-600 hover:bg-amber-700">
-                                {loading ? "Uploading..." : "Save Achievement"}
+                                {loading ? t('achievementsSection.uploading') : t('achievementsSection.save')}
                             </Button>
                         </form>
                     </CardContent>
@@ -212,10 +214,10 @@ export function AchievementsSection({ achievements, isOwner }: AchievementsProps
                                     <div>
                                         <div className="flex flex-wrap items-center gap-2">
                                             <h4 className="font-bold text-foreground">{a.title}</h4>
-                                            <StatusBadge status={a.status} />
+                                            <StatusBadge status={a.status} t={t} />
                                             {a.tier && (
                                                 <Badge variant="outline" className="text-[10px] uppercase tracking-wide bg-muted">
-                                                    {TIER_LABELS[a.tier]}
+                                                    {t(TIER_LABEL_KEYS[a.tier])}
                                                 </Badge>
                                             )}
                                         </div>
@@ -223,7 +225,7 @@ export function AchievementsSection({ achievements, isOwner }: AchievementsProps
                                             <p className="text-sm text-muted-foreground mt-1">{a.description}</p>
                                         )}
                                         {a.status === 'rejected' && a.rejection_reason && (
-                                            <p className="text-xs text-red-600 mt-1">Reason: {a.rejection_reason}</p>
+                                            <p className="text-xs text-red-600 mt-1">{t('achievementsSection.reason', { reason: a.rejection_reason })}</p>
                                         )}
                                         {a.achievement_date && (
                                             <span className="text-xs text-muted-foreground mt-2 block">
@@ -249,7 +251,7 @@ export function AchievementsSection({ achievements, isOwner }: AchievementsProps
                     <div className="col-span-full text-center py-8 bg-muted rounded-xl border border-dashed">
                         <Award className="w-10 h-10 mx-auto text-muted-foreground mb-2" />
                         <p className="text-muted-foreground text-sm">
-                            {isOwner ? "Share your achievements with the community!" : "No achievements yet."}
+                            {isOwner ? t('achievementsSection.emptyOwner') : t('achievementsSection.emptyOther')}
                         </p>
                     </div>
                 )}

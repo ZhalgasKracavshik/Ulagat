@@ -160,8 +160,8 @@ export function PersonalCabinet({
                                 </h1>
                             </div>
                             <div className="flex flex-wrap items-center gap-2">
-                                <Badge variant="secondary" className="capitalize">
-                                    {role}
+                                <Badge variant="secondary">
+                                    {t(`common.roles.${role}`)}
                                 </Badge>
                                 {classLabel && (
                                     <Badge variant="outline" className="font-medium">

@@ -11,6 +11,7 @@ import {
     REFERENCE_DATA_DISCLAIMER,
 } from "@/data/universities";
 import { AddTargetDialog } from "./AddTargetDialog";
+import { useT } from "@/hooks/useT";
 
 /**
  * Browse the reference list of KZ universities. Filter by city, or by the
@@ -26,6 +27,7 @@ export function UniversityExplorer({
     unlockedGroups: string[];
     readOnly?: boolean;
 }) {
+    const { t } = useT();
     const [city, setCity] = useState<string>("all");
     const [onlyUnlocked, setOnlyUnlocked] = useState(false);
 
@@ -53,7 +55,7 @@ export function UniversityExplorer({
                     className="rounded-full"
                     onClick={() => setCity("all")}
                 >
-                    All cities
+                    {t("careerExplorer.allCities")}
                 </Button>
                 {UNIVERSITY_CITIES.map((c) => (
                     <Button
@@ -73,7 +75,7 @@ export function UniversityExplorer({
                         className="rounded-full ml-auto"
                         onClick={() => setOnlyUnlocked((v) => !v)}
                     >
-                        {onlyUnlocked ? "Showing my combo only" : "Match my subject combo"}
+                        {onlyUnlocked ? t("careerExplorer.showingComboOnly") : t("careerExplorer.matchCombo")}
                     </Button>
                 )}
             </div>
@@ -122,7 +124,7 @@ export function UniversityExplorer({
                                     {!readOnly && (
                                         <AddTargetDialog
                                             compact
-                                            triggerLabel="Add"
+                                            triggerLabel={t("careerExplorer.addTarget")}
                                             prefill={{
                                                 university: uni.name,
                                                 specialty: s.name,
@@ -137,7 +139,7 @@ export function UniversityExplorer({
                 ))}
                 {filtered.length === 0 && (
                     <p className="col-span-full text-center text-sm text-muted-foreground py-8">
-                        No universities match the current filters.
+                        {t("careerExplorer.noMatch")}
                     </p>
                 )}
             </div>

@@ -8,8 +8,17 @@ import Link from "next/link";
 import { InteractiveButton } from "@/components/shared/InteractiveButton";
 import { YearFilter } from "@/components/olympiad/YearFilter";
 import { MATERIAL_DIFFICULTIES, MATERIAL_UPLOADER_ROLES, isMaterialDifficulty } from "@/lib/olympiad";
+import { cookies } from "next/headers";
+import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
 
 export const dynamic = 'force-dynamic';
+
+/** Difficulty slug → dictionary key. */
+const DIFFICULTY_KEYS: Record<string, string> = {
+    easy: "olympiad.diffEasy",
+    medium: "olympiad.diffMedium",
+    hard: "olympiad.diffHard",
+};
 
 type MaterialRow = {
     id: string;
@@ -25,6 +34,13 @@ type MaterialRow = {
 
 export default async function OlympiadPrepPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const supabase = await createClient();
+
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t = (key: string) => resolveKey(dict, key);
+
     const params = await searchParams;
     const categoryFilter = typeof params?.category === 'string' ? params.category : null;
     const rawDifficulty = typeof params?.difficulty === 'string' ? params.difficulty : null;
@@ -102,10 +118,10 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
                 <div className="space-y-2">
                     <h1 className="text-4xl font-extrabold tracking-tight text-foreground flex items-center gap-3">
                         <GraduationCap className="w-10 h-10 text-indigo-600" />
-                        Olympiad Prep Center
+                        {t('olympiad.title')}
                     </h1>
                     <p className="text-muted-foreground text-lg max-w-xl">
-                        Study materials, example questions, and resources to ace your next olympiad.
+                        {t('olympiad.subtitle')}
                     </p>
                 </div>
                 {canUpload && (
@@ -115,7 +131,7 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
                             className="rounded-full shadow-lg gap-2 font-bold px-6 bg-indigo-600 hover:bg-indigo-700 transition-all hover:ring-4 hover:ring-indigo-200 active:scale-95"
                         >
                             <PlusCircle className="w-5 h-5" />
-                            Add Resource
+                            {t('olympiad.addResource')}
                         </Button>
                     </Link>
                 )}
@@ -130,7 +146,7 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
                         size="sm"
                         className="rounded-full px-4 hover:ring-2 hover:ring-indigo-400/50 transition-all"
                     >
-                        All
+                        {t('olympiad.all')}
                     </Button>
                 </Link>
                 {CATEGORIES.map(cat => (
@@ -151,7 +167,7 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
                 <Gauge className="w-4 h-4 text-muted-foreground shrink-0" />
                 <Link href={buildHref({ difficulty: null })}>
                     <Button variant={!difficultyFilter ? "secondary" : "ghost"} size="sm" className="rounded-full px-4">
-                        Any difficulty
+                        {t('olympiad.anyDifficulty')}
                     </Button>
                 </Link>
                 {MATERIAL_DIFFICULTIES.map((level) => (
@@ -159,9 +175,9 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
                         <Button
                             variant={difficultyFilter === level ? "secondary" : "ghost"}
                             size="sm"
-                            className="rounded-full px-4 capitalize"
+                            className="rounded-full px-4"
                         >
-                            {level}
+                            {t(DIFFICULTY_KEYS[level] ?? level)}
                         </Button>
                     </Link>
                 ))}
@@ -184,7 +200,7 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
                                         {material.title}
                                     </CardTitle>
                                     <Badge className={`shrink-0 border shadow-none ${difficultyColors[material.difficulty] || difficultyColors.medium}`}>
-                                        {material.difficulty}
+                                        {t(DIFFICULTY_KEYS[material.difficulty] ?? material.difficulty)}
                                     </Badge>
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -206,7 +222,7 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
                                             {material.profiles?.full_name?.[0] || 'A'}
                                         </div>
                                         <span className="text-[11px] font-medium text-muted-foreground">
-                                            {material.profiles?.full_name || 'Admin'}
+                                            {material.profiles?.full_name || t('olympiad.admin')}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -230,7 +246,7 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
                                                     className="gap-1.5 text-indigo-600 border-indigo-200 bg-indigo-50/30 dark:bg-indigo-950/30 hover:bg-indigo-600 hover:text-white transition-all font-bold"
                                                 >
                                                     <ExternalLink className="w-3.5 h-3.5" />
-                                                    Open
+                                                    {t('common.open')}
                                                 </InteractiveButton>
                                             </a>
                                         )}
@@ -244,11 +260,11 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
                         <div className="mx-auto w-24 h-24 bg-indigo-50 dark:bg-indigo-950/40 rounded-full flex items-center justify-center">
                             <BookOpen className="w-12 h-12 text-indigo-300" />
                         </div>
-                        <h3 className="text-xl font-bold text-foreground">No Materials Found</h3>
+                        <h3 className="text-xl font-bold text-foreground">{t('olympiad.emptyTitle')}</h3>
                         <p className="text-muted-foreground">
                             {hasFilter
-                                ? "No resources match the selected filters yet."
-                                : "Staff and Parliament will add study materials soon!"}
+                                ? t('olympiad.emptyFiltered')
+                                : t('olympiad.emptyDefault')}
                         </p>
                     </div>
                 )}

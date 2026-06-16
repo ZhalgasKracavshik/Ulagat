@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { deleteLostItem } from "@/app/lost-found/actions";
+import { useT } from "@/hooks/useT";
 
 const REDIRECT_DIGEST = "NEXT_REDIRECT";
 
@@ -14,6 +15,7 @@ const REDIRECT_DIGEST = "NEXT_REDIRECT";
  * The server action redirects to /lost-found on success.
  */
 export function DeleteItemButton({ itemId }: { itemId: string }) {
+    const { t } = useT();
     const [isDeleting, startDeleting] = useTransition();
     const [armed, setArmed] = useState(false);
     const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -44,7 +46,7 @@ export function DeleteItemButton({ itemId }: { itemId: string }) {
                 if (err && typeof err === "object" && "digest" in err && String((err as { digest?: string }).digest).startsWith(REDIRECT_DIGEST)) {
                     throw err;
                 }
-                const message = err instanceof Error ? err.message : "Failed to delete the item.";
+                const message = err instanceof Error ? err.message : t("lostFoundClaim.deleteFailed");
                 toast.error(message);
             }
         });
@@ -59,7 +61,7 @@ export function DeleteItemButton({ itemId }: { itemId: string }) {
             className={armed ? "gap-2 font-bold" : "gap-2 border-red-200 text-red-600 hover:bg-red-50 font-bold"}
         >
             <Trash2 className="w-4 h-4" />
-            {armed ? "Click again to confirm" : "Delete"}
+            {armed ? t("lostFoundClaim.deleteConfirm") : t("lostFoundClaim.delete")}
         </Button>
     );
 }

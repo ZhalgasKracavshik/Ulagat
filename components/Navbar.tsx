@@ -299,12 +299,12 @@ export function Navbar() {
                         <div className="flex items-center gap-2">
                             <Link href="/login">
                                 <Button variant="ghost" size="sm">
-                                    Sign In
+                                    {t('auth.signIn')}
                                 </Button>
                             </Link>
                             <Link href="/register">
                                 <Button size="sm">
-                                    Get Started
+                                    {t('auth.getStarted')}
                                 </Button>
                             </Link>
                         </div>

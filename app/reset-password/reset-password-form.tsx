@@ -6,8 +6,10 @@ import { useRouter } from "next/navigation";
 import { SubmitButton } from "@/components/auth/submit-button";
 import { Lock, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import { useT } from "@/hooks/useT";
 
 export function ResetPasswordForm() {
+    const { t } = useT();
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
     const [ready, setReady] = useState(false);
@@ -24,12 +26,12 @@ export function ResetPasswordForm() {
         const confirmPassword = formData.get("confirm_password") as string;
 
         if (password !== confirmPassword) {
-            setError("Passwords do not match.");
+            setError(t("auth.passwordsNoMatch"));
             return;
         }
 
         if (password.length < 6) {
-            setError("Password must be at least 6 characters.");
+            setError(t("auth.passwordTooShort"));
             return;
         }
 
@@ -51,8 +53,8 @@ export function ResetPasswordForm() {
                     <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
                         <CheckCircle2 className="w-8 h-8 text-green-600" />
                     </div>
-                    <h2 className="text-2xl font-bold text-foreground">Password Updated!</h2>
-                    <p className="text-muted-foreground">Redirecting to your dashboard...</p>
+                    <h2 className="text-2xl font-bold text-foreground">{t('auth.passwordUpdated')}</h2>
+                    <p className="text-muted-foreground">{t('auth.redirecting')}</p>
                 </div>
             </div>
         );
@@ -66,17 +68,17 @@ export function ResetPasswordForm() {
                         <Lock className="w-7 h-7 text-primary" />
                     </div>
                     <h2 className="text-2xl font-bold tracking-tight text-foreground">
-                        Set new password
+                        {t('auth.setNewPassword')}
                     </h2>
                     <p className="mt-2 text-sm text-muted-foreground">
-                        Choose a strong password for your account.
+                        {t('auth.setNewPasswordSubtitle')}
                     </p>
                 </div>
 
                 <form action={handleSubmit} className="space-y-6">
                     <div>
                         <label htmlFor="password" className="mb-2 block text-sm font-medium text-foreground">
-                            New Password
+                            {t('auth.newPassword')}
                         </label>
                         <input
                             id="password"
@@ -91,7 +93,7 @@ export function ResetPasswordForm() {
 
                     <div>
                         <label htmlFor="confirm_password" className="mb-2 block text-sm font-medium text-foreground">
-                            Confirm Password
+                            {t('auth.confirmPassword')}
                         </label>
                         <input
                             id="confirm_password"
@@ -106,16 +108,16 @@ export function ResetPasswordForm() {
 
                     {error && (
                         <div className="rounded-lg bg-red-50 dark:bg-red-950/40 p-4 text-sm text-red-800" role="alert">
-                            <span className="font-medium">Error:</span> {error}
+                            <span className="font-medium">{t('auth.errorPrefix')}</span> {error}
                         </div>
                     )}
 
-                    <SubmitButton>Update Password</SubmitButton>
+                    <SubmitButton>{t('auth.updatePassword')}</SubmitButton>
                 </form>
 
                 <div className="text-center">
                     <Link href="/login" className="text-sm font-medium text-primary hover:underline">
-                        Back to login
+                        {t('auth.backToLogin')}
                     </Link>
                 </div>
             </div>

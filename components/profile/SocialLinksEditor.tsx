@@ -11,17 +11,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { useT } from "@/hooks/useT";
 
 const SOCIAL_NETWORKS = [
-    { value: "instagram", label: "Instagram", placeholder: "https://instagram.com/username" },
-    { value: "telegram", label: "Telegram", placeholder: "https://t.me/username" },
-    { value: "tiktok", label: "TikTok", placeholder: "https://tiktok.com/@username" },
-    { value: "youtube", label: "YouTube", placeholder: "https://youtube.com/@channel" },
-    { value: "twitter", label: "Twitter / X", placeholder: "https://twitter.com/username" },
-    { value: "github", label: "GitHub", placeholder: "https://github.com/username" },
-    { value: "linkedin", label: "LinkedIn", placeholder: "https://linkedin.com/in/name" },
-    { value: "vk", label: "VK", placeholder: "https://vk.com/id" },
-    { value: "other", label: "Other", placeholder: "https://..." },
+    { value: "instagram", labelKey: "socialLinks.instagram", placeholder: "https://instagram.com/username" },
+    { value: "telegram", labelKey: "socialLinks.telegram", placeholder: "https://t.me/username" },
+    { value: "tiktok", labelKey: "socialLinks.tiktok", placeholder: "https://tiktok.com/@username" },
+    { value: "youtube", labelKey: "socialLinks.youtube", placeholder: "https://youtube.com/@channel" },
+    { value: "twitter", labelKey: "socialLinks.twitter", placeholder: "https://twitter.com/username" },
+    { value: "github", labelKey: "socialLinks.github", placeholder: "https://github.com/username" },
+    { value: "linkedin", labelKey: "socialLinks.linkedin", placeholder: "https://linkedin.com/in/name" },
+    { value: "vk", labelKey: "socialLinks.vk", placeholder: "https://vk.com/id" },
+    { value: "other", labelKey: "socialLinks.other", placeholder: "https://..." },
 ];
 
 interface SocialLink {
@@ -34,6 +35,7 @@ interface SocialLinksEditorProps {
 }
 
 export function SocialLinksEditor({ initialLinks }: SocialLinksEditorProps) {
+    const { t } = useT();
     const [links, setLinks] = useState<SocialLink[]>(
         initialLinks.length > 0 ? initialLinks : []
     );
@@ -74,7 +76,7 @@ export function SocialLinksEditor({ initialLinks }: SocialLinksEditorProps) {
                             <SelectContent>
                                 {SOCIAL_NETWORKS.map((sn) => (
                                     <SelectItem key={sn.value} value={sn.value}>
-                                        {sn.label}
+                                        {t(sn.labelKey)}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -109,13 +111,13 @@ export function SocialLinksEditor({ initialLinks }: SocialLinksEditorProps) {
                     onClick={addLink}
                 >
                     <Plus className="w-4 h-4" />
-                    Add Social Link
+                    {t("socialLinks.add")}
                 </Button>
             )}
 
             {links.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                    No social links yet. Click &quot;Add Social Link&quot; to get started.
+                    {t("socialLinks.empty")}
                 </p>
             )}
         </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { useT } from "@/hooks/useT";
 
 /**
  * Shows a one-time toast based on the ?status=success|cancel flag that Stripe
@@ -9,18 +10,19 @@ import { toast } from "sonner";
  * the webhook, so success here only confirms the payment flow returned.
  */
 export function CheckoutStatusToast({ status }: { status?: string }) {
+    const { t } = useT();
     const shown = useRef(false);
 
     useEffect(() => {
         if (shown.current) return;
         if (status === "success") {
-            toast.success("Payment received — your Premium access is being activated.");
+            toast.success(t("pricing.paymentReceived"));
             shown.current = true;
         } else if (status === "cancel") {
-            toast.info("Checkout canceled. You can upgrade anytime.");
+            toast.info(t("pricing.checkoutCanceled"));
             shown.current = true;
         }
-    }, [status]);
+    }, [status, t]);
 
     return null;
 }

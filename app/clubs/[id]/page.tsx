@@ -20,10 +20,15 @@ import {
     Sparkles,
 } from "lucide-react";
 import { joinClub, leaveClub } from "../actions";
-import { CLUB_CATEGORY_LABELS, CLUB_JOINER_ROLES } from "@/lib/clubs";
+import { CLUB_JOINER_ROLES } from "@/lib/clubs";
+import { clubCategoryKey } from "@/lib/clubs-i18n";
 import { CLUB_CATEGORY_ICONS } from "@/components/clubs/category-icons";
 import { almatyTodayIso } from "@/lib/schedule/almaty-time";
+import { cookies } from "next/headers";
+import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
 import type { Club, ClubAnnouncement, ClubMeeting } from "@/types";
+
+type ClubT = (key: string, vars?: Record<string, string | number>) => string;
 
 export const dynamic = 'force-dynamic';
 
@@ -48,6 +53,20 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect(`/login?next=/clubs/${id}`);
+
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t: ClubT = (key, vars) => {
+        let value = resolveKey(dict, key);
+        if (vars) {
+            for (const [name, replacement] of Object.entries(vars)) {
+                value = value.replace(`{${name}}`, String(replacement));
+            }
+        }
+        return value;
+    };
 
     const [{ data: clubRaw }, { data: profile }] = await Promise.all([
         supabase.from('clubs').select('*').eq('id', id).single(),
@@ -109,7 +128,7 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
             <Link href="/clubs" className="inline-flex">
                 <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
                     <ArrowLeft className="w-4 h-4" />
-                    All clubs
+                    {t('clubDetail.allClubs')}
                 </Button>
             </Link>
 
@@ -130,12 +149,12 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
                             <div className="flex flex-wrap items-center gap-2">
                                 <h1 className="text-3xl font-extrabold tracking-tight text-foreground">{club.name}</h1>
                                 <Badge variant="outline" className="border-violet-200 dark:border-violet-800 text-violet-700 dark:text-violet-300 font-bold">
-                                    {CLUB_CATEGORY_LABELS[club.category]}
+                                    {t(clubCategoryKey(club.category))}
                                 </Badge>
                                 {club.status === 'archived' && (
                                     <Badge variant="outline" className="border-border text-muted-foreground font-bold gap-1">
                                         <Archive className="w-3 h-3" />
-                                        Archived
+                                        {t('clubDetail.archived')}
                                     </Badge>
                                 )}
                             </div>
@@ -145,17 +164,17 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
                             <div className="flex flex-wrap items-center gap-4 text-sm pt-1">
                                 <span className="flex items-center gap-1.5 font-bold text-amber-600">
                                     <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                                    {club.points} points
+                                    {t('clubDetail.points', { count: club.points })}
                                 </span>
                                 <span className="flex items-center gap-1.5 text-muted-foreground font-medium">
                                     <Users className="w-4 h-4 text-violet-500" />
-                                    {members.length} members
+                                    {t('clubDetail.members', { count: members.length })}
                                 </span>
                                 <span className="flex items-center gap-1.5 text-muted-foreground font-medium">
                                     <Crown className="w-4 h-4 text-yellow-500" />
-                                    Leader:{' '}
+                                    {t('clubDetail.leader')}{' '}
                                     <Link href={`/profile/${club.leader_id}`} className="text-violet-700 hover:underline font-semibold">
-                                        {leaderProfile?.full_name || 'Unknown'}
+                                        {leaderProfile?.full_name || t('clubDetail.unknown')}
                                     </Link>
                                 </span>
                             </div>
@@ -165,7 +184,7 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
                                 <Link href={`/clubs/${club.id}/manage`}>
                                     <Button variant="outline" className="w-full gap-2 border-violet-200 dark:border-violet-800 text-violet-700 dark:text-violet-300 hover:bg-violet-50 dark:hover:bg-violet-950/40 font-bold">
                                         <Settings className="w-4 h-4" />
-                                        Manage
+                                        {t('clubDetail.manage')}
                                     </Button>
                                 </Link>
                             )}
@@ -174,7 +193,7 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
                                     <input type="hidden" name="club_id" value={club.id} />
                                     <Button type="submit" className="w-full gap-2 bg-violet-600 hover:bg-violet-700 font-bold">
                                         <LogIn className="w-4 h-4" />
-                                        Join Club
+                                        {t('clubDetail.joinClub')}
                                     </Button>
                                 </form>
                             )}
@@ -183,7 +202,7 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
                                     <input type="hidden" name="club_id" value={club.id} />
                                     <Button type="submit" variant="outline" className="w-full gap-2 border-red-200 dark:border-red-900 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 font-bold">
                                         <LogOut className="w-4 h-4" />
-                                        Leave Club
+                                        {t('clubDetail.leaveClub')}
                                     </Button>
                                 </form>
                             )}
@@ -198,7 +217,7 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-lg">
                             <Users className="w-5 h-5 text-violet-500" />
-                            Members
+                            {t('clubDetail.membersTitle')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
@@ -216,18 +235,18 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
                                         </AvatarFallback>
                                     </Avatar>
                                     <span className="flex-grow min-w-0 truncate font-medium text-foreground group-hover:text-violet-700 transition-colors">
-                                        {member.profiles?.full_name || 'Unknown'}
+                                        {member.profiles?.full_name || t('clubDetail.unknown')}
                                         {member.user_id === club.leader_id && (
                                             <Crown className="inline w-3.5 h-3.5 text-yellow-500 ml-1.5 -mt-0.5" />
                                         )}
                                     </span>
                                     <span className="text-xs font-bold text-muted-foreground bg-muted px-2 py-1 rounded-full tabular-nums shrink-0">
-                                        {member.total_attendance} attended
+                                        {t('clubDetail.attended', { count: member.total_attendance })}
                                     </span>
                                 </Link>
                             ))
                         ) : (
-                            <p className="text-sm text-muted-foreground py-4 text-center">No members yet — be the first to join!</p>
+                            <p className="text-sm text-muted-foreground py-4 text-center">{t('clubDetail.noMembers')}</p>
                         )}
                     </CardContent>
                 </Card>
@@ -237,7 +256,7 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-lg">
                             <Megaphone className="w-5 h-5 text-violet-500" />
-                            Club Announcements
+                            {t('clubDetail.announcementsTitle')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -254,7 +273,7 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
                                 </div>
                             ))
                         ) : (
-                            <p className="text-sm text-muted-foreground py-4 text-center">No announcements yet.</p>
+                            <p className="text-sm text-muted-foreground py-4 text-center">{t('clubDetail.noAnnouncements')}</p>
                         )}
                     </CardContent>
                 </Card>
@@ -265,27 +284,27 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
                         <CalendarDays className="w-5 h-5 text-violet-500" />
-                        Meetings
+                        {t('clubDetail.meetingsTitle')}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                     {meetings.length > 0 ? (
                         <>
                             {todayMeetings.length > 0 && (
-                                <p className="text-xs font-bold uppercase tracking-wider text-violet-500">Today</p>
+                                <p className="text-xs font-bold uppercase tracking-wider text-violet-500">{t('clubDetail.today')}</p>
                             )}
                             {todayMeetings.map((meeting) => (
-                                <MeetingRow key={meeting.id} meeting={meeting} highlight />
+                                <MeetingRow key={meeting.id} meeting={meeting} highlight t={t} />
                             ))}
                             {pastMeetings.length > 0 && (
-                                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground pt-1">Past</p>
+                                <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground pt-1">{t('clubDetail.past')}</p>
                             )}
                             {pastMeetings.map((meeting) => (
-                                <MeetingRow key={meeting.id} meeting={meeting} />
+                                <MeetingRow key={meeting.id} meeting={meeting} t={t} />
                             ))}
                         </>
                     ) : (
-                        <p className="text-sm text-muted-foreground py-4 text-center">No meetings recorded yet.</p>
+                        <p className="text-sm text-muted-foreground py-4 text-center">{t('clubDetail.noMeetings')}</p>
                     )}
                 </CardContent>
             </Card>
@@ -293,14 +312,14 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
     );
 }
 
-function MeetingRow({ meeting, highlight = false }: { meeting: ClubMeeting; highlight?: boolean }) {
+function MeetingRow({ meeting, highlight = false, t }: { meeting: ClubMeeting; highlight?: boolean; t: ClubT }) {
     return (
         <div className={`flex items-center gap-4 p-3 rounded-lg border ${highlight ? 'border-violet-200 dark:border-violet-800 bg-violet-50/50 dark:bg-violet-950/30' : 'border-border bg-muted'}`}>
             <div className="font-bold text-foreground text-sm tabular-nums shrink-0">
                 {format(new Date(meeting.date + 'T00:00:00'), 'MMM d, yyyy')}
             </div>
             <div className="flex-grow min-w-0 text-sm text-muted-foreground truncate">
-                {meeting.notes || 'Club meeting'}
+                {meeting.notes || t('clubDetail.clubMeeting')}
             </div>
             <div className="flex items-center gap-1 text-xs font-bold text-muted-foreground bg-card border border-border px-2 py-1 rounded-full shrink-0">
                 <Users className="w-3 h-3" />

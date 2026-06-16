@@ -15,12 +15,15 @@ import {
     User as UserIcon,
     Package,
 } from "lucide-react";
-import { LOST_ITEM_CATEGORY_LABELS, LOST_ITEM_STAFF_ROLES } from "@/lib/lost-found";
+import { LOST_ITEM_STAFF_ROLES } from "@/lib/lost-found";
+import { lostItemCategoryKey } from "@/lib/lost-found-i18n";
 import { LOST_ITEM_CATEGORY_ICONS } from "@/components/lost-found/category-icons";
 import { StatusBadge } from "@/components/lost-found/StatusBadge";
 import { ClaimButton } from "@/components/lost-found/ClaimButton";
 import { StatusManager, type Claimant } from "@/components/lost-found/StatusManager";
 import { DeleteItemButton } from "@/components/lost-found/DeleteItemButton";
+import { cookies } from "next/headers";
+import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
 import type { LostItem } from "@/types";
 
 export const dynamic = 'force-dynamic';
@@ -46,6 +49,20 @@ export default async function LostItemPage({ params }: { params: Promise<{ id: s
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect(`/login?next=/lost-found/${id}`);
+
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t = (key: string, vars?: Record<string, string | number>) => {
+        let value = resolveKey(dict, key);
+        if (vars) {
+            for (const [name, replacement] of Object.entries(vars)) {
+                value = value.replace(`{${name}}`, String(replacement));
+            }
+        }
+        return value;
+    };
 
     const [{ data: itemRaw }, { data: profile }] = await Promise.all([
         supabase.from('lost_items').select('*').eq('id', id).single(),
@@ -82,7 +99,7 @@ export default async function LostItemPage({ params }: { params: Promise<{ id: s
 
     const claimants: Claimant[] = claims.map((c) => ({
         id: c.claimant_id,
-        name: c.profiles?.full_name || 'Unknown',
+        name: c.profiles?.full_name || t('lostFoundDetail.unknown'),
     }));
 
     const CategoryIcon = LOST_ITEM_CATEGORY_ICONS[item.category] ?? Package;
@@ -92,7 +109,7 @@ export default async function LostItemPage({ params }: { params: Promise<{ id: s
             <Link href="/lost-found" className="inline-flex">
                 <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
                     <ArrowLeft className="w-4 h-4" />
-                    All items
+                    {t('lostFoundDetail.allItems')}
                 </Button>
             </Link>
 
@@ -114,7 +131,7 @@ export default async function LostItemPage({ params }: { params: Promise<{ id: s
                     <div className="flex flex-wrap items-center gap-2">
                         <StatusBadge status={item.status} />
                         <Badge variant="outline" className="border-teal-200 dark:border-teal-800 text-teal-700 dark:text-teal-300 font-bold">
-                            {LOST_ITEM_CATEGORY_LABELS[item.category]}
+                            {t(lostItemCategoryKey(item.category))}
                         </Badge>
                     </div>
 
@@ -127,18 +144,18 @@ export default async function LostItemPage({ params }: { params: Promise<{ id: s
                     <div className="space-y-2 text-sm pt-1">
                         <div className="flex items-center gap-2 text-muted-foreground">
                             <MapPin className="w-4 h-4 text-teal-500 shrink-0" />
-                            <span>{item.location || 'No location given'}</span>
+                            <span>{item.location || t('lostFoundDetail.noLocation')}</span>
                         </div>
                         <div className="flex items-center gap-2 text-muted-foreground">
                             <Clock className="w-4 h-4 text-teal-500 shrink-0" />
-                            <span>Posted {format(new Date(item.created_at), 'MMM d, yyyy')}</span>
+                            <span>{t('lostFoundDetail.posted', { date: format(new Date(item.created_at), 'MMM d, yyyy') })}</span>
                         </div>
                         <div className="flex items-center gap-2 text-muted-foreground">
                             <UserIcon className="w-4 h-4 text-teal-500 shrink-0" />
                             <span>
-                                Posted by{' '}
+                                {t('lostFoundDetail.postedBy')}{' '}
                                 <Link href={`/profile/${item.posted_by}`} className="text-teal-700 hover:underline font-semibold">
-                                    {posterProfile?.full_name || 'Unknown'}
+                                    {posterProfile?.full_name || t('lostFoundDetail.unknown')}
                                 </Link>
                             </span>
                         </div>
@@ -149,17 +166,17 @@ export default async function LostItemPage({ params }: { params: Promise<{ id: s
                         {item.status === 'claimed' ? (
                             <div className="flex items-center gap-2 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 p-4 text-emerald-800 dark:text-emerald-300 font-semibold">
                                 <CheckCircle2 className="w-5 h-5" />
-                                This item has been returned to its owner.
+                                {t('lostFoundDetail.returnedToOwner')}
                             </div>
                         ) : hasClaimed ? (
                             <div className="flex items-center gap-2 rounded-xl border border-teal-200 dark:border-teal-800 bg-teal-50 dark:bg-teal-950/40 p-4 text-teal-800 dark:text-teal-300 font-semibold">
                                 <CheckCircle2 className="w-5 h-5" />
-                                You&apos;ve claimed this — awaiting verification.
+                                {t('lostFoundDetail.awaitingVerification')}
                             </div>
                         ) : canClaim ? (
                             <ClaimButton itemId={item.id} />
                         ) : isPoster ? (
-                            <p className="text-sm text-muted-foreground italic">You posted this item.</p>
+                            <p className="text-sm text-muted-foreground italic">{t('lostFoundDetail.youPosted')}</p>
                         ) : null}
                     </div>
 
@@ -177,7 +194,7 @@ export default async function LostItemPage({ params }: { params: Promise<{ id: s
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-lg">
                             <ShieldCheck className="w-5 h-5 text-indigo-500" />
-                            Verification &amp; status
+                            {t('lostFoundDetail.verificationStatus')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
@@ -185,7 +202,7 @@ export default async function LostItemPage({ params }: { params: Promise<{ id: s
 
                         <div className="space-y-3">
                             <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-                                Claim audit log ({claims.length})
+                                {t('lostFoundDetail.claimAuditLog', { count: claims.length })}
                             </h3>
                             {claims.length > 0 ? (
                                 <div className="space-y-3">
@@ -203,12 +220,12 @@ export default async function LostItemPage({ params }: { params: Promise<{ id: s
                                             <div className="flex-grow min-w-0 space-y-1">
                                                 <div className="flex flex-wrap items-center gap-2">
                                                     <Link href={`/profile/${claim.claimant_id}`} className="font-semibold text-foreground hover:text-indigo-700 hover:underline">
-                                                        {claim.profiles?.full_name || 'Unknown'}
+                                                        {claim.profiles?.full_name || t('lostFoundDetail.unknown')}
                                                     </Link>
                                                     {claim.claimant_id === item.claimed_by && (
                                                         <Badge variant="outline" className="border-emerald-300 text-emerald-700 text-[10px] font-bold gap-1">
                                                             <CheckCircle2 className="w-3 h-3" />
-                                                            Received
+                                                            {t('lostFoundDetail.received')}
                                                         </Badge>
                                                     )}
                                                     <span className="text-[11px] text-muted-foreground">
@@ -223,7 +240,7 @@ export default async function LostItemPage({ params }: { params: Promise<{ id: s
                                     ))}
                                 </div>
                             ) : (
-                                <p className="text-sm text-muted-foreground py-2">No one has claimed this item yet.</p>
+                                <p className="text-sm text-muted-foreground py-2">{t('lostFoundDetail.noClaims')}</p>
                             )}
                         </div>
                     </CardContent>

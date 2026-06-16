@@ -82,7 +82,7 @@ export default async function FriendsPage() {
                                                 </Avatar>
                                                 <div className="truncate">
                                                     <p className="font-bold text-foreground group-hover:text-primary transition-colors truncate">{friend.full_name}</p>
-                                                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">{friend.role}</p>
+                                                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">{friend.role ? t(`common.roles.${friend.role}`) : ''}</p>
                                                 </div>
                                             </Link>
                                             <FriendButton
