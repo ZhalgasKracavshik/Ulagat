@@ -27,6 +27,22 @@ export default async function PaymentPage({ params }: PageProps) {
         "use server";
         const supabase = await createClient();
 
+        // Require an authenticated caller who owns the service before mutating it.
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            redirect('/login');
+        }
+
+        const { data: target } = await supabase
+            .from('services')
+            .select('owner_id')
+            .eq('id', id)
+            .single();
+
+        if (!target || target.owner_id !== user.id) {
+            throw new Error("Unauthorized");
+        }
+
         // Update status to PENDING (Moderation required)
         await supabase.from('services').update({ status: 'pending' }).eq('id', id);
 

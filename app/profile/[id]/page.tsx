@@ -15,6 +15,8 @@ import { PersonalCabinet } from "@/components/profile/PersonalCabinet";
 import { verifyChain } from "@/lib/reputation";
 import { resolvePlan } from "@/lib/subscription-plan";
 import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
+import { isUuid } from "@/lib/validation";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
 
 interface PageProps {
@@ -55,6 +57,11 @@ export default async function ProfilePage({ params }: PageProps) {
         }
         id = user.id;
     }
+
+    // Reject any non-uuid route param before it reaches a query. The "me" case
+    // above already resolved `id` to user.id (a uuid); a raw param that is not a
+    // uuid is rejected here to prevent PostgREST `.or()` filter injection.
+    if (!isUuid(id)) notFound();
 
     // Fetch Profile
     const { data: profile } = await supabase

@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 import type { UserRole } from '@/types';
 
@@ -26,7 +27,7 @@ export async function updateUserRole(
     newRole: UserRole
 ): Promise<{ error?: string }> {
     try {
-        const { supabase, user } = await requireAdmin();
+        const { user } = await requireAdmin();
 
         // P0-5: Validate that newRole is one of the allowed values at runtime.
         const VALID_ROLES: UserRole[] = ['student', 'teacher', 'parent', 'parliament', 'moderator', 'admin'];
@@ -39,7 +40,12 @@ export async function updateUserRole(
             return { error: 'Cannot change your own role.' };
         }
 
-        const { error } = await supabase
+        // The live profiles UPDATE RLS policy is own-row only (auth.uid() = id),
+        // so the request-scoped client updates 0 rows for OTHER users. The caller
+        // is already authorized as admin above; execute the write with the
+        // service-role client to bypass RLS for this admin-only operation.
+        const admin = createAdminClient();
+        const { error } = await admin
             .from('profiles')
             .update({ role: newRole })
             .eq('id', userId);
@@ -59,9 +65,14 @@ export async function updateUserSkudId(
     skudId: string
 ): Promise<{ error?: string }> {
     try {
-        const { supabase } = await requireAdmin();
+        // Authorize the caller as admin with the request-scoped client, then
+        // execute the write with the service-role client (the live profiles
+        // UPDATE RLS policy is own-row only, so the request client would update
+        // 0 rows for OTHER users).
+        await requireAdmin();
 
-        const { error } = await supabase
+        const admin = createAdminClient();
+        const { error } = await admin
             .from('profiles')
             .update({ external_skud_id: skudId.trim() || null })
             .eq('id', userId);

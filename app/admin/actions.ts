@@ -2,8 +2,10 @@
 'use server'
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import type { UserRole } from "@/types";
 
 // Check if current user is admin/moderator
 async function checkPermission() {
@@ -62,14 +64,29 @@ export async function rejectMaterial(materialId: string, reason: string) {
     revalidatePath('/admin');
 }
 
-export async function updateUserRole(targetUserId: string, newRole: 'student' | 'teacher' | 'moderator' | 'admin' | 'parent' | 'parliament') {
-    const { supabase, role: currentUserRole } = await checkPermission();
+export async function updateUserRole(targetUserId: string, newRole: UserRole) {
+    const { user, role: currentUserRole } = await checkPermission();
 
     // Only Admins can change roles. Moderators cannot.
     if (currentUserRole !== 'admin') {
         throw new Error("Only Admins can manage roles");
     }
 
-    await supabase.from('profiles').update({ role: newRole }).eq('id', targetUserId);
+    // Validate that newRole is one of the allowed values at runtime.
+    const VALID_ROLES: UserRole[] = ['student', 'teacher', 'parent', 'parliament', 'moderator', 'admin'];
+    if (!VALID_ROLES.includes(newRole)) {
+        throw new Error("Invalid role value.");
+    }
+
+    // Prevent an admin from demoting their own account.
+    if (user.id === targetUserId) {
+        throw new Error("Cannot change your own role.");
+    }
+
+    // The live profiles UPDATE RLS policy is own-row only (auth.uid() = id), so
+    // the request-scoped client updates 0 rows for OTHER users. The caller is
+    // authorized as admin above; execute the write with the service-role client.
+    const admin = createAdminClient();
+    await admin.from('profiles').update({ role: newRole }).eq('id', targetUserId);
     revalidatePath('/admin');
 }
