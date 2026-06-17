@@ -8,10 +8,23 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Check, X, Eye, FileText } from "lucide-react";
 import { approveService, rejectService } from "@/app/admin/actions";
 import { useT } from "@/hooks/useT";
+import { Input } from "@/components/ui/input";
 import Image from "next/image";
 
+/** Minimal shape of a pending service row passed from the admin page. */
+type PendingService = {
+    id: string;
+    title: string;
+    category: string | null;
+    price: number;
+    description: string | null;
+    image_url: string | null;
+    created_at: string;
+    profiles?: { full_name: string | null } | null;
+};
+
 interface ServiceReviewTableProps {
-    services: any[];
+    services: PendingService[];
 }
 
 export function ServiceReviewTable({ services }: ServiceReviewTableProps) {
@@ -152,5 +165,3 @@ export function ServiceReviewTable({ services }: ServiceReviewTableProps) {
         </Table>
     );
 }
-
-import { Input } from "@/components/ui/input";

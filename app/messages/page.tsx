@@ -14,6 +14,26 @@ import {
     resolveKey,
 } from "@/lib/i18n";
 
+type ConversationParty = { full_name: string | null; avatar_url: string | null };
+
+/** A DM conversation row joined with both participants. */
+type ConversationRow = {
+    id: string;
+    updated_at: string;
+    participant1_id: string;
+    participant2_id: string;
+    participant1: ConversationParty | ConversationParty[] | null;
+    participant2: ConversationParty | ConversationParty[] | null;
+};
+
+/** A group summary (id, name, avatar, updated_at) used in the list. */
+type GroupSummary = {
+    id: string;
+    name: string | null;
+    avatar_url: string | null;
+    updated_at: string;
+};
+
 export default async function MessagesPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -61,12 +81,12 @@ export default async function MessagesPage() {
         .eq('creator_id', user.id);
 
     // Merge groups, deduplicate
-    const groupMap = new Map();
-    userGroups?.forEach((gm: any) => {
+    const groupMap = new Map<string, GroupSummary>();
+    (userGroups as { groups: GroupSummary | null }[] | null)?.forEach((gm) => {
         if (gm.groups) groupMap.set(gm.groups.id, gm.groups);
     });
-    createdGroups?.forEach((g: any) => {
-        groupMap.set(g.id, { ...g, updated_at: g.created_at });
+    (createdGroups as { id: string; name: string | null; avatar_url: string | null; created_at: string }[] | null)?.forEach((g) => {
+        groupMap.set(g.id, { id: g.id, name: g.name, avatar_url: g.avatar_url, updated_at: g.created_at });
     });
     const groups = Array.from(groupMap.values());
 
@@ -90,11 +110,11 @@ export default async function MessagesPage() {
                             <Users2 className="w-4 h-4" /> {t('messages.groups')}
                         </h2>
                         <div className="space-y-2">
-                            {groups.map((group: any) => (
+                            {groups.map((group) => (
                                 <Link href={`/messages/group/${group.id}`} key={group.id}>
                                     <div className="flex items-center gap-4 p-4 bg-card rounded-xl border border-border shadow-sm hover:shadow-md transition-all cursor-pointer mb-2">
                                         <Avatar className="h-12 w-12 bg-indigo-100 dark:bg-indigo-950/40">
-                                            <AvatarImage src={group.avatar_url} />
+                                            <AvatarImage src={group.avatar_url ?? undefined} />
                                             <AvatarFallback className="bg-indigo-100 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 font-bold">{group.name?.[0] || 'G'}</AvatarFallback>
                                         </Avatar>
                                         <div className="flex-1 min-w-0">
@@ -115,7 +135,7 @@ export default async function MessagesPage() {
                     </h2>
                     <div className="space-y-2">
                         {conversations && conversations.length > 0 ? (
-                            conversations.map((conv: any) => {
+                            (conversations as ConversationRow[]).map((conv) => {
                                 const otherUser = conv.participant1_id === user.id ? conv.participant2 : conv.participant1;
                                 const participant = Array.isArray(otherUser) ? otherUser[0] : otherUser;
 
@@ -123,7 +143,7 @@ export default async function MessagesPage() {
                                     <Link href={`/messages/${conv.id}`} key={conv.id}>
                                         <div className="flex items-center gap-4 p-4 bg-card rounded-xl border border-border shadow-sm hover:shadow-md transition-all cursor-pointer mb-2">
                                             <Avatar className="h-12 w-12">
-                                                <AvatarImage src={participant?.avatar_url} />
+                                                <AvatarImage src={participant?.avatar_url ?? undefined} />
                                                 <AvatarFallback>{participant?.full_name?.[0] || '?'}</AvatarFallback>
                                             </Avatar>
                                             <div className="flex-1 min-w-0">

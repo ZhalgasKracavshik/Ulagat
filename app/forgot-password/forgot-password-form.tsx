@@ -77,13 +77,13 @@ export function ForgotPasswordForm() {
                             type="email"
                             autoComplete="email"
                             required
-                            className="block w-full rounded-lg border border-border bg-gray-50 p-2.5 text-foreground focus:border-primary focus:ring-primary"
+                            className="block w-full rounded-lg border border-border bg-gray-50 p-2.5 text-foreground focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
                             placeholder="name@example.com"
                         />
                     </div>
 
                     {error && (
-                        <div className="rounded-lg bg-red-50 dark:bg-red-950/40 p-4 text-sm text-red-800" role="alert">
+                        <div className="rounded-lg bg-red-50 dark:bg-red-950/40 p-4 text-sm text-red-800 dark:text-red-400" role="alert">
                             <span className="font-medium">{t('auth.errorPrefix')}</span> {error}
                         </div>
                     )}

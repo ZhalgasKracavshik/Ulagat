@@ -9,11 +9,13 @@ import { StartChatButton } from "../messages/StartChatButton";
 import { serviceCategoryLabel } from "@/lib/services";
 
 interface ServiceCardProps {
-    service: any;
+    // A service row joined with its owner profile (as fetched on the
+    // services list / profile pages).
+    service: Service & { profiles?: Partial<Profile> | null };
 }
 
 export function ServiceCard({ service }: ServiceCardProps) {
-    const owner = service.profiles || {};
+    const owner: Partial<Profile> = service.profiles || {};
 
     return (
         <Card className="overflow-hidden bg-card hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-primary/10 group flex flex-col h-full">

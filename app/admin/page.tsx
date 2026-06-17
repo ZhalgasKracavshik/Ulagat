@@ -13,6 +13,16 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
 
+/** A service row joined with its owner profile (admin moderation table). */
+type AdminServiceRow = {
+    id: string;
+    title: string;
+    status: string;
+    price: number;
+    created_at: string;
+    profiles?: { full_name: string | null; role: string | null } | null;
+};
+
 export default async function AdminPage() {
     const supabase = await createClient();
 
@@ -197,7 +207,7 @@ export default async function AdminPage() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {allServices.map((service: any) => (
+                                            {(allServices as AdminServiceRow[]).map((service) => (
                                                 <tr key={service.id} className="border-b hover:bg-muted">
                                                     <td className="py-3 px-2 font-medium">
                                                         <Link href={`/services/${service.id}`} className="hover:text-primary">

@@ -2,6 +2,20 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { NewGroupForm } from "./new-group-form";
 
+type FriendProfile = { id: string; full_name: string; avatar_url: string };
+
+/**
+ * A friendship row with both parties' profiles joined. Supabase may surface a
+ * joined relation as either a single object or a single-element array, so the
+ * profile fields are typed permissively and normalized below.
+ */
+type FriendshipRow = {
+    requester_id: string;
+    addressee_id: string;
+    profiles_requester: FriendProfile | FriendProfile[] | null;
+    profiles_addressee: FriendProfile | FriendProfile[] | null;
+};
+
 export default async function NewGroupPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -19,12 +33,12 @@ export default async function NewGroupPage() {
         .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
         .eq('status', 'accepted');
 
-    const friends = friendships?.map((f: any) => {
-        const isRequester = f.requester_id === user.id;
-        const profile = isRequester ? f.profiles_addressee : f.profiles_requester;
-        // In Supabase with multiple joins, sometimes it returns as an object directly
-        return profile;
-    }).filter(Boolean) || [];
+    const friends = ((friendships || []) as unknown as FriendshipRow[])
+        .map((f) => {
+            const joined = f.requester_id === user.id ? f.profiles_addressee : f.profiles_requester;
+            return Array.isArray(joined) ? joined[0] ?? null : joined;
+        })
+        .filter((p): p is FriendProfile => p !== null);
 
     return <NewGroupForm friends={friends} />;
 }

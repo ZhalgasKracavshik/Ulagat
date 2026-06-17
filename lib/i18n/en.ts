@@ -51,7 +51,7 @@ export const en: Dictionary = {
         bulletin: "Tutoring and student services",
         prep: "Olympiad problem archive",
         "lost-found": "Report or claim lost items",
-        career: "Track your ЕНТ scores and targets",
+        career: "Track your ҰБТ scores and targets",
         premium: "Unlock the AI mentor and extras",
         guide: "Learn how Ulagat works",
         achievements: "Your verified accomplishments",
@@ -493,6 +493,42 @@ export const en: Dictionary = {
         unknownUser: "Unknown User",
         loginPrompt: "to view messages.",
         login: "Log in",
+        typeMessage: "Type a message…",
+        activeNow: "Active now",
+        conversationNotFound: "Conversation not found",
+        groupNotFound: "Group not found.",
+        groupMembers: "{count} members",
+    },
+    // "New group chat" creation form.
+    newGroup: {
+        back: "Back to Messages",
+        title: "Create a New Group",
+        description: "Start a group chat with your friends.",
+        nameLabel: "Group Name",
+        namePlaceholder: "e.g. Math Study Group",
+        addMembers: "Add Members ({count} selected)",
+        noFriends: "You don't have any friends yet. Add friends first!",
+        nameRequired: "Group name is required.",
+        selectMember: "Select at least one member.",
+        createFailed: "Failed to create group.",
+        creating: "Creating…",
+        create: "Create Group",
+    },
+    // Friend / people search box.
+    userSearch: {
+        placeholder: "Find people by name…",
+        noResults: "No users found with that name.",
+        tryDifferent: "Try a different spelling",
+    },
+    // Service listing payment / confirmation page.
+    servicePay: {
+        notFound: "Service not found",
+        confirmTitle: "Confirm Payment",
+        intro: "You are about to pay",
+        introSuffix: "to list your service:",
+        amount: "100 ₸",
+        secureNote: "Secure payment via Stripe (Simulated)",
+        submit: "Submit for Review (100 ₸)",
     },
     // Club detail / manage / create / leaderboard surfaces.
     clubDetail: {
@@ -679,6 +715,20 @@ export const en: Dictionary = {
         cutoff: "Grant cutoff (/140)",
         cutoffPlaceholder: "e.g. 120",
         deadline: "Grant deadline",
+    },
+    // User-facing validation messages for the career tracker forms.
+    careerErrors: {
+        subjectRange: "{label} must be a whole number between 0 and {max}.",
+        subjectsSame: "Your two profile subjects must be different.",
+        totalTooHigh: "Total ҰБТ score cannot exceed {max} (you entered {total}).",
+        targetRange: "Target score must be a whole number between 0 and {max}.",
+        notesTooLong: "Notes are too long (max 2000 characters).",
+        universityRequired: "University name is required.",
+        universityTooLong: "University name is too long (max 200 characters).",
+        specialtyRequired: "Specialty is required.",
+        specialtyTooLong: "Specialty is too long (max 200 characters).",
+        cutoffRange: "Cutoff score must be a whole number between 0 and {max}.",
+        invalidDeadline: "Grant deadline must be a valid date.",
     },
     // Shared "Access Denied" + create-form surfaces.
     forms: {

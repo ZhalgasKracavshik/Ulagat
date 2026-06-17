@@ -189,7 +189,7 @@ export default async function GuidePage() {
                                             key={item.key}
                                             item={item}
                                             label={t(`nav.${item.key}`)}
-                                            hint={t(`nav.hints.${item.key}`)}
+                                            hint={t(`hints.${item.key}`)}
                                             openLabel={t("common.open")}
                                         />
                                     ))}

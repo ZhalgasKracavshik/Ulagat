@@ -6,11 +6,27 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Send } from "lucide-react";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import {
+    DEFAULT_LOCALE,
+    LOCALE_COOKIE,
+    getDictionary,
+    isLocale,
+    resolveKey,
+} from "@/lib/i18n";
 import { sendMessage } from "./actions";
 
 interface PageProps {
     params: Promise<{ id: string }>;
 }
+
+/** Minimal shape of a row from the `messages` table used by this view. */
+type MessageRow = {
+    id: string;
+    sender_id: string;
+    content: string;
+    created_at: string;
+};
 
 export default async function ChatPage({ params }: PageProps) {
     const { id } = await params;
@@ -18,6 +34,13 @@ export default async function ChatPage({ params }: PageProps) {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) redirect("/login");
+
+    // Server component: resolve locale from cookie and translate via dictionary.
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t = (key: string) => resolveKey(dict, key);
 
     // Fetch conversation details to show header
     const { data: conversation } = await supabase
@@ -30,7 +53,7 @@ export default async function ChatPage({ params }: PageProps) {
         .eq('id', id)
         .single();
 
-    if (!conversation) return <div>Conversation not found</div>;
+    if (!conversation) return <div>{t('messages.conversationNotFound')}</div>;
 
     // Identify other participant
     const otherParticipant = conversation.participant1_id === user.id ? conversation.participant2 : conversation.participant1;
@@ -54,13 +77,13 @@ export default async function ChatPage({ params }: PageProps) {
                 </Avatar>
                 <div>
                     <h2 className="font-bold text-xl">{partner?.full_name}</h2>
-                    <p className="text-xs text-muted-foreground">Active now</p>
+                    <p className="text-xs text-muted-foreground">{t('messages.activeNow')}</p>
                 </div>
             </div>
 
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto space-y-4 p-4 bg-muted rounded-lg mb-4">
-                {messages && messages.map((msg: any) => {
+                {messages && (messages as MessageRow[]).map((msg) => {
                     const isMe = msg.sender_id === user.id;
                     return (
                         <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
@@ -82,7 +105,7 @@ export default async function ChatPage({ params }: PageProps) {
             <form action={sendMessage.bind(null, id)} className="flex gap-2">
                 <Input
                     name="content"
-                    placeholder="Type a message..."
+                    placeholder={t('messages.typeMessage')}
                     className="flex-1"
                     autoComplete="off"
                     required

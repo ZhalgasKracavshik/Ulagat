@@ -7,11 +7,20 @@ import { Search, Loader2, UserPlus, ExternalLink } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { useT } from "@/hooks/useT";
+
+/** Minimal shape returned by /api/users/search. */
+type SearchUser = {
+    id: string;
+    full_name: string | null;
+    avatar_url: string | null;
+    role: string | null;
+};
 
 export function UserSearch() {
+    const { t } = useT();
     const [query, setQuery] = useState("");
-    const [results, setResults] = useState<any[]>([]);
+    const [results, setResults] = useState<SearchUser[]>([]);
     const [loading, setLoading] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -58,7 +67,7 @@ export function UserSearch() {
             <div className="relative group">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
-                    placeholder="Find people by name..."
+                    placeholder={t("userSearch.placeholder")}
                     className="pl-10 h-11 bg-card border-border focus:ring-primary/20 rounded-xl font-medium"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
@@ -84,7 +93,7 @@ export function UserSearch() {
                                         onClick={() => setIsOpen(false)}
                                     >
                                         <Avatar className="w-10 h-10 border shadow-sm">
-                                            <AvatarImage src={user.avatar_url} />
+                                            <AvatarImage src={user.avatar_url ?? undefined} />
                                             <AvatarFallback>{user.full_name?.[0]}</AvatarFallback>
                                         </Avatar>
                                         <div className="flex-grow min-w-0">
@@ -101,8 +110,8 @@ export function UserSearch() {
                             </div>
                         ) : (
                             <div className="p-8 text-center text-muted-foreground">
-                                <p className="text-sm font-medium">No users found with that name.</p>
-                                <p className="text-[10px] uppercase tracking-wider mt-1">Try a different spelling</p>
+                                <p className="text-sm font-medium">{t("userSearch.noResults")}</p>
+                                <p className="text-[10px] uppercase tracking-wider mt-1">{t("userSearch.tryDifferent")}</p>
                             </div>
                         )}
                     </div>
