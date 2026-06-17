@@ -22,6 +22,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { updateUserRole, updateUserSkudId } from '@/app/admin/users/actions';
 import { Loader2, Check, X } from 'lucide-react';
+import { useT } from '@/hooks/useT';
 import type { UserRole, AdminUserRow } from '@/types';
 
 interface UsersManagementTableProps {
@@ -29,7 +30,18 @@ interface UsersManagementTableProps {
     currentUserId: string;
 }
 
+const ROLE_KEYS: Record<string, string> = {
+    student: 'admin.roleStudent',
+    teacher: 'admin.roleTeacher',
+    parent: 'admin.roleParent',
+    parliament: 'admin.roleParliament',
+    moderator: 'admin.roleModerator',
+    admin: 'admin.roleAdmin',
+};
+
 export function UsersManagementTable({ users, currentUserId }: UsersManagementTableProps) {
+    const { t } = useT();
+    const roleLabel = (role: string) => (ROLE_KEYS[role] ? t(ROLE_KEYS[role]) : role);
     const [loadingRole, setLoadingRole] = useState<Record<string, boolean>>({});
     const [loadingSkud, setLoadingSkud] = useState<Record<string, boolean>>({});
     const [skudEditing, setSkudEditing] = useState<Record<string, string>>({});
@@ -40,7 +52,7 @@ export function UsersManagementTable({ users, currentUserId }: UsersManagementTa
         setErrors((prev) => ({ ...prev, [userId]: '' }));
         const result = await updateUserRole(userId, newRole);
         if (result.error) {
-            setErrors((prev) => ({ ...prev, [userId]: result.error ?? 'Error' }));
+            setErrors((prev) => ({ ...prev, [userId]: result.error ?? t('admin.error') }));
         }
         setLoadingRole((prev) => ({ ...prev, [userId]: false }));
     }
@@ -50,7 +62,7 @@ export function UsersManagementTable({ users, currentUserId }: UsersManagementTa
         setLoadingSkud((prev) => ({ ...prev, [userId]: true }));
         const result = await updateUserSkudId(userId, val);
         if (result.error) {
-            setErrors((prev) => ({ ...prev, [`skud_${userId}`]: result.error ?? 'Error' }));
+            setErrors((prev) => ({ ...prev, [`skud_${userId}`]: result.error ?? t('admin.error') }));
         } else {
             setSkudEditing((prev) => {
                 const next = { ...prev };
@@ -85,13 +97,13 @@ export function UsersManagementTable({ users, currentUserId }: UsersManagementTa
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>User</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Role</TableHead>
-                        <TableHead>Grade / Class</TableHead>
-                        <TableHead>Joined</TableHead>
-                        <TableHead>SKUD ID</TableHead>
-                        <TableHead className="text-right">Change Role</TableHead>
+                        <TableHead>{t('admin.colUser')}</TableHead>
+                        <TableHead>{t('admin.colEmail')}</TableHead>
+                        <TableHead>{t('admin.colRole')}</TableHead>
+                        <TableHead>{t('admin.colGradeClass')}</TableHead>
+                        <TableHead>{t('admin.colJoined')}</TableHead>
+                        <TableHead>{t('admin.colSkud')}</TableHead>
+                        <TableHead className="text-right">{t('admin.colChangeRole')}</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -114,7 +126,7 @@ export function UsersManagementTable({ users, currentUserId }: UsersManagementTa
                                             <p className="font-medium text-sm">
                                                 {user.full_name}
                                                 {isCurrentUser && (
-                                                    <span className="text-muted-foreground text-xs ml-2">(You)</span>
+                                                    <span className="text-muted-foreground text-xs ml-2">{t('admin.you')}</span>
                                                 )}
                                             </p>
                                             <p className="text-xs text-muted-foreground">{user.id.slice(0, 8)}…</p>
@@ -126,14 +138,14 @@ export function UsersManagementTable({ users, currentUserId }: UsersManagementTa
                                 </TableCell>
                                 <TableCell>
                                     <Badge variant="outline" className={roleBadgeClass(user.role)}>
-                                        {user.role}
+                                        {roleLabel(user.role)}
                                     </Badge>
                                     {errors[user.id] && (
                                         <p className="text-xs text-red-500 mt-1">{errors[user.id]}</p>
                                     )}
                                 </TableCell>
                                 <TableCell className="text-sm text-muted-foreground">
-                                    {user.grade ? `Grade ${user.grade}` : '—'}
+                                    {user.grade ? t('admin.gradeLabel', { grade: user.grade }) : '—'}
                                     {user.class_letter ? ` ${user.class_letter}` : ''}
                                 </TableCell>
                                 <TableCell className="text-sm text-muted-foreground">
@@ -150,7 +162,7 @@ export function UsersManagementTable({ users, currentUserId }: UsersManagementTa
                                                     setSkudEditing((prev) => ({ ...prev, [user.id]: e.target.value }))
                                                 }
                                                 className="h-7 w-28 text-xs"
-                                                placeholder="SKUD ID"
+                                                placeholder={t('admin.skudPlaceholder')}
                                             />
                                             <Button
                                                 size="icon"
@@ -187,7 +199,7 @@ export function UsersManagementTable({ users, currentUserId }: UsersManagementTa
                                                 }))
                                             }
                                         >
-                                            {user.external_skud_id || 'Set SKUD ID'}
+                                            {user.external_skud_id || t('admin.setSkud')}
                                         </button>
                                     )}
                                 </TableCell>
@@ -206,17 +218,17 @@ export function UsersManagementTable({ users, currentUserId }: UsersManagementTa
                                                     <SelectValue />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="student">Student</SelectItem>
-                                                    <SelectItem value="teacher">Teacher</SelectItem>
-                                                    <SelectItem value="parent">Parent</SelectItem>
-                                                    <SelectItem value="parliament">Parliament</SelectItem>
-                                                    <SelectItem value="moderator">Moderator</SelectItem>
-                                                    <SelectItem value="admin">Admin</SelectItem>
+                                                    <SelectItem value="student">{t('admin.roleStudent')}</SelectItem>
+                                                    <SelectItem value="teacher">{t('admin.roleTeacher')}</SelectItem>
+                                                    <SelectItem value="parent">{t('admin.roleParent')}</SelectItem>
+                                                    <SelectItem value="parliament">{t('admin.roleParliament')}</SelectItem>
+                                                    <SelectItem value="moderator">{t('admin.roleModerator')}</SelectItem>
+                                                    <SelectItem value="admin">{t('admin.roleAdmin')}</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
                                     ) : (
-                                        <span className="text-xs text-muted-foreground">Cannot edit self</span>
+                                        <span className="text-xs text-muted-foreground">{t('admin.cannotEditSelf')}</span>
                                     )}
                                 </TableCell>
                             </TableRow>

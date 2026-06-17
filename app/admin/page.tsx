@@ -10,6 +10,8 @@ import { UserManagementTable } from "@/components/admin/UserManagementTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
 
 export default async function AdminPage() {
     const supabase = await createClient();
@@ -17,6 +19,16 @@ export default async function AdminPage() {
     // Check Admin Role
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect('/login');
+
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t = (key: string, vars?: Record<string, string | number>) => {
+        let v = resolveKey(dict, key);
+        if (vars) for (const [n, r] of Object.entries(vars)) v = v.replace(`{${n}}`, String(r));
+        return v;
+    };
 
     const { data: profile } = await supabase
         .from('profiles')
@@ -28,8 +40,8 @@ export default async function AdminPage() {
         return (
             <div className="container py-20 text-center text-destructive">
                 <ShieldAlert className="w-16 h-16 mx-auto mb-4" />
-                <h1 className="text-2xl font-bold">Access Denied</h1>
-                <p>You do not have permission to view this page. (Role: {profile?.role})</p>
+                <h1 className="text-2xl font-bold">{t('admin.accessDenied')}</h1>
+                <p>{t('admin.accessDeniedBody', { role: profile?.role ?? '' })}</p>
             </div>
         );
     }
@@ -70,15 +82,15 @@ export default async function AdminPage() {
                         <ShieldAlert className="w-8 h-8 text-primary" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-                        <p className="text-muted-foreground">Manage services, users, and platform content.</p>
+                        <h1 className="text-3xl font-bold">{t('admin.dashboardTitle')}</h1>
+                        <p className="text-muted-foreground">{t('admin.dashboardSubtitle')}</p>
                     </div>
                 </div>
                 {/* Achievement verification lives at /achievements/review (also accessible to parliament) */}
                 <Link href="/achievements/review">
                     <Button variant="outline" className="gap-2 font-bold">
                         <Award className="w-4 h-4 text-amber-500" />
-                        Review Achievements
+                        {t('admin.reviewAchievements')}
                         {(pendingAchievements ?? 0) > 0 && <Badge className="bg-red-500">{pendingAchievements}</Badge>}
                     </Button>
                 </Link>
@@ -88,7 +100,7 @@ export default async function AdminPage() {
             <div className="grid gap-4 md:grid-cols-3">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                        <CardTitle className="text-sm font-medium">{t('admin.totalUsers')}</CardTitle>
                         <Users className="w-4 h-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -97,7 +109,7 @@ export default async function AdminPage() {
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Services</CardTitle>
+                        <CardTitle className="text-sm font-medium">{t('admin.totalServices')}</CardTitle>
                         <ListFilter className="w-4 h-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -106,7 +118,7 @@ export default async function AdminPage() {
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Events</CardTitle>
+                        <CardTitle className="text-sm font-medium">{t('admin.events')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{eventCount || 0}</div>
@@ -118,22 +130,22 @@ export default async function AdminPage() {
             <Tabs defaultValue="services" className="w-full">
                 <TabsList className="w-full md:w-auto">
                     <TabsTrigger value="services" className="flex-1 md:flex-none">
-                        Services {pendingServices && pendingServices.length > 0 && <Badge className="ml-2 bg-red-500">{pendingServices.length}</Badge>}
+                        {t('admin.tabServices')} {pendingServices && pendingServices.length > 0 && <Badge className="ml-2 bg-red-500">{pendingServices.length}</Badge>}
                     </TabsTrigger>
                     <TabsTrigger value="events" className="flex-1 md:flex-none">
-                        Events {pendingEvents && pendingEvents.length > 0 && <Badge className="ml-2 bg-red-500">{pendingEvents.length}</Badge>}
+                        {t('admin.tabEvents')} {pendingEvents && pendingEvents.length > 0 && <Badge className="ml-2 bg-red-500">{pendingEvents.length}</Badge>}
                     </TabsTrigger>
                     <TabsTrigger value="materials" className="flex-1 md:flex-none">
-                        Materials {pendingMaterials && pendingMaterials.length > 0 && <Badge className="ml-2 bg-red-500">{pendingMaterials.length}</Badge>}
+                        {t('admin.tabMaterials')} {pendingMaterials && pendingMaterials.length > 0 && <Badge className="ml-2 bg-red-500">{pendingMaterials.length}</Badge>}
                     </TabsTrigger>
-                    <TabsTrigger value="all-services" className="flex-1 md:flex-none">All Services</TabsTrigger>
-                    <TabsTrigger value="users" className="flex-1 md:flex-none">Users</TabsTrigger>
+                    <TabsTrigger value="all-services" className="flex-1 md:flex-none">{t('admin.tabAllServices')}</TabsTrigger>
+                    <TabsTrigger value="users" className="flex-1 md:flex-none">{t('admin.tabUsers')}</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="services" className="space-y-4">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Review Service Listings</CardTitle>
+                            <CardTitle>{t('admin.reviewServiceListings')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <ServiceReviewTable services={pendingServices || []} />
@@ -144,7 +156,7 @@ export default async function AdminPage() {
                 <TabsContent value="events" className="space-y-4">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Review Events & Olympiads</CardTitle>
+                            <CardTitle>{t('admin.reviewEventsOlympiads')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <EventReviewTable events={pendingEvents || []} />
@@ -155,7 +167,7 @@ export default async function AdminPage() {
                 <TabsContent value="materials" className="space-y-4">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Review Study Materials</CardTitle>
+                            <CardTitle>{t('admin.reviewStudyMaterials')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <MaterialReviewTable materials={pendingMaterials || []} />
@@ -167,8 +179,8 @@ export default async function AdminPage() {
                 <TabsContent value="all-services" className="space-y-4">
                     <Card>
                         <CardHeader>
-                            <CardTitle>All Service Listings</CardTitle>
-                            <p className="text-sm text-muted-foreground">View and manage all services from teachers.</p>
+                            <CardTitle>{t('admin.allServiceListings')}</CardTitle>
+                            <p className="text-sm text-muted-foreground">{t('admin.allServicesHint')}</p>
                         </CardHeader>
                         <CardContent>
                             {allServices && allServices.length > 0 ? (
@@ -176,12 +188,12 @@ export default async function AdminPage() {
                                     <table className="w-full text-sm">
                                         <thead>
                                             <tr className="border-b text-left">
-                                                <th className="py-3 px-2 font-medium">Title</th>
-                                                <th className="py-3 px-2 font-medium">Owner</th>
-                                                <th className="py-3 px-2 font-medium">Status</th>
-                                                <th className="py-3 px-2 font-medium">Price</th>
-                                                <th className="py-3 px-2 font-medium">Created</th>
-                                                <th className="py-3 px-2 font-medium">Actions</th>
+                                                <th className="py-3 px-2 font-medium">{t('admin.colTitle')}</th>
+                                                <th className="py-3 px-2 font-medium">{t('admin.colOwner')}</th>
+                                                <th className="py-3 px-2 font-medium">{t('admin.colStatus')}</th>
+                                                <th className="py-3 px-2 font-medium">{t('admin.colPrice')}</th>
+                                                <th className="py-3 px-2 font-medium">{t('admin.colCreated')}</th>
+                                                <th className="py-3 px-2 font-medium">{t('admin.colActions')}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -207,7 +219,7 @@ export default async function AdminPage() {
                                                     </td>
                                                     <td className="py-3 px-2">
                                                         <Link href={`/services/${service.id}`}>
-                                                            <Button size="sm" variant="outline">View</Button>
+                                                            <Button size="sm" variant="outline">{t('admin.view')}</Button>
                                                         </Link>
                                                     </td>
                                                 </tr>
@@ -216,7 +228,7 @@ export default async function AdminPage() {
                                     </table>
                                 </div>
                             ) : (
-                                <p className="text-center py-8 text-muted-foreground">No services found.</p>
+                                <p className="text-center py-8 text-muted-foreground">{t('admin.noServices')}</p>
                             )}
                         </CardContent>
                     </Card>
@@ -225,8 +237,8 @@ export default async function AdminPage() {
                 <TabsContent value="users">
                     <Card>
                         <CardHeader>
-                            <CardTitle>User Database</CardTitle>
-                            {!isAdmin && <p className="text-sm text-yellow-600">Note: Only Admins can change user roles.</p>}
+                            <CardTitle>{t('admin.userDatabase')}</CardTitle>
+                            {!isAdmin && <p className="text-sm text-yellow-600">{t('admin.roleChangeNote')}</p>}
                         </CardHeader>
                         <CardContent>
                             <UserManagementTable users={allUsers || []} currentUserId={user.id} />

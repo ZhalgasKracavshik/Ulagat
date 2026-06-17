@@ -5,9 +5,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { Star } from "lucide-react";
 import { addReview } from "@/app/services/[id]/actions";
 import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
+import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
 
 export async function ReviewSection({ serviceId }: { serviceId: string }) {
     const supabase = await createClient();
+
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t = (key: string, vars?: Record<string, string | number>) => {
+        let v = resolveKey(dict, key);
+        if (vars) for (const [n, r] of Object.entries(vars)) v = v.replace(`{${n}}`, String(r));
+        return v;
+    };
 
     // Fetch reviews
     const { data: reviews } = await supabase
@@ -21,7 +33,7 @@ export async function ReviewSection({ serviceId }: { serviceId: string }) {
 
     return (
         <div className="space-y-8">
-            <h3 className="text-2xl font-bold">Reviews ({reviews?.length || 0})</h3>
+            <h3 className="text-2xl font-bold">{t('serviceDetail.reviewsTitle', { count: reviews?.length || 0 })}</h3>
 
             {/* List Reviews */}
             <div className="space-y-4">
@@ -46,32 +58,32 @@ export async function ReviewSection({ serviceId }: { serviceId: string }) {
                         </div>
                     ))
                 ) : (
-                    <p className="text-muted-foreground italic">No reviews yet. Be the first!</p>
+                    <p className="text-muted-foreground italic">{t('serviceDetail.noReviews')}</p>
                 )}
             </div>
 
             {/* Add Review Form */}
             {user ? (
                 <div className="bg-card p-6 rounded-xl border shadow-sm">
-                    <h4 className="font-bold mb-4">Leave a Review</h4>
+                    <h4 className="font-bold mb-4">{t('serviceDetail.leaveReview')}</h4>
                     <form action={addReview.bind(null, serviceId)} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium mb-1">Rating</label>
+                            <label className="block text-sm font-medium mb-1">{t('serviceDetail.rating')}</label>
                             <select name="rating" className="w-full border rounded-md p-2 text-sm bg-background">
-                                <option value="5">⭐⭐⭐⭐⭐ (Excellent)</option>
-                                <option value="4">⭐⭐⭐⭐ (Good)</option>
-                                <option value="3">⭐⭐⭐ (Average)</option>
-                                <option value="2">⭐⭐ (Poor)</option>
-                                <option value="1">⭐ (Terrible)</option>
+                                <option value="5">{t('serviceDetail.rating5')}</option>
+                                <option value="4">{t('serviceDetail.rating4')}</option>
+                                <option value="3">{t('serviceDetail.rating3')}</option>
+                                <option value="2">{t('serviceDetail.rating2')}</option>
+                                <option value="1">{t('serviceDetail.rating1')}</option>
                             </select>
                         </div>
-                        <Textarea name="comment" placeholder="Share your experience..." required />
-                        <Button type="submit">Post Review</Button>
+                        <Textarea name="comment" placeholder={t('serviceDetail.commentPlaceholder')} required />
+                        <Button type="submit">{t('serviceDetail.postReview')}</Button>
                     </form>
                 </div>
             ) : (
                 <div className="p-6 bg-muted rounded-xl text-center">
-                    <p>Please <a href="/login" className="text-blue-600 underline">log in</a> to leave a review.</p>
+                    <p>{t('serviceDetail.loginPrefix')}<a href="/login" className="text-blue-600 underline">{t('serviceDetail.loginLink')}</a>{t('serviceDetail.loginSuffix')}</p>
                 </div>
             )}
         </div>

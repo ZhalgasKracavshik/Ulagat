@@ -11,12 +11,14 @@ import Image from "next/image";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useT } from "@/hooks/useT";
 
 interface EventReviewTableProps {
     events: any[];
 }
 
 export function EventReviewTable({ events }: EventReviewTableProps) {
+    const { t } = useT();
     const [isLoading, setIsLoading] = useState(false);
     const [rejectionReason, setRejectionReason] = useState("");
     const [showRejectDialog, setShowRejectDialog] = useState(false);
@@ -39,18 +41,18 @@ export function EventReviewTable({ events }: EventReviewTableProps) {
     }
 
     if (!events || events.length === 0) {
-        return <div className="text-center py-12 text-muted-foreground">No pending events to review. 🏆</div>;
+        return <div className="text-center py-12 text-muted-foreground">{t('admin.noPendingEvents')}</div>;
     }
 
     return (
         <Table>
             <TableHeader>
                 <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Location</TableHead>
-                    <TableHead>Organizer</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>{t('admin.colTitle')}</TableHead>
+                    <TableHead>{t('admin.colDate')}</TableHead>
+                    <TableHead>{t('admin.colLocation')}</TableHead>
+                    <TableHead>{t('admin.colOrganizer')}</TableHead>
+                    <TableHead className="text-right">{t('admin.colActions')}</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -60,7 +62,7 @@ export function EventReviewTable({ events }: EventReviewTableProps) {
                         <TableCell className="whitespace-nowrap">
                             {format(new Date(event.event_date), 'MMM d, h:mm a')}
                         </TableCell>
-                        <TableCell>{event.location || 'School Hall'}</TableCell>
+                        <TableCell>{event.location || t('admin.schoolHall')}</TableCell>
                         <TableCell>{event.profiles?.full_name}</TableCell>
                         <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-2">
@@ -68,14 +70,14 @@ export function EventReviewTable({ events }: EventReviewTableProps) {
                                     <DialogTrigger asChild>
                                         <Button variant="ghost" size="sm">
                                             <Eye className="w-4 h-4 mr-2" />
-                                            View
+                                            {t('admin.viewAction')}
                                         </Button>
                                     </DialogTrigger>
                                     <DialogContent className="max-w-2xl">
                                         <DialogHeader>
                                             <DialogTitle>{event.title}</DialogTitle>
                                             <DialogDescription>
-                                                Organized by {event.profiles?.full_name}
+                                                {t('admin.organizedBy', { name: event.profiles?.full_name ?? '' })}
                                             </DialogDescription>
                                         </DialogHeader>
 
@@ -93,13 +95,13 @@ export function EventReviewTable({ events }: EventReviewTableProps) {
                                                 </div>
                                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                     <MapPin className="w-4 h-4 text-red-500" />
-                                                    <span>{event.location || 'School Hall'}</span>
+                                                    <span>{event.location || t('admin.schoolHall')}</span>
                                                 </div>
                                             </div>
 
                                             <div className="space-y-2">
                                                 <h4 className="font-medium flex items-center gap-2">
-                                                    <FileText className="w-4 h-4" /> Description
+                                                    <FileText className="w-4 h-4" /> {t('admin.descriptionLabel')}
                                                 </h4>
                                                 <div className="text-sm text-muted-foreground dark:text-slate-300 whitespace-pre-wrap bg-muted p-4 rounded-md max-h-40 overflow-y-auto border border-dashed">
                                                     {event.description}
@@ -117,11 +119,11 @@ export function EventReviewTable({ events }: EventReviewTableProps) {
                                                 disabled={isLoading}
                                             >
                                                 <X className="w-4 h-4 mr-2" />
-                                                Reject
+                                                {t('admin.reject')}
                                             </Button>
                                             <Button onClick={() => handleApprove(event.id)} disabled={isLoading} className="bg-green-600 hover:bg-green-700">
                                                 <Check className="w-4 h-4 mr-2" />
-                                                Approve
+                                                {t('admin.approve')}
                                             </Button>
                                         </DialogFooter>
                                     </DialogContent>
@@ -136,25 +138,25 @@ export function EventReviewTable({ events }: EventReviewTableProps) {
             <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Reason for Rejection</DialogTitle>
+                        <DialogTitle>{t('admin.rejectionTitle')}</DialogTitle>
                         <DialogDescription>
-                            Please provide a brief reason why this event is being rejected. The organizer will see this feedback.
+                            {t('admin.rejectEventHint')}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="py-4">
-                        <Label htmlFor="reason">Rejection Reason</Label>
+                        <Label htmlFor="reason">{t('admin.rejectionReason')}</Label>
                         <Input
                             id="reason"
-                            placeholder="e.g. Inappropriate content, duplicant event, etc."
+                            placeholder={t('admin.rejectEventPlaceholder')}
                             value={rejectionReason}
                             onChange={(e) => setRejectionReason(e.target.value)}
                             className="mt-2"
                         />
                     </div>
                     <DialogFooter>
-                        <Button variant="ghost" onClick={() => setShowRejectDialog(false)}>Cancel</Button>
+                        <Button variant="ghost" onClick={() => setShowRejectDialog(false)}>{t('admin.cancel')}</Button>
                         <Button variant="destructive" onClick={handleReject} disabled={isLoading || !rejectionReason.trim()}>
-                            Confirm Rejection
+                            {t('admin.confirmRejection')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

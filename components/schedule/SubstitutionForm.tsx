@@ -18,12 +18,13 @@ import {
 } from "@/components/ui/select";
 import { BookOpen, Send } from "lucide-react";
 import { BELL_SCHEDULE } from "@/lib/schedule/bells";
+import { useT } from "@/hooks/useT";
 import type { ScheduleEntry, SubstitutionType } from "@/types";
 
-const TYPE_OPTIONS: { value: SubstitutionType; label: string }[] = [
-    { value: 'substitution', label: 'Substitution (new teacher/subject)' },
-    { value: 'cancellation', label: 'Cancellation (lesson removed)' },
-    { value: 'room_change', label: 'Room change' },
+const TYPE_OPTIONS: { value: SubstitutionType; labelKey: string }[] = [
+    { value: 'substitution', labelKey: 'substitutions.typeSubstitution' },
+    { value: 'cancellation', labelKey: 'substitutions.typeCancellation' },
+    { value: 'room_change', labelKey: 'substitutions.typeRoomChange' },
 ];
 
 function todayIso(): string {
@@ -37,6 +38,7 @@ function isoDayOfWeek(date: string): number {
 }
 
 export function SubstitutionForm() {
+    const { t } = useT();
     const router = useRouter();
     const [date, setDate] = useState<string>(() => todayIso());
     const [grade, setGrade] = useState<string>('');
@@ -88,7 +90,7 @@ export function SubstitutionForm() {
 
     const handleSubmit = () => {
         if (!date || !grade || !classLetter.trim() || !period) {
-            toast.error("Fill in the date, grade, class letter and period.");
+            toast.error(t('substitutions.fillSlot'));
             return;
         }
 
@@ -106,18 +108,18 @@ export function SubstitutionForm() {
             });
 
             if (!result.success) {
-                toast.error(result.error ?? "Failed to save the substitution.");
+                toast.error(result.error ?? t('substitutions.saveFailed'));
                 return;
             }
 
             if (result.emailsFailed) {
-                toast.warning("Substitution saved, but email notification failed — notify the class manually.");
+                toast.warning(t('substitutions.emailFailed'));
             } else if (result.emailsSkipped) {
-                toast.success("Substitution saved. Email sending is not configured (dev mode) — notification was logged instead.");
+                toast.success(t('substitutions.emailSkipped'));
             } else if ((result.emailsSent ?? 0) > 0) {
-                toast.success(`Substitution saved. ${result.emailsSent} student(s) and parent(s) notified by email.`);
+                toast.success(t('substitutions.emailSent').replace('{count}', String(result.emailsSent)));
             } else {
-                toast.success("Substitution saved. No matching recipients found for email notification.");
+                toast.success(t('substitutions.noRecipients'));
             }
 
             setNewSubject('');
@@ -132,7 +134,7 @@ export function SubstitutionForm() {
         <div className="space-y-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="space-y-2">
-                    <Label htmlFor="sub_date" className="text-sm font-semibold text-foreground">Date</Label>
+                    <Label htmlFor="sub_date" className="text-sm font-semibold text-foreground">{t('substitutions.date')}</Label>
                     <Input
                         id="sub_date"
                         type="date"
@@ -141,10 +143,10 @@ export function SubstitutionForm() {
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-foreground">Grade</Label>
+                    <Label className="text-sm font-semibold text-foreground">{t('substitutions.grade')}</Label>
                     <Select value={grade} onValueChange={setGrade}>
                         <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Grade" />
+                            <SelectValue placeholder={t('substitutions.gradePlaceholder')} />
                         </SelectTrigger>
                         <SelectContent>
                             {Array.from({ length: 11 }, (_, i) => i + 1).map((g) => (
@@ -154,20 +156,20 @@ export function SubstitutionForm() {
                     </Select>
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="sub_letter" className="text-sm font-semibold text-foreground">Class letter</Label>
+                    <Label htmlFor="sub_letter" className="text-sm font-semibold text-foreground">{t('substitutions.classLetter')}</Label>
                     <Input
                         id="sub_letter"
                         value={classLetter}
                         onChange={(e) => setClassLetter(e.target.value)}
-                        placeholder="e.g. А"
+                        placeholder={t('substitutions.classLetterPlaceholder')}
                         maxLength={3}
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-foreground">Period</Label>
+                    <Label className="text-sm font-semibold text-foreground">{t('substitutions.period')}</Label>
                     <Select value={period} onValueChange={setPeriod}>
                         <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Period" />
+                            <SelectValue placeholder={t('substitutions.periodPlaceholder')} />
                         </SelectTrigger>
                         <SelectContent>
                             {BELL_SCHEDULE.map((b) => (
@@ -185,27 +187,27 @@ export function SubstitutionForm() {
                     <BookOpen className={`w-4 h-4 mt-0.5 shrink-0 ${scheduledLesson ? 'text-sky-600' : 'text-amber-600'}`} />
                     {scheduledLesson ? (
                         <p className="text-foreground">
-                            Scheduled lesson: <strong>{scheduledLesson.subject}</strong>
+                            {t('substitutions.scheduledLesson')} <strong>{scheduledLesson.subject}</strong>
                             {scheduledLesson.teacher_name && <> — {scheduledLesson.teacher_name}</>}
-                            {scheduledLesson.room && <>, Room {scheduledLesson.room}</>}
+                            {scheduledLesson.room && <>, {t('substitutions.room')} {scheduledLesson.room}</>}
                         </p>
                     ) : (
                         <p className="text-amber-700">
-                            No lesson found in the timetable for this slot. You can still save the substitution.
+                            {t('substitutions.noLessonFound')}
                         </p>
                     )}
                 </div>
             )}
 
             <div className="space-y-2">
-                <Label className="text-sm font-semibold text-foreground">Type</Label>
+                <Label className="text-sm font-semibold text-foreground">{t('substitutions.type')}</Label>
                 <Select value={type} onValueChange={(v) => setType(v as SubstitutionType)}>
                     <SelectTrigger className="w-full">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                        {TYPE_OPTIONS.map((t) => (
-                            <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                        {TYPE_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>{t(opt.labelKey)}</SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
@@ -216,44 +218,44 @@ export function SubstitutionForm() {
                     {type === 'substitution' && (
                         <>
                             <div className="space-y-2">
-                                <Label htmlFor="new_subject" className="text-sm font-semibold text-foreground">New subject</Label>
+                                <Label htmlFor="new_subject" className="text-sm font-semibold text-foreground">{t('substitutions.newSubject')}</Label>
                                 <Input
                                     id="new_subject"
                                     value={newSubject}
                                     onChange={(e) => setNewSubject(e.target.value)}
-                                    placeholder="Leave empty to keep the subject"
+                                    placeholder={t('substitutions.newSubjectPlaceholder')}
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="new_teacher" className="text-sm font-semibold text-foreground">New teacher</Label>
+                                <Label htmlFor="new_teacher" className="text-sm font-semibold text-foreground">{t('substitutions.newTeacher')}</Label>
                                 <Input
                                     id="new_teacher"
                                     value={newTeacher}
                                     onChange={(e) => setNewTeacher(e.target.value)}
-                                    placeholder="Substitute teacher's name"
+                                    placeholder={t('substitutions.newTeacherPlaceholder')}
                                 />
                             </div>
                         </>
                     )}
                     <div className="space-y-2">
-                        <Label htmlFor="new_room" className="text-sm font-semibold text-foreground">New room</Label>
+                        <Label htmlFor="new_room" className="text-sm font-semibold text-foreground">{t('substitutions.newRoom')}</Label>
                         <Input
                             id="new_room"
                             value={newRoom}
                             onChange={(e) => setNewRoom(e.target.value)}
-                            placeholder={type === 'room_change' ? 'Required' : 'Optional'}
+                            placeholder={type === 'room_change' ? t('substitutions.newRoomRequired') : t('substitutions.newRoomOptional')}
                         />
                     </div>
                 </div>
             )}
 
             <div className="space-y-2">
-                <Label htmlFor="sub_note" className="text-sm font-semibold text-foreground">Note (optional)</Label>
+                <Label htmlFor="sub_note" className="text-sm font-semibold text-foreground">{t('substitutions.note')}</Label>
                 <Textarea
                     id="sub_note"
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
-                    placeholder="Shown to students and parents, e.g. 'Bring your textbooks to room 305'"
+                    placeholder={t('substitutions.notePlaceholder')}
                     className="resize-none min-h-[80px]"
                 />
             </div>
@@ -264,7 +266,7 @@ export function SubstitutionForm() {
                 className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold text-lg h-12 rounded-xl shadow-lg gap-2"
             >
                 <Send className="w-5 h-5" />
-                {isSubmitting ? 'Saving & notifying…' : 'Save & Notify Class'}
+                {isSubmitting ? t('substitutions.submitting') : t('substitutions.submit')}
             </Button>
         </div>
     );

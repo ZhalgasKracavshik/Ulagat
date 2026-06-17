@@ -1,5 +1,6 @@
 
 import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ReviewSection } from "@/components/services/ReviewSection";
 import { ContactTutorButton } from "@/components/shared/ContactTutorButton";
+import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -17,6 +19,16 @@ interface PageProps {
 export default async function ServiceDetailsPage({ params }: PageProps) {
     const { id } = await params;
     const supabase = await createClient();
+
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t = (key: string, vars?: Record<string, string | number>) => {
+        let v = resolveKey(dict, key);
+        if (vars) for (const [n, r] of Object.entries(vars)) v = v.replace(`{${n}}`, String(r));
+        return v;
+    };
 
     const { data: service } = await supabase
         .from('services')
@@ -36,7 +48,7 @@ export default async function ServiceDetailsPage({ params }: PageProps) {
     return (
         <div className="container py-12 max-w-3xl mx-auto px-4">
             <Link href="/services" className="flex items-center text-sm text-muted-foreground hover:text-primary mb-8 transition-colors">
-                <ArrowLeft className="w-4 h-4 mr-1" /> Back to Services
+                <ArrowLeft className="w-4 h-4 mr-1" /> {t('serviceDetail.backToServices')}
             </Link>
 
             <div className="space-y-10">
@@ -66,12 +78,12 @@ export default async function ServiceDetailsPage({ params }: PageProps) {
                                     <span>5.0</span>
                                 </div>
                                 <span className="text-muted-foreground">•</span>
-                                <span className="text-muted-foreground">0 reviews</span>
+                                <span className="text-muted-foreground">{t('serviceDetail.reviewsCount', { count: 0 })}</span>
                             </div>
                         </div>
                         <div className="flex flex-col items-end">
                             <div className="text-3xl font-black text-primary">
-                                {service.price > 0 ? `${service.price} ₸` : 'Free'}
+                                {service.price > 0 ? `${service.price} ₸` : t('serviceDetail.free')}
                             </div>
                             {(user?.id === service.owner_id || ['admin', 'moderator'].includes(profile?.role)) && (
                                 <form action={async () => {
@@ -80,7 +92,7 @@ export default async function ServiceDetailsPage({ params }: PageProps) {
                                     await deleteService(id);
                                 }} className="mt-2">
                                     <Button variant="ghost" size="sm" className="text-destructive hover:bg-red-50 hover:text-red-700">
-                                        Delete Service
+                                        {t('serviceDetail.deleteService')}
                                     </Button>
                                 </form>
                             )}
@@ -91,7 +103,7 @@ export default async function ServiceDetailsPage({ params }: PageProps) {
                 {/* Main Content Sections */}
                 <div className="grid grid-cols-1 gap-12">
                     <div className="space-y-4">
-                        <h3 className="text-xl font-bold text-foreground">About this service</h3>
+                        <h3 className="text-xl font-bold text-foreground">{t('serviceDetail.aboutTitle')}</h3>
                         <p className="text-muted-foreground leading-relaxed text-lg whitespace-pre-wrap">
                             {service.description}
                         </p>
@@ -107,15 +119,15 @@ export default async function ServiceDetailsPage({ params }: PageProps) {
                                         <AvatarFallback className="text-2xl font-bold">{service.profiles?.full_name?.[0]}</AvatarFallback>
                                     </Avatar>
                                     <div>
-                                        <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">Provided By</p>
+                                        <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">{t('serviceDetail.providedBy')}</p>
                                         <h4 className="text-2xl font-bold text-foreground">{service.profiles?.full_name}</h4>
                                         <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
                                             <span className="capitalize bg-card px-2 py-0.5 rounded border text-[10px] font-bold">
-                                                {service.profiles?.role || 'Student'}
+                                                {service.profiles?.role || t('serviceDetail.roleStudent')}
                                             </span>
                                             <span className="flex items-center gap-1">
                                                 <Calendar className="w-3 h-3" />
-                                                Since {new Date(service.profiles?.created_at).getFullYear()}
+                                                {t('serviceDetail.since', { year: new Date(service.profiles?.created_at).getFullYear() })}
                                             </span>
                                         </div>
                                     </div>
@@ -127,7 +139,7 @@ export default async function ServiceDetailsPage({ params }: PageProps) {
                                     />
                                     <div className="flex items-center justify-center md:justify-start gap-2 text-xs text-muted-foreground font-medium">
                                         <Clock className="w-3 h-3" />
-                                        Avg. Response: ~1 hour
+                                        {t('serviceDetail.avgResponse')}
                                     </div>
                                 </div>
                             </div>
