@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Check, X, Eye, FileText } from "lucide-react";
 import { approveService, rejectService } from "@/app/admin/actions";
+import { useT } from "@/hooks/useT";
 import Image from "next/image";
 
 interface ServiceReviewTableProps {
@@ -14,6 +15,7 @@ interface ServiceReviewTableProps {
 }
 
 export function ServiceReviewTable({ services }: ServiceReviewTableProps) {
+    const { t } = useT();
     const [isLoading, setIsLoading] = useState(false);
     const [rejectionReason, setRejectionReason] = useState("");
     const [showRejectDialog, setShowRejectDialog] = useState(false);
@@ -36,18 +38,18 @@ export function ServiceReviewTable({ services }: ServiceReviewTableProps) {
     }
 
     if (!services || services.length === 0) {
-        return <div className="text-center py-12 text-muted-foreground">No pending services to review. 🎉</div>;
+        return <div className="text-center py-12 text-muted-foreground">{t('admin.noPendingServices')}</div>;
     }
 
     return (
         <Table>
             <TableHeader>
                 <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Owner</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>{t('admin.colTitle')}</TableHead>
+                    <TableHead>{t('admin.colCategory')}</TableHead>
+                    <TableHead>{t('admin.colOwner')}</TableHead>
+                    <TableHead>{t('admin.colPrice')}</TableHead>
+                    <TableHead className="text-right">{t('admin.colActions')}</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -63,14 +65,14 @@ export function ServiceReviewTable({ services }: ServiceReviewTableProps) {
                                     <DialogTrigger asChild>
                                         <Button variant="ghost" size="sm" onClick={() => setSelectedId(service.id)}>
                                             <Eye className="w-4 h-4 mr-2" />
-                                            View
+                                            {t('admin.viewAction')}
                                         </Button>
                                     </DialogTrigger>
                                     <DialogContent className="max-w-2xl">
                                         <DialogHeader>
                                             <DialogTitle>{service.title}</DialogTitle>
                                             <DialogDescription>
-                                                Posted by {service.profiles?.full_name} • {new Date(service.created_at).toLocaleDateString()}
+                                                {t('admin.postedBy', { name: service.profiles?.full_name ?? '', date: new Date(service.created_at).toLocaleDateString() })}
                                             </DialogDescription>
                                         </DialogHeader>
 
@@ -83,7 +85,7 @@ export function ServiceReviewTable({ services }: ServiceReviewTableProps) {
 
                                             <div className="space-y-2">
                                                 <h4 className="font-medium flex items-center gap-2">
-                                                    <FileText className="w-4 h-4" /> Description
+                                                    <FileText className="w-4 h-4" /> {t('admin.descriptionLabel')}
                                                 </h4>
                                                 <p className="text-sm text-muted-foreground dark:text-slate-300 whitespace-pre-wrap bg-muted p-4 rounded-md">
                                                     {service.description}
@@ -91,8 +93,8 @@ export function ServiceReviewTable({ services }: ServiceReviewTableProps) {
                                             </div>
 
                                             <div className="flex gap-4 text-sm">
-                                                <div className="bg-muted px-3 py-1 rounded">Price: <strong>{service.price} ₸</strong></div>
-                                                <div className="bg-muted px-3 py-1 rounded">Category: <strong>{service.category}</strong></div>
+                                                <div className="bg-muted px-3 py-1 rounded">{t('admin.priceLabel')} <strong>{service.price} ₸</strong></div>
+                                                <div className="bg-muted px-3 py-1 rounded">{t('admin.categoryLabel')} <strong>{service.category}</strong></div>
                                             </div>
                                         </div>
 
@@ -106,11 +108,11 @@ export function ServiceReviewTable({ services }: ServiceReviewTableProps) {
                                                 disabled={isLoading}
                                             >
                                                 <X className="w-4 h-4 mr-2" />
-                                                Reject
+                                                {t('admin.reject')}
                                             </Button>
                                             <Button onClick={() => handleApprove(service.id)} disabled={isLoading} className="bg-green-600 hover:bg-green-700">
                                                 <Check className="w-4 h-4 mr-2" />
-                                                Approve
+                                                {t('admin.approve')}
                                             </Button>
                                         </DialogFooter>
                                     </DialogContent>
@@ -125,24 +127,24 @@ export function ServiceReviewTable({ services }: ServiceReviewTableProps) {
             <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Reason for Rejection</DialogTitle>
+                        <DialogTitle>{t('admin.rejectionTitle')}</DialogTitle>
                         <DialogDescription>
-                            Please provide a brief reason why this service is being rejected. The teacher will see this feedback.
+                            {t('admin.rejectServiceHint')}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="py-4 space-y-2">
-                        <label htmlFor="reason" className="text-sm font-medium">Rejection Reason</label>
+                        <label htmlFor="reason" className="text-sm font-medium">{t('admin.rejectionReason')}</label>
                         <Input
                             id="reason"
-                            placeholder="e.g. Inappropriate content, misleading price, etc."
+                            placeholder={t('admin.rejectServicePlaceholder')}
                             value={rejectionReason}
                             onChange={(e) => setRejectionReason(e.target.value)}
                         />
                     </div>
                     <DialogFooter>
-                        <Button variant="ghost" onClick={() => setShowRejectDialog(false)}>Cancel</Button>
+                        <Button variant="ghost" onClick={() => setShowRejectDialog(false)}>{t('admin.cancel')}</Button>
                         <Button variant="destructive" onClick={handleReject} disabled={isLoading || !rejectionReason.trim()}>
-                            Confirm Rejection
+                            {t('admin.confirmRejection')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

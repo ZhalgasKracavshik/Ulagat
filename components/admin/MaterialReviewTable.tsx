@@ -10,12 +10,23 @@ import { approveMaterial, rejectMaterial } from "@/app/admin/actions";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useT } from "@/hooks/useT";
 
 interface MaterialReviewTableProps {
     materials: any[];
 }
 
+const DIFFICULTY_KEYS: Record<string, string> = {
+    easy: 'admin.diffEasy',
+    low: 'admin.diffEasy',
+    medium: 'admin.diffMedium',
+    hard: 'admin.diffHard',
+    high: 'admin.diffHard',
+};
+
 export function MaterialReviewTable({ materials }: MaterialReviewTableProps) {
+    const { t } = useT();
+    const difficultyLabel = (d: string) => (DIFFICULTY_KEYS[d] ? t(DIFFICULTY_KEYS[d]) : d);
     const [isLoading, setIsLoading] = useState(false);
     const [rejectionReason, setRejectionReason] = useState("");
     const [showRejectDialog, setShowRejectDialog] = useState(false);
@@ -38,18 +49,18 @@ export function MaterialReviewTable({ materials }: MaterialReviewTableProps) {
     }
 
     if (!materials || materials.length === 0) {
-        return <div className="text-center py-12 text-muted-foreground">No pending study materials to review. 📚</div>;
+        return <div className="text-center py-12 text-muted-foreground">{t('admin.noPendingMaterials')}</div>;
     }
 
     return (
         <Table>
             <TableHeader>
                 <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Difficulty</TableHead>
-                    <TableHead>Contributor</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>{t('admin.colTitle')}</TableHead>
+                    <TableHead>{t('admin.colCategory')}</TableHead>
+                    <TableHead>{t('admin.colDifficulty')}</TableHead>
+                    <TableHead>{t('admin.colContributor')}</TableHead>
+                    <TableHead className="text-right">{t('admin.colActions')}</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -64,7 +75,7 @@ export function MaterialReviewTable({ materials }: MaterialReviewTableProps) {
                                     material.difficulty === 'medium' ? 'text-amber-600 border-amber-200' :
                                         'text-green-600 border-green-200'
                                 }`}>
-                                {material.difficulty}
+                                {difficultyLabel(material.difficulty)}
                             </Badge>
                         </TableCell>
                         <TableCell>{material.profiles?.full_name}</TableCell>

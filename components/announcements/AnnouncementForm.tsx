@@ -17,18 +17,20 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Send } from "lucide-react";
+import { useT } from "@/hooks/useT";
 import type { AnnouncementCategory } from "@/types";
 
-const CATEGORY_OPTIONS: { value: AnnouncementCategory; label: string }[] = [
-    { value: 'general', label: '📝 General' },
-    { value: 'important', label: '❗ Important' },
-    { value: 'assembly', label: '📢 Assembly' },
-    { value: 'medical', label: '🏥 Medical' },
+const CATEGORY_OPTIONS: { value: AnnouncementCategory; labelKey: string }[] = [
+    { value: 'general', labelKey: 'announcementForm.catGeneral' },
+    { value: 'important', labelKey: 'announcementForm.catImportant' },
+    { value: 'assembly', labelKey: 'announcementForm.catAssembly' },
+    { value: 'medical', labelKey: 'announcementForm.catMedical' },
 ];
 
 const ALL_GRADES = Array.from({ length: 11 }, (_, i) => i + 1);
 
 export function AnnouncementForm() {
+    const { t } = useT();
     const router = useRouter();
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
@@ -47,15 +49,15 @@ export function AnnouncementForm() {
 
     const handleSubmit = () => {
         if (!title.trim()) {
-            toast.error("Enter a title for the announcement.");
+            toast.error(t('announcementForm.titleRequired'));
             return;
         }
         if (!body.trim()) {
-            toast.error("Enter the announcement text.");
+            toast.error(t('announcementForm.bodyRequired'));
             return;
         }
         if (!allGrades && selectedGrades.length === 0) {
-            toast.error("Select at least one grade or check 'All grades'.");
+            toast.error(t('announcementForm.gradeRequired'));
             return;
         }
 
@@ -70,18 +72,18 @@ export function AnnouncementForm() {
             });
 
             if (!result.success) {
-                toast.error(result.error ?? "Failed to publish the announcement.");
+                toast.error(result.error ?? t('announcementForm.publishFailed'));
                 return;
             }
 
             if (result.emailsFailed) {
-                toast.warning("Announcement published, but email notification failed — notify recipients manually.");
+                toast.warning(t('announcementForm.emailFailed'));
             } else if (result.emailsSkipped) {
-                toast.success("Announcement published. Email sending is not configured (dev mode) — notification was logged instead.");
+                toast.success(t('announcementForm.emailSkipped'));
             } else if ((result.emailsSent ?? 0) > 0) {
-                toast.success(`Announcement published. ${result.emailsSent} student(s) and parent(s) notified by email.`);
+                toast.success(t('announcementForm.emailSent').replace('{count}', String(result.emailsSent)));
             } else {
-                toast.success("Announcement published. No matching recipients found for email notification.");
+                toast.success(t('announcementForm.noRecipients'));
             }
 
             router.push('/announcements');
@@ -92,23 +94,23 @@ export function AnnouncementForm() {
     return (
         <div className="space-y-6">
             <div className="space-y-2">
-                <Label htmlFor="ann_title" className="text-sm font-semibold text-foreground">Title</Label>
+                <Label htmlFor="ann_title" className="text-sm font-semibold text-foreground">{t('announcementForm.title')}</Label>
                 <Input
                     id="ann_title"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="e.g. Medical check-up for grades 5–7"
+                    placeholder={t('announcementForm.titlePlaceholder')}
                     maxLength={200}
                 />
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="ann_body" className="text-sm font-semibold text-foreground">Text</Label>
+                <Label htmlFor="ann_body" className="text-sm font-semibold text-foreground">{t('announcementForm.text')}</Label>
                 <Textarea
                     id="ann_body"
                     value={body}
                     onChange={(e) => setBody(e.target.value)}
-                    placeholder="Full announcement text — it will be shown in the feed and emailed to students and parents."
+                    placeholder={t('announcementForm.textPlaceholder')}
                     className="resize-none min-h-[140px]"
                     maxLength={5000}
                 />
@@ -116,21 +118,21 @@ export function AnnouncementForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-foreground">Category</Label>
+                    <Label className="text-sm font-semibold text-foreground">{t('announcementForm.category')}</Label>
                     <Select value={category} onValueChange={(v) => setCategory(v as AnnouncementCategory)}>
                         <SelectTrigger className="w-full">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                             {CATEGORY_OPTIONS.map((c) => (
-                                <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                                <SelectItem key={c.value} value={c.value}>{t(c.labelKey)}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="ann_expires" className="text-sm font-semibold text-foreground">
-                        Visible until (optional)
+                        {t('announcementForm.visibleUntil')}
                     </Label>
                     <Input
                         id="ann_expires"
@@ -138,12 +140,12 @@ export function AnnouncementForm() {
                         value={expiresAt}
                         onChange={(e) => setExpiresAt(e.target.value)}
                     />
-                    <p className="text-xs text-muted-foreground">Leave empty to keep the announcement up indefinitely.</p>
+                    <p className="text-xs text-muted-foreground">{t('announcementForm.visibleUntilHint')}</p>
                 </div>
             </div>
 
             <div className="space-y-3">
-                <Label className="text-sm font-semibold text-foreground">Target grades</Label>
+                <Label className="text-sm font-semibold text-foreground">{t('announcementForm.targetGrades')}</Label>
                 <div className="flex items-center gap-2">
                     <Checkbox
                         id="ann_all_grades"
@@ -151,7 +153,7 @@ export function AnnouncementForm() {
                         onCheckedChange={(checked) => setAllGrades(checked === true)}
                     />
                     <Label htmlFor="ann_all_grades" className="font-medium text-foreground cursor-pointer">
-                        All grades (whole school)
+                        {t('announcementForm.allGrades')}
                     </Label>
                 </div>
                 {!allGrades && (
@@ -183,7 +185,7 @@ export function AnnouncementForm() {
                     onCheckedChange={(checked) => setPinned(checked === true)}
                 />
                 <Label htmlFor="ann_pinned" className="font-medium text-foreground cursor-pointer">
-                    Pin to the top of the feed
+                    {t('announcementForm.pinned')}
                 </Label>
             </div>
 
@@ -193,7 +195,7 @@ export function AnnouncementForm() {
                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg h-12 rounded-xl shadow-lg gap-2"
             >
                 <Send className="w-5 h-5" />
-                {isSubmitting ? 'Publishing & notifying…' : 'Publish & Notify'}
+                {isSubmitting ? t('announcementForm.submitting') : t('announcementForm.submit')}
             </Button>
         </div>
     );

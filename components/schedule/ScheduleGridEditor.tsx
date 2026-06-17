@@ -25,16 +25,10 @@ import {
 } from "@/components/ui/select";
 import { Plus, Save, Trash2 } from "lucide-react";
 import { BELL_SCHEDULE } from "@/lib/schedule/bells";
+import { useT } from "@/hooks/useT";
 import type { ScheduleEntry } from "@/types";
 
-const DAYS = [
-    { value: 1, label: 'Monday', short: 'Mon' },
-    { value: 2, label: 'Tuesday', short: 'Tue' },
-    { value: 3, label: 'Wednesday', short: 'Wed' },
-    { value: 4, label: 'Thursday', short: 'Thu' },
-    { value: 5, label: 'Friday', short: 'Fri' },
-    { value: 6, label: 'Saturday', short: 'Sat' },
-];
+const DAY_VALUES = [1, 2, 3, 4, 5, 6] as const;
 
 type CellDraft = {
     day_of_week: number;
@@ -60,6 +54,12 @@ function plusDaysIso(days: number): string {
 }
 
 export function ScheduleGridEditor() {
+    const { t } = useT();
+    const DAYS = DAY_VALUES.map((value) => ({
+        value,
+        label: t(`scheduleManage.day${value}`),
+        short: t(`scheduleManage.dayShort${value}`),
+    }));
     const [grade, setGrade] = useState<string>('');
     const [classLetter, setClassLetter] = useState<string>('');
     const [referenceDate, setReferenceDate] = useState<string>(() => todayIso());
@@ -85,7 +85,7 @@ export function ScheduleGridEditor() {
                 .gte('valid_until', referenceDate);
 
             if (error) {
-                toast.error("Failed to load the timetable.");
+                toast.error(t('scheduleManage.loadFailed'));
                 return;
             }
             setEntries((data ?? []) as ScheduleEntry[]);
@@ -93,7 +93,7 @@ export function ScheduleGridEditor() {
         } finally {
             setIsLoading(false);
         }
-    }, [classReady, grade, classLetter, referenceDate]);
+    }, [classReady, grade, classLetter, referenceDate, t]);
 
     // Auto-load when the class selection is complete / changes
     useEffect(() => {
@@ -126,7 +126,7 @@ export function ScheduleGridEditor() {
     const handleSave = () => {
         if (!draft) return;
         if (!draft.subject.trim()) {
-            toast.error("Subject is required.");
+            toast.error(t('scheduleManage.subjectRequired'));
             return;
         }
         startSaving(async () => {
@@ -142,11 +142,11 @@ export function ScheduleGridEditor() {
                 valid_until: draft.valid_until,
             });
             if (result.success) {
-                toast.success("Lesson saved.");
+                toast.success(t('scheduleManage.lessonSaved'));
                 setDraft(null);
                 await loadEntries();
             } else {
-                toast.error(result.error ?? "Failed to save the lesson.");
+                toast.error(result.error ?? t('scheduleManage.saveFailed'));
             }
         });
     };
@@ -157,11 +157,11 @@ export function ScheduleGridEditor() {
         startSaving(async () => {
             const result = await deleteScheduleCell(id);
             if (result.success) {
-                toast.success("Lesson removed.");
+                toast.success(t('scheduleManage.lessonRemoved'));
                 setDraft(null);
                 await loadEntries();
             } else {
-                toast.error(result.error ?? "Failed to delete the lesson.");
+                toast.error(result.error ?? t('scheduleManage.deleteFailed'));
             }
         });
     };
@@ -174,17 +174,17 @@ export function ScheduleGridEditor() {
             <Card className="border-0 shadow-xl shadow-sky-100/50 overflow-hidden">
                 <div className="h-2 bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500" />
                 <CardHeader className="pb-4">
-                    <CardTitle className="text-xl">Class</CardTitle>
+                    <CardTitle className="text-xl">{t('scheduleManage.classTitle')}</CardTitle>
                     <CardDescription>
-                        Pick the class to edit. The grid shows the timetable version valid on the chosen date.
+                        {t('scheduleManage.classDescription')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4 items-end">
                     <div className="space-y-2">
-                        <Label className="text-sm font-semibold text-foreground">Grade</Label>
+                        <Label className="text-sm font-semibold text-foreground">{t('scheduleManage.grade')}</Label>
                         <Select value={grade} onValueChange={setGrade}>
                             <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Grade" />
+                                <SelectValue placeholder={t('scheduleManage.gradePlaceholder')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {Array.from({ length: 11 }, (_, i) => i + 1).map((g) => (
@@ -194,17 +194,17 @@ export function ScheduleGridEditor() {
                         </Select>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="class_letter" className="text-sm font-semibold text-foreground">Class letter</Label>
+                        <Label htmlFor="class_letter" className="text-sm font-semibold text-foreground">{t('scheduleManage.classLetter')}</Label>
                         <Input
                             id="class_letter"
                             value={classLetter}
                             onChange={(e) => setClassLetter(e.target.value)}
-                            placeholder="e.g. А"
+                            placeholder={t('scheduleManage.classLetterPlaceholder')}
                             maxLength={3}
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="reference_date" className="text-sm font-semibold text-foreground">Valid on date</Label>
+                        <Label htmlFor="reference_date" className="text-sm font-semibold text-foreground">{t('scheduleManage.validOnDate')}</Label>
                         <Input
                             id="reference_date"
                             type="date"
@@ -219,10 +219,10 @@ export function ScheduleGridEditor() {
                 <Card className="border-0 shadow-xl shadow-sky-100/50">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-xl">
-                            Weekly Grid — Class {grade}{classLetter.trim()}
+                            {t('scheduleManage.weeklyGrid').replace('{label}', `${grade}${classLetter.trim()}`)}
                         </CardTitle>
                         <CardDescription>
-                            Click a cell to add or edit a lesson. {isLoading && 'Loading…'}
+                            {t('scheduleManage.weeklyGridHint')} {isLoading && t('scheduleManage.loading')}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -230,7 +230,7 @@ export function ScheduleGridEditor() {
                             <table className="w-full text-sm border-collapse">
                                 <thead>
                                     <tr className="bg-muted">
-                                        <th className="px-3 py-2 text-left font-semibold text-muted-foreground w-24 border-b">Period</th>
+                                        <th className="px-3 py-2 text-left font-semibold text-muted-foreground w-24 border-b">{t('scheduleManage.period')}</th>
                                         {DAYS.map((d) => (
                                             <th key={d.value} className="px-2 py-2 text-left font-semibold text-foreground border-b">
                                                 <span className="hidden lg:inline">{d.label}</span>
@@ -263,7 +263,7 @@ export function ScheduleGridEditor() {
                                                                 <span className="block space-y-0.5">
                                                                     <span className="block font-semibold text-foreground leading-tight">{entry.subject}</span>
                                                                     <span className="block text-xs text-muted-foreground">
-                                                                        {entry.room && <>Room {entry.room}</>}
+                                                                        {entry.room && <>{t('scheduleManage.room')} {entry.room}</>}
                                                                         {entry.room && entry.teacher_name && <> · </>}
                                                                         {entry.teacher_name}
                                                                     </span>
@@ -290,49 +290,57 @@ export function ScheduleGridEditor() {
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>
-                            {draft?.existingId ? 'Edit lesson' : 'Add lesson'}
+                            {draft?.existingId ? t('scheduleManage.editLesson') : t('scheduleManage.addLesson')}
                         </DialogTitle>
                         <DialogDescription>
-                            {draftDayLabel}, period {draft?.period}
-                            {draftBell && <> ({draftBell.start}–{draftBell.end})</>} — Class {grade}{classLetter.trim()}
+                            {draftBell
+                                ? t('scheduleManage.dialogSlotTime')
+                                    .replace('{day}', draftDayLabel)
+                                    .replace('{period}', String(draft?.period ?? ''))
+                                    .replace('{start}', draftBell.start)
+                                    .replace('{end}', draftBell.end)
+                                    .replace('{label}', `${grade}${classLetter.trim()}`)
+                                : t('scheduleManage.dialogSlot')
+                                    .replace('{day}', draftDayLabel)
+                                    .replace('{period}', String(draft?.period ?? ''))}
                         </DialogDescription>
                     </DialogHeader>
 
                     {draft && (
                         <div className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="cell_subject" className="text-sm font-semibold text-foreground">Subject</Label>
+                                <Label htmlFor="cell_subject" className="text-sm font-semibold text-foreground">{t('scheduleManage.subject')}</Label>
                                 <Input
                                     id="cell_subject"
                                     value={draft.subject}
                                     onChange={(e) => setDraft({ ...draft, subject: e.target.value })}
-                                    placeholder="e.g. Mathematics"
+                                    placeholder={t('scheduleManage.subjectPlaceholder')}
                                     autoFocus
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="cell_teacher" className="text-sm font-semibold text-foreground">Teacher</Label>
+                                    <Label htmlFor="cell_teacher" className="text-sm font-semibold text-foreground">{t('scheduleManage.teacher')}</Label>
                                     <Input
                                         id="cell_teacher"
                                         value={draft.teacher_name}
                                         onChange={(e) => setDraft({ ...draft, teacher_name: e.target.value })}
-                                        placeholder="Teacher's name"
+                                        placeholder={t('scheduleManage.teacherPlaceholder')}
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="cell_room" className="text-sm font-semibold text-foreground">Room</Label>
+                                    <Label htmlFor="cell_room" className="text-sm font-semibold text-foreground">{t('scheduleManage.room')}</Label>
                                     <Input
                                         id="cell_room"
                                         value={draft.room}
                                         onChange={(e) => setDraft({ ...draft, room: e.target.value })}
-                                        placeholder="e.g. 305"
+                                        placeholder={t('scheduleManage.roomPlaceholder')}
                                     />
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="cell_valid_from" className="text-sm font-semibold text-foreground">Valid from</Label>
+                                    <Label htmlFor="cell_valid_from" className="text-sm font-semibold text-foreground">{t('scheduleManage.validFrom')}</Label>
                                     <Input
                                         id="cell_valid_from"
                                         type="date"
@@ -341,7 +349,7 @@ export function ScheduleGridEditor() {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="cell_valid_until" className="text-sm font-semibold text-foreground">Valid until</Label>
+                                    <Label htmlFor="cell_valid_until" className="text-sm font-semibold text-foreground">{t('scheduleManage.validUntil')}</Label>
                                     <Input
                                         id="cell_valid_until"
                                         type="date"
@@ -362,12 +370,12 @@ export function ScheduleGridEditor() {
                                 className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 gap-2 mr-auto"
                             >
                                 <Trash2 className="w-4 h-4" />
-                                Delete
+                                {t('scheduleManage.delete')}
                             </Button>
                         )}
                         <Button onClick={handleSave} disabled={isSaving} className="gap-2 bg-blue-600 hover:bg-blue-700">
                             <Save className="w-4 h-4" />
-                            {isSaving ? 'Saving…' : 'Save'}
+                            {isSaving ? t('scheduleManage.saving') : t('scheduleManage.save')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

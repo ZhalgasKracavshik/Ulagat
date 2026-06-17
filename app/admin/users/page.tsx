@@ -1,9 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 import { ShieldAlert, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UsersManagementTable } from '@/components/admin/UsersManagementTable';
+import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from '@/lib/i18n';
 import type { AdminUserRow } from '@/types';
 
 export default async function AdminUsersPage() {
@@ -11,6 +13,16 @@ export default async function AdminUsersPage() {
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect('/login');
+
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t = (key: string, vars?: Record<string, string | number>) => {
+        let v = resolveKey(dict, key);
+        if (vars) for (const [n, r] of Object.entries(vars)) v = v.replace(`{${n}}`, String(r));
+        return v;
+    };
 
     const { data: profile } = await supabase
         .from('profiles')
@@ -22,8 +34,8 @@ export default async function AdminUsersPage() {
         return (
             <div className="container py-20 text-center text-destructive">
                 <ShieldAlert className="w-16 h-16 mx-auto mb-4" />
-                <h1 className="text-2xl font-bold">Access Denied</h1>
-                <p>Only administrators can manage users.</p>
+                <h1 className="text-2xl font-bold">{t('admin.accessDenied')}</h1>
+                <p>{t('admin.usersAccessDeniedBody')}</p>
             </div>
         );
     }
@@ -62,16 +74,16 @@ export default async function AdminUsersPage() {
                     <Users className="w-8 h-8 text-primary" />
                 </div>
                 <div>
-                    <h1 className="text-3xl font-bold">User Management</h1>
+                    <h1 className="text-3xl font-bold">{t('admin.userManagementTitle')}</h1>
                     <p className="text-muted-foreground">
-                        Manage roles, grades, and SKUD IDs for all platform users.
+                        {t('admin.userManagementSubtitle')}
                     </p>
                 </div>
             </div>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>All Users ({users.length})</CardTitle>
+                    <CardTitle>{t('admin.allUsers', { count: users.length })}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <UsersManagementTable users={users} currentUserId={user.id} />
