@@ -2,8 +2,16 @@
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, CreditCard } from "lucide-react";
+import { CreditCard } from "lucide-react";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import {
+    DEFAULT_LOCALE,
+    LOCALE_COOKIE,
+    getDictionary,
+    isLocale,
+    resolveKey,
+} from "@/lib/i18n";
 
 interface PageProps {
     params: Promise<{ id: string }>;
@@ -13,6 +21,13 @@ export default async function PaymentPage({ params }: PageProps) {
     const { id } = await params;
     const supabase = await createClient();
 
+    // Server component: resolve locale from cookie and translate via dictionary.
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t = (key: string) => resolveKey(dict, key);
+
     // Fetch service
     const { data: service } = await supabase
         .from('services')
@@ -20,7 +35,7 @@ export default async function PaymentPage({ params }: PageProps) {
         .eq('id', id)
         .single();
 
-    if (!service) return <div>Service not found</div>;
+    if (!service) return <div>{t('servicePay.notFound')}</div>;
 
     // Payment Action (Mocked)
     async function processPayment() {
@@ -57,23 +72,23 @@ export default async function PaymentPage({ params }: PageProps) {
                     <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4 text-green-600 dark:text-green-200">
                         <CreditCard className="w-8 h-8" />
                     </div>
-                    <CardTitle className="text-2xl">Confirm Payment</CardTitle>
+                    <CardTitle className="text-2xl">{t('servicePay.confirmTitle')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 text-center">
                     <p className="text-muted-foreground">
-                        You are about to pay <span className="font-bold text-foreground">100 ₸</span> to list your service:
+                        {t('servicePay.intro')} <span className="font-bold text-foreground">{t('servicePay.amount')}</span> {t('servicePay.introSuffix')}
                     </p>
                     <div className="bg-muted p-4 rounded font-bold text-lg">
-                        "{service.title}"
+                        &quot;{service.title}&quot;
                     </div>
                     <p className="text-xs text-muted-foreground">
-                        Secure payment via Stripe (Simulated)
+                        {t('servicePay.secureNote')}
                     </p>
                 </CardContent>
                 <CardFooter>
                     <form action={processPayment} className="w-full">
                         <Button className="w-full bg-green-600 hover:bg-green-700 text-lg h-12">
-                            Submit for Review (100 ₸)
+                            {t('servicePay.submit')}
                         </Button>
                     </form>
                 </CardFooter>

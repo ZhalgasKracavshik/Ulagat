@@ -13,8 +13,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useT } from "@/hooks/useT";
 
+/** Minimal shape of a pending event row passed from the admin page. */
+type PendingEvent = {
+    id: string;
+    title: string;
+    event_date: string;
+    location: string | null;
+    description: string | null;
+    image_url: string | null;
+    profiles?: { full_name: string | null } | null;
+};
+
 interface EventReviewTableProps {
-    events: any[];
+    events: PendingEvent[];
 }
 
 export function EventReviewTable({ events }: EventReviewTableProps) {

@@ -12,7 +12,7 @@ export function calculateHash(
   points: number,
   previousHash: string,
   timestamp: string,
-  metadata: any
+  metadata: Record<string, unknown>
 ): string {
   const data = `${userId}${action}${points}${previousHash}${timestamp}${JSON.stringify(metadata)}${REPUTATION_SECRET}`;
   return crypto.createHash('sha256').update(data).digest('hex');
@@ -32,7 +32,7 @@ export async function mineBlock(
   userId: string,
   action: string,
   points: number,
-  metadata: any = {}
+  metadata: Record<string, unknown> = {}
 ) {
   const supabase = await createClient();
 

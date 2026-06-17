@@ -8,6 +8,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Award, BadgeCheck, Ban, ShieldAlert } from "lucide-react";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import {
+    DEFAULT_LOCALE,
+    LOCALE_COOKIE,
+    getDictionary,
+    isLocale,
+    resolveKey,
+} from "@/lib/i18n";
 import { verifyAchievement, rejectAchievement } from "./actions";
 import { ACHIEVEMENT_REVIEWER_ROLES, TIER_POINTS, type AchievementTier } from "@/lib/leaderboard";
 
@@ -36,10 +44,31 @@ const TIER_BADGES: Record<AchievementTier, string> = {
     national: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-200 border-purple-200',
 };
 
+const TIER_LABEL_KEYS: Record<AchievementTier, string> = {
+    school: 'achievementReview.tierSchool',
+    city: 'achievementReview.tierCity',
+    national: 'achievementReview.tierNational',
+};
+
 export default async function AchievementReviewPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect('/login');
+
+    // Server component: resolve locale from cookie and translate via dictionary.
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t = (key: string, vars?: Record<string, string | number>) => {
+        let value = resolveKey(dict, key);
+        if (vars) {
+            for (const [name, replacement] of Object.entries(vars)) {
+                value = value.replace(`{${name}}`, String(replacement));
+            }
+        }
+        return value;
+    };
 
     const { data: profile } = await supabase
         .from('profiles')
@@ -51,8 +80,8 @@ export default async function AchievementReviewPage() {
         return (
             <div className="container py-20 text-center text-destructive">
                 <ShieldAlert className="w-16 h-16 mx-auto mb-4" />
-                <h1 className="text-2xl font-bold">Access Denied</h1>
-                <p>Only Parliament members, Moderators and Admins can review achievements.</p>
+                <h1 className="text-2xl font-bold">{t('achievementReview.accessDenied')}</h1>
+                <p>{t('achievementReview.accessDeniedBody')}</p>
             </div>
         );
     }
@@ -72,10 +101,13 @@ export default async function AchievementReviewPage() {
                     <Award className="w-8 h-8 text-amber-600" />
                 </div>
                 <div>
-                    <h1 className="text-3xl font-bold">Achievement Verification</h1>
+                    <h1 className="text-3xl font-bold">{t('achievementReview.title')}</h1>
                     <p className="text-muted-foreground">
-                        Approve student achievements to award reputation points
-                        (School +{TIER_POINTS.school} / City +{TIER_POINTS.city} / National +{TIER_POINTS.national}).
+                        {t('achievementReview.subtitle', {
+                            school: TIER_POINTS.school,
+                            city: TIER_POINTS.city,
+                            national: TIER_POINTS.national,
+                        })}
                     </p>
                 </div>
             </div>
@@ -83,8 +115,8 @@ export default async function AchievementReviewPage() {
             {pending.length === 0 ? (
                 <div className="text-center py-20 space-y-4 border border-dashed rounded-2xl">
                     <BadgeCheck className="w-16 h-16 mx-auto text-green-200" />
-                    <h3 className="text-xl font-bold text-muted-foreground">All caught up!</h3>
-                    <p className="text-muted-foreground">There are no pending achievements to review.</p>
+                    <h3 className="text-xl font-bold text-muted-foreground">{t('achievementReview.allCaughtUp')}</h3>
+                    <p className="text-muted-foreground">{t('achievementReview.noneToReview')}</p>
                 </div>
             ) : (
                 <div className="space-y-4">
@@ -105,15 +137,20 @@ export default async function AchievementReviewPage() {
                                         <div className="flex flex-wrap items-center gap-2">
                                             <h3 className="font-bold text-lg text-foreground">{a.title}</h3>
                                             {a.tier && (
-                                                <Badge className={`border shadow-none capitalize ${TIER_BADGES[a.tier]}`}>
-                                                    {a.tier} · +{TIER_POINTS[a.tier]} pts
+                                                <Badge className={`border shadow-none ${TIER_BADGES[a.tier]}`}>
+                                                    {t('achievementReview.tierPoints', {
+                                                        tier: t(TIER_LABEL_KEYS[a.tier]),
+                                                        pts: TIER_POINTS[a.tier],
+                                                    })}
                                                 </Badge>
                                             )}
                                         </div>
                                         {a.description && <p className="text-sm text-muted-foreground">{a.description}</p>}
                                         {a.achievement_date && (
                                             <p className="text-xs text-muted-foreground">
-                                                Achieved: {new Date(a.achievement_date).toLocaleDateString()}
+                                                {t('achievementReview.achieved', {
+                                                    date: new Date(a.achievement_date).toLocaleDateString(),
+                                                })}
                                             </p>
                                         )}
                                         {a.profiles && (
@@ -123,7 +160,7 @@ export default async function AchievementReviewPage() {
                                                     <AvatarFallback>{a.profiles.full_name?.[0] || 'U'}</AvatarFallback>
                                                 </Avatar>
                                                 <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
-                                                    {a.profiles.full_name || 'Unknown'}
+                                                    {a.profiles.full_name || t('achievementReview.unknown')}
                                                     {a.profiles.grade ? ` · ${a.profiles.grade}${a.profiles.class_letter || ''}` : ''}
                                                 </span>
                                             </Link>
@@ -135,7 +172,7 @@ export default async function AchievementReviewPage() {
                                     <input type="hidden" name="id" value={a.id} />
                                     <Input
                                         name="reason"
-                                        placeholder="Rejection reason (optional)"
+                                        placeholder={t('achievementReview.rejectionPlaceholder')}
                                         className="h-10 flex-grow"
                                     />
                                     <div className="flex gap-2 shrink-0">
@@ -143,14 +180,14 @@ export default async function AchievementReviewPage() {
                                             formAction={verifyAchievement}
                                             className="gap-1.5 bg-green-600 hover:bg-green-700 font-bold"
                                         >
-                                            <BadgeCheck className="w-4 h-4" /> Verify
+                                            <BadgeCheck className="w-4 h-4" /> {t('achievementReview.verify')}
                                         </Button>
                                         <Button
                                             formAction={rejectAchievement}
                                             variant="outline"
                                             className="gap-1.5 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 font-bold"
                                         >
-                                            <Ban className="w-4 h-4" /> Reject
+                                            <Ban className="w-4 h-4" /> {t('achievementReview.reject')}
                                         </Button>
                                     </div>
                                 </form>

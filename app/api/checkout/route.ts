@@ -8,8 +8,9 @@ export async function POST(req: NextRequest) {
         const successUrl = `${origin}/services?success=true`;
 
         return NextResponse.json({ url: successUrl });
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error(err);
-        return NextResponse.json({ error: err.message }, { status: 500 });
+        const message = err instanceof Error ? err.message : 'Checkout failed.';
+        return NextResponse.json({ error: message }, { status: 500 });
     }
 }

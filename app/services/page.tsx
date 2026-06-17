@@ -9,6 +9,10 @@ import Link from "next/link";
 import { SERVICE_CATEGORIES, SERVICE_CREATOR_ROLES } from "@/lib/services";
 import { serviceCategoryKey } from "@/lib/services-i18n";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
+import type { Service, Profile } from "@/types";
+
+/** A service row joined with its owner profile, as consumed by ServiceCard. */
+type ServiceWithOwner = Service & { profiles?: Partial<Profile> | null };
 
 export default async function ServicesPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
     const supabase = await createClient();
@@ -112,7 +116,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
             {/* Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {services && services.length > 0 ? (
-                    services.map((service: { id: string }) => (
+                    (services as ServiceWithOwner[]).map((service) => (
                         <ServiceCard key={service.id} service={service} />
                     ))
                 ) : (

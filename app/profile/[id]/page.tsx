@@ -18,10 +18,28 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { isUuid } from "@/lib/validation";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
+import type { Service, Event, Profile, SocialLink } from "@/types";
 
 interface PageProps {
     params: Promise<{ id: string }>;
 }
+
+/** A reputation_ledger row (only the columns selected here). */
+type RepBlock = { points: number | null; action_type: string | null };
+
+/** A profile party joined into a friendship row on the profile page. */
+type FriendParty = { id: string; full_name: string | null; avatar_url: string | null };
+
+/** A friendship row joined with both parties. */
+type ProfileFriendshipRow = {
+    requester_id: string;
+    addressee_id: string;
+    requester: FriendParty | FriendParty[] | null;
+    addressee: FriendParty | FriendParty[] | null;
+};
+
+/** A service row joined with its owner profile, as consumed by ServiceCard. */
+type ProfileServiceRow = Service & { profiles?: Partial<Profile> | null };
 
 export default async function ProfilePage({ params }: PageProps) {
     let { id } = await params;
@@ -119,8 +137,8 @@ export default async function ProfilePage({ params }: PageProps) {
         .select('points, action_type')
         .eq('user_id', id);
 
-    const totalPoints = repBlocks?.reduce((sum: number, b: any) => sum + (b.points || 0), 0) || 0;
-    const totalActions = repBlocks?.filter((b: any) => b.action_type !== 'genesis').length || 0;
+    const totalPoints = (repBlocks as RepBlock[] | null)?.reduce((sum, b) => sum + (b.points || 0), 0) || 0;
+    const totalActions = (repBlocks as RepBlock[] | null)?.filter((b) => b.action_type !== 'genesis').length || 0;
     const isChainValid = await verifyChain(id);
 
     // Premium status — only needed for the owner's cabinet badge.
@@ -179,12 +197,12 @@ export default async function ProfilePage({ params }: PageProps) {
     }
 
     // Build friends list for display
-    const friendsList = (friendships || []).map((f: any) => {
+    const friendsList = ((friendships || []) as ProfileFriendshipRow[]).map((f) => {
         const friend = f.requester_id === id
             ? (Array.isArray(f.addressee) ? f.addressee[0] : f.addressee)
             : (Array.isArray(f.requester) ? f.requester[0] : f.requester);
         return friend;
-    }).filter(Boolean);
+    }).filter((f): f is FriendParty => Boolean(f));
 
     return (
         <div className="min-h-screen bg-background">
@@ -253,7 +271,7 @@ export default async function ProfilePage({ params }: PageProps) {
                             {/* Social Links */}
                             {profile.social_links && profile.social_links.length > 0 && (
                                 <div className="flex items-center gap-3 pt-1 flex-wrap">
-                                    {profile.social_links.map((link: any, idx: number) => (
+                                    {(profile.social_links as SocialLink[]).map((link, idx) => (
                                         <a key={idx} href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors bg-primary/5 px-3 py-1 rounded-full">
                                             <ExternalLink className="w-3 h-3" />
                                             {link.network.charAt(0).toUpperCase() + link.network.slice(1)}
@@ -324,7 +342,7 @@ export default async function ProfilePage({ params }: PageProps) {
                     <TabsContent value="services" className="space-y-6 animate-in fade-in-50 duration-300">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {services && services.length > 0 ? (
-                                services.map((service: any) => (
+                                (services as ProfileServiceRow[]).map((service) => (
                                     <ServiceCard key={service.id} service={service} />
                                 ))
                             ) : (
@@ -344,7 +362,7 @@ export default async function ProfilePage({ params }: PageProps) {
                     <TabsContent value="events" className="space-y-6 animate-in fade-in-50 duration-300">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {events && events.length > 0 ? (
-                                events.map((event: any) => (
+                                (events as Event[]).map((event) => (
                                     <Card key={event.id} className="overflow-hidden hover:shadow-md transition-all">
                                         <div className="h-32 bg-gradient-to-r from-blue-500 to-cyan-500" />
                                         <CardHeader>
@@ -371,11 +389,11 @@ export default async function ProfilePage({ params }: PageProps) {
                     <TabsContent value="friends" className="animate-in fade-in-50 duration-300">
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                             {friendsList.length > 0 ? (
-                                friendsList.map((friend: any) => (
+                                friendsList.map((friend) => (
                                     <Link href={`/profile/${friend.id}`} key={friend.id}>
                                         <Card className="hover:shadow-md transition-all p-4 flex items-center gap-3">
                                             <Avatar className="w-12 h-12">
-                                                <AvatarImage src={friend.avatar_url} />
+                                                <AvatarImage src={friend.avatar_url ?? undefined} />
                                                 <AvatarFallback>{friend.full_name?.[0]}</AvatarFallback>
                                             </Avatar>
                                             <div>

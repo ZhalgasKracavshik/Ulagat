@@ -18,6 +18,24 @@ import {
     resolveKey,
 } from "@/lib/i18n";
 
+/** A profile party joined into a friendship row. */
+type FriendParty = {
+    id: string;
+    full_name: string | null;
+    avatar_url: string | null;
+    role: string | null;
+} | null;
+
+/** A friendship row joined with both parties. */
+type FriendshipRow = {
+    id: string;
+    requester_id: string;
+    addressee_id: string;
+    status: string;
+    requester: FriendParty;
+    addressee: FriendParty;
+};
+
 export default async function FriendsPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -41,11 +59,13 @@ export default async function FriendsPage() {
         `)
         .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
 
-    const incomingRequests = (friendships || []).filter(f => f.addressee_id === user.id && f.status === 'pending');
-    const sentRequests = (friendships || []).filter(f => f.requester_id === user.id && f.status === 'pending');
-    const friends = (friendships || []).filter(f => f.status === 'accepted').map(f => {
-        return f.requester_id === user.id ? f.addressee : f.requester;
-    });
+    const allFriendships = (friendships || []) as FriendshipRow[];
+    const incomingRequests = allFriendships.filter(f => f.addressee_id === user.id && f.status === 'pending');
+    const sentRequests = allFriendships.filter(f => f.requester_id === user.id && f.status === 'pending');
+    const friends = allFriendships
+        .filter(f => f.status === 'accepted')
+        .map(f => (f.requester_id === user.id ? f.addressee : f.requester))
+        .filter((f): f is NonNullable<FriendParty> => f !== null);
 
     return (
         <div className="container mx-auto py-10 px-4 max-w-5xl space-y-10">
@@ -72,12 +92,12 @@ export default async function FriendsPage() {
                         </h2>
                         {friends.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {friends.map((friend: any) => (
+                                {friends.map((friend) => (
                                     <Card key={friend.id} className="hover:shadow-md transition-all group border-border overflow-hidden">
                                         <CardContent className="p-4 flex items-center justify-between">
                                             <Link href={`/profile/${friend.id}`} className="flex items-center gap-3 flex-grow min-w-0">
                                                 <Avatar className="w-12 h-12 border">
-                                                    <AvatarImage src={friend.avatar_url} />
+                                                    <AvatarImage src={friend.avatar_url ?? undefined} />
                                                     <AvatarFallback>{friend.full_name?.[0]}</AvatarFallback>
                                                 </Avatar>
                                                 <div className="truncate">
@@ -113,12 +133,12 @@ export default async function FriendsPage() {
                         </h2>
                         {incomingRequests.length > 0 ? (
                             <div className="space-y-3">
-                                {incomingRequests.map((req: any) => (
+                                {incomingRequests.map((req) => (
                                     <Card key={req.id} className="border-indigo-100 bg-indigo-50/10 dark:bg-indigo-950/10 shadow-sm overflow-hidden">
                                         <CardContent className="p-4 space-y-4">
                                             <div className="flex items-center gap-3">
                                                 <Avatar className="w-10 h-10 border shadow-sm">
-                                                    <AvatarImage src={req.requester?.avatar_url} />
+                                                    <AvatarImage src={req.requester?.avatar_url ?? undefined} />
                                                     <AvatarFallback>{req.requester?.full_name?.[0]}</AvatarFallback>
                                                 </Avatar>
                                                 <div>
@@ -149,12 +169,12 @@ export default async function FriendsPage() {
                     <section className="space-y-4">
                         <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-widest">{t('friends.outbound')}</h2>
                         <div className="space-y-2">
-                            {sentRequests.map((req: any) => (
+                            {sentRequests.map((req) => (
                                 <Card key={req.id} className="border-slate-50 bg-muted/50 shadow-none">
                                     <CardContent className="p-3 flex items-center justify-between">
                                         <div className="flex items-center gap-2 truncate">
                                             <Avatar className="w-6 h-6">
-                                                <AvatarImage src={req.addressee?.avatar_url} />
+                                                <AvatarImage src={req.addressee?.avatar_url ?? undefined} />
                                                 <AvatarFallback>{req.addressee?.full_name?.[0]}</AvatarFallback>
                                             </Avatar>
                                             <span className="text-sm font-medium text-muted-foreground truncate">{req.addressee?.full_name}</span>

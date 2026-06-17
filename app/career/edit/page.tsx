@@ -22,10 +22,16 @@ const MANDATORY_LABEL_KEYS: Record<string, string> = {
     history: "career.entHistory",
 };
 
-export default async function CareerEditPage() {
+export default async function CareerEditPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ error?: string }>;
+}) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect("/login");
+
+    const { error: formError } = await searchParams;
 
     const cookieStore = await cookies();
     const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
@@ -76,6 +82,15 @@ export default async function CareerEditPage() {
                 </div>
 
                 <form action={upsertCareerTracker} className="space-y-6">
+                    {formError && (
+                        <div
+                            role="alert"
+                            className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400"
+                        >
+                            {formError}
+                        </div>
+                    )}
+
                     {/* Profile subjects */}
                     <Card className="border-0 shadow-lg">
                         <CardHeader>

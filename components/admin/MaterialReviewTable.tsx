@@ -5,15 +5,26 @@ import { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Check, X, Eye, FileText, Download, User, Tag } from "lucide-react";
+import { Check, X, Eye, FileText, Download, Tag, ShieldCheck } from "lucide-react";
 import { approveMaterial, rejectMaterial } from "@/app/admin/actions";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useT } from "@/hooks/useT";
 
+/** Minimal shape of a pending study-material row passed from the admin page. */
+type PendingMaterial = {
+    id: string;
+    title: string;
+    category: string;
+    difficulty: string;
+    description: string | null;
+    url: string;
+    profiles?: { full_name: string | null } | null;
+};
+
 interface MaterialReviewTableProps {
-    materials: any[];
+    materials: PendingMaterial[];
 }
 
 const DIFFICULTY_KEYS: Record<string, string> = {
@@ -85,14 +96,14 @@ export function MaterialReviewTable({ materials }: MaterialReviewTableProps) {
                                     <DialogTrigger asChild>
                                         <Button variant="ghost" size="sm">
                                             <Eye className="w-4 h-4 mr-2" />
-                                            View
+                                            {t('admin.view')}
                                         </Button>
                                     </DialogTrigger>
                                     <DialogContent className="max-w-2xl">
                                         <DialogHeader>
                                             <DialogTitle>{material.title}</DialogTitle>
                                             <DialogDescription>
-                                                Uploaded by {material.profiles?.full_name}
+                                                {t('admin.uploadedBy', { name: material.profiles?.full_name ?? '' })}
                                             </DialogDescription>
                                         </DialogHeader>
 
@@ -100,20 +111,20 @@ export function MaterialReviewTable({ materials }: MaterialReviewTableProps) {
                                             <div className="flex flex-wrap gap-4">
                                                 <div className="flex items-center gap-2 bg-muted px-3 py-1.5 rounded-lg border">
                                                     <Tag className="w-4 h-4 text-indigo-500" />
-                                                    <span className="text-sm font-medium">Category: {material.category}</span>
+                                                    <span className="text-sm font-medium">{t('admin.categoryLabel')} {material.category}</span>
                                                 </div>
                                                 <div className="flex items-center gap-2 bg-muted px-3 py-1.5 rounded-lg border">
                                                     <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                                                    <span className="text-sm font-medium underline">Difficulty: {material.difficulty}</span>
+                                                    <span className="text-sm font-medium underline">{t('admin.difficultyLabel')} {difficultyLabel(material.difficulty)}</span>
                                                 </div>
                                             </div>
 
                                             <div className="space-y-2">
                                                 <h4 className="font-medium flex items-center gap-2">
-                                                    <FileText className="w-4 h-4" /> Description
+                                                    <FileText className="w-4 h-4" /> {t('admin.descriptionLabel')}
                                                 </h4>
                                                 <p className="text-sm text-muted-foreground bg-muted p-4 rounded-md border border-dashed">
-                                                    {material.description || 'No description provided.'}
+                                                    {material.description || t('admin.noDescriptionProvided')}
                                                 </p>
                                             </div>
 
@@ -123,14 +134,14 @@ export function MaterialReviewTable({ materials }: MaterialReviewTableProps) {
                                                         <FileText className="w-6 h-6 text-blue-600" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-sm font-bold text-blue-900">Resource File</p>
-                                                        <p className="text-xs text-blue-600">Material Link is ready for review</p>
+                                                        <p className="text-sm font-bold text-blue-900">{t('admin.resourceFile')}</p>
+                                                        <p className="text-xs text-blue-600">{t('admin.resourceFileReady')}</p>
                                                     </div>
                                                 </div>
                                                 <Button size="sm" asChild>
                                                     <a href={material.url} target="_blank" rel="noopener noreferrer">
                                                         <Download className="w-4 h-4 mr-2" />
-                                                        Open Resource
+                                                        {t('admin.openResource')}
                                                     </a>
                                                 </Button>
                                             </div>
@@ -146,11 +157,11 @@ export function MaterialReviewTable({ materials }: MaterialReviewTableProps) {
                                                 disabled={isLoading}
                                             >
                                                 <X className="w-4 h-4 mr-2" />
-                                                Reject
+                                                {t('admin.reject')}
                                             </Button>
                                             <Button onClick={() => handleApprove(material.id)} disabled={isLoading} className="bg-green-600 hover:bg-green-700">
                                                 <Check className="w-4 h-4 mr-2" />
-                                                Approve
+                                                {t('admin.approve')}
                                             </Button>
                                         </DialogFooter>
                                     </DialogContent>
@@ -165,25 +176,25 @@ export function MaterialReviewTable({ materials }: MaterialReviewTableProps) {
             <Dialog open={showRejectDialog} onOpenChange={setShowRejectDialog}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Reason for Rejection</DialogTitle>
+                        <DialogTitle>{t('admin.rejectionTitle')}</DialogTitle>
                         <DialogDescription>
-                            Please provide a brief reason why this study material is being rejected. The contributor will see this feedback.
+                            {t('admin.rejectMaterialHint')}
                         </DialogDescription>
                     </DialogHeader>
                     <div className="py-4">
-                        <Label htmlFor="reason">Rejection Reason</Label>
+                        <Label htmlFor="reason">{t('admin.rejectionReason')}</Label>
                         <Input
                             id="reason"
-                            placeholder="e.g. Broken link, incorrect difficulty, irrelevant content, etc."
+                            placeholder={t('admin.rejectMaterialPlaceholder')}
                             value={rejectionReason}
                             onChange={(e) => setRejectionReason(e.target.value)}
                             className="mt-2"
                         />
                     </div>
                     <DialogFooter>
-                        <Button variant="ghost" onClick={() => setShowRejectDialog(false)}>Cancel</Button>
+                        <Button variant="ghost" onClick={() => setShowRejectDialog(false)}>{t('admin.cancel')}</Button>
                         <Button variant="destructive" onClick={handleReject} disabled={isLoading || !rejectionReason.trim()}>
-                            Confirm Rejection
+                            {t('admin.confirmRejection')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -191,6 +202,3 @@ export function MaterialReviewTable({ materials }: MaterialReviewTableProps) {
         </Table>
     );
 }
-
-// Helper icon (since ShieldCheck might not be imported from lucide-react above if filtered by me)
-import { ShieldCheck } from "lucide-react";

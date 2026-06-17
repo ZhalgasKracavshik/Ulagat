@@ -14,6 +14,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { PlusCircle } from "lucide-react";
+import { toast } from "sonner";
 import { addCareerTarget } from "./actions";
 import { useT } from "@/hooks/useT";
 
@@ -59,7 +60,11 @@ export function AddTargetDialog({
             <DialogContent>
                 <form
                     action={async (formData) => {
-                        await addCareerTarget(formData);
+                        const result = await addCareerTarget(formData);
+                        if (result && "error" in result) {
+                            toast.error(result.error);
+                            return;
+                        }
                         setOpen(false);
                     }}
                     className="space-y-4"

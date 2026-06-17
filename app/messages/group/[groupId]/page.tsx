@@ -5,17 +5,52 @@ import { Input } from "@/components/ui/input";
 import { Send, ArrowLeft, Users } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import {
+    DEFAULT_LOCALE,
+    LOCALE_COOKIE,
+    getDictionary,
+    isLocale,
+    resolveKey,
+} from "@/lib/i18n";
 import { sendGroupMessage } from "./actions";
 
 interface PageProps {
     params: Promise<{ groupId: string }>;
 }
 
+/** Minimal shape of a `group_messages` row joined with its sender profile. */
+type GroupMessageRow = {
+    id: string;
+    sender_id: string;
+    content: string;
+    created_at: string;
+    sender:
+        | { full_name: string | null; avatar_url: string | null }
+        | { full_name: string | null; avatar_url: string | null }[]
+        | null;
+};
+
 export default async function GroupChatPage({ params }: PageProps) {
     const { groupId } = await params;
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect("/login");
+
+    // Server component: resolve locale from cookie and translate via dictionary.
+    const cookieStore = await cookies();
+    const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+    const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+    const dict = getDictionary(locale);
+    const t = (key: string, vars?: Record<string, string | number>) => {
+        let value = resolveKey(dict, key);
+        if (vars) {
+            for (const [name, replacement] of Object.entries(vars)) {
+                value = value.replace(`{${name}}`, String(replacement));
+            }
+        }
+        return value;
+    };
 
     // Fetch group details
     const { data: group } = await supabase
@@ -24,7 +59,7 @@ export default async function GroupChatPage({ params }: PageProps) {
         .eq('id', groupId)
         .single();
 
-    if (!group) return <div className="container py-10 text-center">Group not found.</div>;
+    if (!group) return <div className="container py-10 text-center">{t('messages.groupNotFound')}</div>;
 
     // Fetch members count
     const { count: memberCount } = await supabase
@@ -53,14 +88,14 @@ export default async function GroupChatPage({ params }: PageProps) {
                 <div>
                     <h2 className="font-bold text-xl">{group.name}</h2>
                     <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Users className="w-3 h-3" /> {memberCount} members
+                        <Users className="w-3 h-3" /> {t('messages.groupMembers', { count: memberCount ?? 0 })}
                     </p>
                 </div>
             </div>
 
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto space-y-4 p-4 bg-muted rounded-lg mb-4">
-                {messages && messages.map((msg: any) => {
+                {messages && (messages as GroupMessageRow[]).map((msg) => {
                     const isMe = msg.sender_id === user.id;
                     const sender = Array.isArray(msg.sender) ? msg.sender[0] : msg.sender;
                     return (
@@ -68,7 +103,7 @@ export default async function GroupChatPage({ params }: PageProps) {
                             <div className={`max-w-[70%] ${isMe ? '' : 'flex gap-2'}`}>
                                 {!isMe && (
                                     <Avatar className="w-6 h-6 mt-1">
-                                        <AvatarImage src={sender?.avatar_url} />
+                                        <AvatarImage src={sender?.avatar_url ?? undefined} />
                                         <AvatarFallback className="text-[8px]">{sender?.full_name?.[0]}</AvatarFallback>
                                     </Avatar>
                                 )}
@@ -94,7 +129,7 @@ export default async function GroupChatPage({ params }: PageProps) {
             <form action={sendGroupMessage.bind(null, groupId)} className="flex gap-2">
                 <Input
                     name="content"
-                    placeholder="Type a message..."
+                    placeholder={t('messages.typeMessage')}
                     className="flex-1"
                     autoComplete="off"
                     required

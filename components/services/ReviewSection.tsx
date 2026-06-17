@@ -8,6 +8,14 @@ import { createClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
 
+/** A review row joined with its reviewer profile. */
+type ReviewRow = {
+    id: string;
+    rating: number;
+    comment: string | null;
+    profiles?: { full_name: string | null; avatar_url: string | null } | null;
+};
+
 export async function ReviewSection({ serviceId }: { serviceId: string }) {
     const supabase = await createClient();
 
@@ -38,10 +46,10 @@ export async function ReviewSection({ serviceId }: { serviceId: string }) {
             {/* List Reviews */}
             <div className="space-y-4">
                 {reviews && reviews.length > 0 ? (
-                    reviews.map((review: any) => (
+                    (reviews as ReviewRow[]).map((review) => (
                         <div key={review.id} className="flex gap-4 p-4 bg-muted rounded-lg border">
                             <Avatar>
-                                <AvatarImage src={review.profiles?.avatar_url} />
+                                <AvatarImage src={review.profiles?.avatar_url ?? undefined} />
                                 <AvatarFallback>{review.profiles?.full_name?.[0]}</AvatarFallback>
                             </Avatar>
                             <div>

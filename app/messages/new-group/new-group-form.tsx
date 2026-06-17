@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Users, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useT } from "@/hooks/useT";
 
 interface Friend {
     id: string;
@@ -22,6 +23,7 @@ interface NewGroupFormProps {
 }
 
 export function NewGroupForm({ friends }: NewGroupFormProps) {
+    const { t } = useT();
     const [name, setName] = useState("");
     const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
@@ -36,11 +38,11 @@ export function NewGroupForm({ friends }: NewGroupFormProps) {
 
     async function handleCreate() {
         if (!name.trim()) {
-            setError("Group name is required.");
+            setError(t("newGroup.nameRequired"));
             return;
         }
         if (selectedFriends.length === 0) {
-            setError("Select at least one member.");
+            setError(t("newGroup.selectMember"));
             return;
         }
         setLoading(true);
@@ -55,13 +57,13 @@ export function NewGroupForm({ friends }: NewGroupFormProps) {
 
             if (!res.ok) {
                 const data = await res.json();
-                throw new Error(data.error || "Failed to create group.");
+                throw new Error(data.error || t("newGroup.createFailed"));
             }
 
             const data = await res.json();
             router.push(`/messages/group/${data.id}`);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : t("newGroup.createFailed"));
             setLoading(false);
         }
     }
@@ -70,31 +72,31 @@ export function NewGroupForm({ friends }: NewGroupFormProps) {
         <div className="min-h-screen bg-background py-10 px-4">
             <div className="mx-auto max-w-lg space-y-6">
                 <Link href="/messages" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
-                    <ArrowLeft className="w-4 h-4" /> Back to Messages
+                    <ArrowLeft className="w-4 h-4" /> {t("newGroup.back")}
                 </Link>
 
                 <Card className="border-0 shadow-lg">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Users className="w-5 h-5 text-indigo-600" />
-                            Create a New Group
+                            {t("newGroup.title")}
                         </CardTitle>
-                        <CardDescription>Start a group chat with your friends.</CardDescription>
+                        <CardDescription>{t("newGroup.description")}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div className="space-y-2">
-                            <Label htmlFor="group-name">Group Name</Label>
+                            <Label htmlFor="group-name">{t("newGroup.nameLabel")}</Label>
                             <Input
                                 id="group-name"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                placeholder="e.g. Math Study Group"
+                                placeholder={t("newGroup.namePlaceholder")}
                                 className="h-11"
                             />
                         </div>
 
                         <div className="space-y-3">
-                            <Label>Add Members ({selectedFriends.length} selected)</Label>
+                            <Label>{t("newGroup.addMembers", { count: selectedFriends.length })}</Label>
                             {friends.length > 0 ? (
                                 <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
                                     {friends.map(friend => (
@@ -117,7 +119,7 @@ export function NewGroupForm({ friends }: NewGroupFormProps) {
                                 </div>
                             ) : (
                                 <p className="text-sm text-muted-foreground text-center py-6">
-                                    You don&apos;t have any friends yet. Add friends first!
+                                    {t("newGroup.noFriends")}
                                 </p>
                             )}
                         </div>
@@ -136,10 +138,10 @@ export function NewGroupForm({ friends }: NewGroupFormProps) {
                             {loading ? (
                                 <>
                                     <Loader2 className="w-4 h-4 animate-spin" />
-                                    Creating...
+                                    {t("newGroup.creating")}
                                 </>
                             ) : (
-                                "Create Group"
+                                t("newGroup.create")
                             )}
                         </Button>
                     </CardContent>

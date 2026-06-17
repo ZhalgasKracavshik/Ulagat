@@ -218,9 +218,9 @@ export function MobileTabBar() {
                                 <AvatarFallback>{profile?.full_name?.[0] || "U"}</AvatarFallback>
                             </Avatar>
                             <div className="min-w-0">
-                                <p className="font-semibold truncate">{profile?.full_name || "My Cabinet"}</p>
-                                <p className="text-xs text-muted-foreground capitalize">
-                                    {profile?.role || "View your cabinet"}
+                                <p className="font-semibold truncate">{profile?.full_name || t("nav.myCabinet")}</p>
+                                <p className="text-xs text-muted-foreground">
+                                    {profile?.role ? t(`common.roles.${profile.role}`) : t("hints.cabinet")}
                                 </p>
                             </div>
                         </Link>

@@ -48,8 +48,8 @@ export function AvatarUpload({ currentAvatarUrl, onUploadComplete }: AvatarUploa
             setAvatarUrl(data.publicUrl);
             if (onUploadComplete) onUploadComplete(data.publicUrl);
 
-        } catch (error: any) {
-            setError(error.message);
+        } catch (error: unknown) {
+            setError(error instanceof Error ? error.message : "Upload failed.");
         } finally {
             setUploading(false);
         }
