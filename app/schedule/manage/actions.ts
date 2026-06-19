@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { normalizeClassLetter } from "@/lib/schedule/class-letter";
 
 export type UpsertScheduleCellInput = {
     grade: number;
@@ -55,7 +56,7 @@ export async function upsertScheduleCell(input: UpsertScheduleCellInput): Promis
     if (!Number.isInteger(input.grade) || input.grade < 1 || input.grade > 11) {
         return { success: false, error: "Grade must be between 1 and 11." };
     }
-    const classLetter = input.class_letter?.trim();
+    const classLetter = normalizeClassLetter(input.class_letter);
     if (!classLetter || classLetter.length > 3) {
         return { success: false, error: "Class letter is required (max 3 characters)." };
     }

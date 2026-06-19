@@ -3,6 +3,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { notifySubstitution } from "@/lib/notifications/substitution";
+import { normalizeClassLetter } from "@/lib/schedule/class-letter";
+import { almatyTodayIso } from "@/lib/schedule/almaty-time";
 import type { SubstitutionType } from "@/types";
 
 export type CreateSubstitutionInput = {
@@ -74,10 +76,15 @@ export async function createSubstitution(input: CreateSubstitutionInput): Promis
     if (typeof input.date !== 'string' || !ISO_DATE.test(input.date)) {
         return { success: false, error: "Date is required (yyyy-mm-dd)." };
     }
+    // Reject past dates (Almaty wall-clock) — emailing about a lesson that has
+    // already happened is almost always a typo (e.g. wrong year/month).
+    if (input.date < almatyTodayIso()) {
+        return { success: false, error: "The date is in the past. Pick today or a future date." };
+    }
     if (!Number.isInteger(input.grade) || input.grade < 1 || input.grade > 11) {
         return { success: false, error: "Grade must be between 1 and 11." };
     }
-    const classLetter = safeTrim(input.class_letter);
+    const classLetter = normalizeClassLetter(input.class_letter);
     if (!classLetter || classLetter.length > 3) {
         return { success: false, error: "Class letter is required (max 3 characters)." };
     }

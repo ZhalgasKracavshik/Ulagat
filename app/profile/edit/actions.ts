@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { normalizeClassLetter } from "@/lib/schedule/class-letter";
 
 function failWith(message: string): never {
     redirect(`/profile/edit?error=${encodeURIComponent(message)}`);
@@ -29,8 +30,9 @@ export async function updateProfile(formData: FormData) {
         }
         grade = gradeNumber;
     }
-    const classLetterRaw = (formData.get("class_letter") as string | null)?.trim() ?? "";
-    const class_letter = classLetterRaw ? classLetterRaw.slice(0, 3) : null;
+    // Normalize so the schedule/substitution class match is reliable (see
+    // lib/schedule/class-letter.ts). Empty stays null.
+    const class_letter = normalizeClassLetter(formData.get("class_letter") as string | null) || null;
 
     // Leaderboard privacy now lives on the /settings page (updatePrivacy server
     // action). This form intentionally no longer touches leaderboard_anonymous

@@ -1087,6 +1087,8 @@ export const ru: Dictionary = {
         submit: "Сохранить и уведомить класс",
         submitting: "Сохранение и уведомление…",
         deleteAria: "Удалить замену",
+        class: "Класс",
+        classPlaceholder: "Выберите класс",
         // Toasts / validation.
         fillSlot: "Заполните дату, параллель, букву класса и урок.",
         saveFailed: "Не удалось сохранить замену.",

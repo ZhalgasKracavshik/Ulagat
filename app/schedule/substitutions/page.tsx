@@ -69,14 +69,40 @@ export default async function SubstitutionsPage() {
 
     // "Today" in school wall-clock time (Asia/Almaty) — the server may run in UTC.
     const todayIso = almatyTodayIso();
-    const { data: subRows } = await supabase
-        .from('substitutions')
-        .select('*')
-        .gte('date', todayIso)
-        .order('date', { ascending: true })
-        .order('period', { ascending: true });
+
+    // Known classes for the picker: union of classes that have students and
+    // classes that have a published timetable. Sourcing the substitution target
+    // from real data (instead of free text) guarantees the email matches actual
+    // students and avoids Latin/Cyrillic/Kazakh letter mix-ups (e.g. A vs А vs Ә).
+    const [{ data: subRows }, { data: studentClasses }, { data: schedClasses }] = await Promise.all([
+        supabase
+            .from('substitutions')
+            .select('*')
+            .gte('date', todayIso)
+            .order('date', { ascending: true })
+            .order('period', { ascending: true }),
+        supabase
+            .from('profiles')
+            .select('grade, class_letter')
+            .eq('role', 'student')
+            .not('grade', 'is', null)
+            .not('class_letter', 'is', null),
+        supabase.from('schedule_classes').select('grade, class_letter'),
+    ]);
 
     const upcoming = (subRows ?? []) as Substitution[];
+
+    const classMap = new Map<string, { grade: number; letter: string }>();
+    for (const row of [...(studentClasses ?? []), ...(schedClasses ?? [])]) {
+        const grade = row.grade as number | null;
+        const letter = ((row.class_letter as string | null) ?? '').trim().toUpperCase();
+        if (grade == null || !letter) continue;
+        const key = `${grade}|${letter}`;
+        if (!classMap.has(key)) classMap.set(key, { grade, letter });
+    }
+    const classes = Array.from(classMap.values()).sort(
+        (a, b) => a.grade - b.grade || a.letter.localeCompare(b.letter)
+    );
 
     return (
         <div className="min-h-screen bg-muted/50 py-12 px-4">
@@ -97,7 +123,7 @@ export default async function SubstitutionsPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <SubstitutionForm />
+                        <SubstitutionForm classes={classes} />
                     </CardContent>
                 </Card>
 

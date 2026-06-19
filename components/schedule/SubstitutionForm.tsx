@@ -37,7 +37,9 @@ function isoDayOfWeek(date: string): number {
     return day === 0 ? 7 : day;
 }
 
-export function SubstitutionForm() {
+type KnownClass = { grade: number; letter: string };
+
+export function SubstitutionForm({ classes }: { classes: KnownClass[] }) {
     const { t } = useT();
     const router = useRouter();
     const [date, setDate] = useState<string>(() => todayIso());
@@ -132,39 +134,73 @@ export function SubstitutionForm() {
 
     return (
         <div className="space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className={`grid grid-cols-2 gap-4 ${classes.length > 0 ? 'md:grid-cols-3' : 'md:grid-cols-4'}`}>
                 <div className="space-y-2">
                     <Label htmlFor="sub_date" className="text-sm font-semibold text-foreground">{t('substitutions.date')}</Label>
                     <Input
                         id="sub_date"
                         type="date"
                         value={date}
+                        min={todayIso()}
                         onChange={(e) => setDate(e.target.value)}
                     />
                 </div>
-                <div className="space-y-2">
-                    <Label className="text-sm font-semibold text-foreground">{t('substitutions.grade')}</Label>
-                    <Select value={grade} onValueChange={setGrade}>
-                        <SelectTrigger className="w-full">
-                            <SelectValue placeholder={t('substitutions.gradePlaceholder')} />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {Array.from({ length: 11 }, (_, i) => i + 1).map((g) => (
-                                <SelectItem key={g} value={String(g)}>{g}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="sub_letter" className="text-sm font-semibold text-foreground">{t('substitutions.classLetter')}</Label>
-                    <Input
-                        id="sub_letter"
-                        value={classLetter}
-                        onChange={(e) => setClassLetter(e.target.value)}
-                        placeholder={t('substitutions.classLetterPlaceholder')}
-                        maxLength={3}
-                    />
-                </div>
+
+                {classes.length > 0 ? (
+                    /* Pick from real classes (has students or a timetable) so the
+                       substitution reliably matches recipients and avoids
+                       Latin/Cyrillic/Kazakh letter mix-ups. */
+                    <div className="space-y-2">
+                        <Label className="text-sm font-semibold text-foreground">{t('substitutions.class')}</Label>
+                        <Select
+                            value={grade && letter ? `${grade}|${letter}` : ''}
+                            onValueChange={(v) => {
+                                const [g, l] = v.split('|');
+                                setGrade(g);
+                                setClassLetter(l);
+                            }}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder={t('substitutions.classPlaceholder')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {classes.map((c) => (
+                                    <SelectItem key={`${c.grade}|${c.letter}`} value={`${c.grade}|${c.letter}`}>
+                                        {c.grade}{c.letter}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                ) : (
+                    <>
+                        <div className="space-y-2">
+                            <Label className="text-sm font-semibold text-foreground">{t('substitutions.grade')}</Label>
+                            <Select value={grade} onValueChange={setGrade}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder={t('substitutions.gradePlaceholder')} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Array.from({ length: 11 }, (_, i) => i + 1).map((g) => (
+                                        <SelectItem key={g} value={String(g)}>{g}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="sub_letter" className="text-sm font-semibold text-foreground">{t('substitutions.classLetter')}</Label>
+                            <Input
+                                id="sub_letter"
+                                value={classLetter}
+                                onChange={(e) => setClassLetter(e.target.value.toUpperCase())}
+                                placeholder={t('substitutions.classLetterPlaceholder')}
+                                maxLength={3}
+                                className="uppercase"
+                            />
+                        </div>
+                    </>
+                )}
+
                 <div className="space-y-2">
                     <Label className="text-sm font-semibold text-foreground">{t('substitutions.period')}</Label>
                     <Select value={period} onValueChange={setPeriod}>

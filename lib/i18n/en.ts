@@ -1122,6 +1122,8 @@ export const en: Dictionary = {
         submitting: "Saving & notifying…",
         deleteAria: "Delete substitution",
         // Toasts / validation.
+        class: "Class",
+        classPlaceholder: "Select class",
         fillSlot: "Fill in the date, grade, class letter and period.",
         saveFailed: "Failed to save the substitution.",
         emailFailed: "Substitution saved, but email notification failed — notify the class manually.",

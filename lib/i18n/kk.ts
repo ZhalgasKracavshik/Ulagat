@@ -1087,6 +1087,8 @@ export const kk: Dictionary = {
         submit: "Сақтау және сыныпқа хабарлау",
         submitting: "Сақтау және хабарлау…",
         deleteAria: "Ауыстыруды жою",
+        class: "Сынып",
+        classPlaceholder: "Сыныпты таңдаңыз",
         // Toasts / validation.
         fillSlot: "Күнді, параллельді, сынып әрпін және сабақты толтырыңыз.",
         saveFailed: "Ауыстыруды сақтау сәтсіз аяқталды.",
