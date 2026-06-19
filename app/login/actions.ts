@@ -6,15 +6,18 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { z } from 'zod'
 
-// P0-1: The role enum below is the self-registration allowlist —
-// admin/moderator/parliament can NOT be self-registered via the public form.
+// P0-1 / audit3 #6: the role enum below is the self-registration allowlist.
+// Only 'student' and 'parent' may be self-registered via the public form.
+// teacher/parliament/moderator/admin are ASSIGNED by an admin (per the PRD),
+// so 'teacher' is intentionally NOT here. The handle_new_user DB trigger
+// enforces the same allowlist defensively at the database layer.
 const signupSchema = z.object({
     email: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     fullName: z.string()
         .min(2, "Name must be at least 2 characters")
         .regex(/^[a-zA-Z\s]+$/, "Please use only Latin letters and spaces"),
-    role: z.enum(["student", "teacher", "parent"], {
+    role: z.enum(["student", "parent"], {
         message: "Invalid role selected",
     }),
 })
@@ -57,22 +60,24 @@ export async function signup(formData: FormData) {
     const { email, password, fullName, role } = validatedFields.data
     const inviteCode = formData.get('inviteCode') as string | null
 
-    // If role is parent, validate invite code first (P1-4: save student_id here, reuse later)
-    let validatedStudentId: string | null = null
+    // If role is parent, pre-validate the invite code for an immediate, friendly
+    // error before we create the account. The actual atomic token-claim + family
+    // bond is performed by the handle_new_user DB trigger (see below), so the
+    // link is created on BOTH the immediate and email-confirmation signup paths.
     if (role === 'parent') {
         if (!inviteCode || inviteCode.trim().length === 0) {
             return { error: 'An invite code is required to register as a parent.' }
         }
 
-        // P2-4: Use admin client for this SELECT since anon users cannot read tokens after RLS fix.
+        // Anon users cannot read tokens under RLS — use the service-role client.
         const adminClient = createAdminClient()
-        const { data: tokenData, error: tokenError } = await adminClient
+        const { data: tokenData } = await adminClient
             .from('parent_invite_tokens')
             .select('id, student_id, expires_at, used_at')
             .eq('token', inviteCode.trim())
-            .single()
+            .maybeSingle()
 
-        if (tokenError || !tokenData) {
+        if (!tokenData) {
             return { error: 'Invalid invite code. Please ask your child for a new code.' }
         }
         if (tokenData.used_at) {
@@ -81,17 +86,18 @@ export async function signup(formData: FormData) {
         if (new Date(tokenData.expires_at) < new Date()) {
             return { error: 'This invite code has expired. Please ask your child for a new code.' }
         }
-
-        // P1-4: Store student_id from initial validation — do NOT re-fetch later.
-        validatedStudentId = tokenData.student_id
     }
 
-    // Check name uniqueness first
-    const { data: existingName } = await supabase
+    // Check name uniqueness via the service-role client. The profiles SELECT
+    // policy is restricted to authenticated users (audit3 #2) and the signup
+    // request is still anonymous, so a normal client cannot read profiles here.
+    // maybeSingle avoids the PGRST116 error that .single() raises on zero rows.
+    const nameClient = createAdminClient()
+    const { data: existingName } = await nameClient
         .from('profiles')
         .select('id')
         .eq('full_name', fullName)
-        .single()
+        .maybeSingle()
 
     if (existingName) {
         return { error: "This name is already taken. Please choose another one." }
@@ -104,6 +110,10 @@ export async function signup(formData: FormData) {
             data: {
                 full_name: fullName,
                 role: role,
+                // Consumed by the handle_new_user DB trigger, which atomically
+                // claims the token and creates the family_bond at account-insert
+                // time (works even when email confirmation is pending).
+                ...(role === 'parent' && inviteCode ? { invite_code: inviteCode.trim() } : {}),
             },
         },
     })
@@ -112,43 +122,13 @@ export async function signup(formData: FormData) {
         return { error: signUpError.message }
     }
 
-    // P1-2: Handle email confirmation path — user may be null when email confirmation is required.
+    // The handle_new_user trigger has already created the profile and, for a
+    // parent with a valid invite_code, claimed the token + created the bond at
+    // account-insert time. Email-confirmation path: no session yet, so show a
+    // confirmation message instead of redirecting into a login loop.
     if (!signUpData.user) {
         return {
-            message: 'Registration successful! Please check your email to confirm your account. Your parent link will be activated after confirmation.',
-        }
-    }
-
-    // If parent registration with valid invite, atomically claim token and create family bond.
-    if (role === 'parent' && inviteCode && validatedStudentId) {
-        const adminClient = createAdminClient()
-
-        // P0-2 + P0-4: Atomic conditional UPDATE — only succeeds if used_at IS NULL (prevents race condition / double-use).
-        // Uses service-role client because the RLS UPDATE policy now restricts to service_role only (P0-4).
-        const { data: claimedToken, error: claimError } = await adminClient
-            .from('parent_invite_tokens')
-            .update({ used_at: new Date().toISOString() })
-            .eq('token', inviteCode.trim())
-            .is('used_at', null)
-            .select('student_id')
-            .single()
-
-        if (claimError || !claimedToken) {
-            // Token was already claimed by a concurrent request.
-            return { error: 'Invite code was already used. Please ask the student to generate a new one.' }
-        }
-
-        // P0-3: Use service-role client for family_bonds INSERT since RLS now restricts to service_role only.
-        // P1-3: Check bondError and log rather than silently discard.
-        const { error: bondError } = await adminClient.from('family_bonds').insert({
-            parent_id: signUpData.user.id,
-            student_id: claimedToken.student_id,
-        })
-
-        if (bondError) {
-            console.error('Failed to create family bond:', bondError)
-            // Do not fail the whole registration — user is registered as parent but without a bond.
-            // An admin can create the bond manually.
+            message: 'Registration successful! Please check your email to confirm your account.',
         }
     }
 

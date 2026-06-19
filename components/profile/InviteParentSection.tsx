@@ -75,7 +75,7 @@ export function InviteParentSection({ studentId, existingTokens }: InviteParentS
             </CardHeader>
             <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                    Generate a 6-digit code for your parent or guardian to register and link to your account.
+                    Generate a one-time code for your parent or guardian to register and link to your account.
                 </p>
 
                 {error && (

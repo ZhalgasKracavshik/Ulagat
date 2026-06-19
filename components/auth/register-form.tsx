@@ -77,7 +77,6 @@ export function RegisterForm({ initialInviteCode }: RegisterFormProps) {
                                 className="block w-full rounded-lg border border-border bg-gray-50 p-2.5 text-foreground focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                             >
                                 <option value="student">{t('auth.roleStudent')}</option>
-                                <option value="teacher">{t('auth.roleTeacher')}</option>
                                 <option value="parent">{t('auth.roleParent')}</option>
                             </select>
                         </div>
@@ -92,14 +91,14 @@ export function RegisterForm({ initialInviteCode }: RegisterFormProps) {
                                     name="inviteCode"
                                     type="text"
                                     required={isParent}
-                                    maxLength={6}
-                                    minLength={6}
-                                    pattern="\d{6}"
+                                    maxLength={8}
+                                    minLength={8}
+                                    pattern="[A-Za-z0-9]{8}"
                                     title={t('auth.inviteCodeTitle')}
                                     value={inviteCode}
-                                    onChange={(e) => setInviteCode(e.target.value)}
-                                    className="block w-full rounded-lg border border-border bg-gray-50 p-2.5 text-foreground focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 tracking-widest text-center text-lg font-mono"
-                                    placeholder="123456"
+                                    onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                                    className="block w-full rounded-lg border border-border bg-gray-50 p-2.5 text-foreground focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 tracking-widest text-center text-lg font-mono uppercase"
+                                    placeholder="AB23CD45"
                                 />
                                 <p className="mt-1 text-xs text-muted-foreground">
                                     {t('auth.inviteCodeHint')}
