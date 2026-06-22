@@ -1,93 +1,188 @@
-import { ArrowRight, BookOpen, Trophy, Users } from "lucide-react";
 import Link from "next/link";
+import {
+  ArrowRight,
+  CalendarDays,
+  Megaphone,
+  Trophy,
+  Users2,
+  Crown,
+  GraduationCap,
+  Users,
+  HeartHandshake,
+  ShieldCheck,
+  type LucideIcon,
+} from "lucide-react";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
+
+export const dynamic = "force-dynamic";
+
+type Feature = { icon: LucideIcon; titleKey: string; descKey: string; color: string; tint: string };
+
+// Reuse each feature's signature icon + colour (see lib/nav-config.ts / .impeccable.md)
+// so first-time visitors start learning the colour-coded wayfinding immediately.
+const FEATURES: Feature[] = [
+  { icon: CalendarDays, titleKey: "landing.f1Title", descKey: "landing.f1Desc", color: "text-sky-500", tint: "bg-sky-50 dark:bg-sky-950/40" },
+  { icon: Megaphone, titleKey: "landing.f2Title", descKey: "landing.f2Desc", color: "text-indigo-500", tint: "bg-indigo-50 dark:bg-indigo-950/40" },
+  { icon: Trophy, titleKey: "landing.f3Title", descKey: "landing.f3Desc", color: "text-amber-500", tint: "bg-amber-50 dark:bg-amber-950/40" },
+  { icon: Users2, titleKey: "landing.f4Title", descKey: "landing.f4Desc", color: "text-violet-500", tint: "bg-violet-50 dark:bg-violet-950/40" },
+  { icon: Crown, titleKey: "landing.f5Title", descKey: "landing.f5Desc", color: "text-yellow-500", tint: "bg-yellow-50 dark:bg-yellow-950/40" },
+  { icon: GraduationCap, titleKey: "landing.f6Title", descKey: "landing.f6Desc", color: "text-rose-500", tint: "bg-rose-50 dark:bg-rose-950/40" },
+];
+
+const AUDIENCES: { icon: LucideIcon; titleKey: string; descKey: string; color: string; tint: string }[] = [
+  { icon: Users, titleKey: "landing.forStudents", descKey: "landing.forStudentsDesc", color: "text-indigo-600", tint: "bg-indigo-50 dark:bg-indigo-950/40" },
+  { icon: HeartHandshake, titleKey: "landing.forParents", descKey: "landing.forParentsDesc", color: "text-rose-500", tint: "bg-rose-50 dark:bg-rose-950/40" },
+  { icon: ShieldCheck, titleKey: "landing.forStaff", descKey: "landing.forStaffDesc", color: "text-emerald-600", tint: "bg-emerald-50 dark:bg-emerald-950/40" },
+];
 
 export default async function Home() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  const cookieStore = await cookies();
+  const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
+  const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
+  const dict = getDictionary(locale);
+  const t = (key: string) => resolveKey(dict, key);
+
+  // Render the accent word in brand violet without gradient text (per .impeccable.md).
+  const title = t("landing.title");
+  const accent = t("landing.titleAccent");
+  const [before, after] = accent && title.includes(accent) ? title.split(accent) : [title, ""];
+
   return (
-    <div className="flex flex-col min-h-[calc(100vh-3.5rem)]">
-      {/* Hero Section */}
-      <section className="space-y-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32">
-        <div className="container mx-auto flex max-w-[64rem] flex-col items-center gap-4 text-center px-4 md:px-6">
-          <Link
-            href="/events"
-            className="rounded-2xl bg-muted px-4 py-1.5 text-sm font-medium transition-colors hover:bg-muted/80 backdrop-blur-sm"
-          >
-            🎉 Upcoming School Olympics &rarr;
-          </Link>
-          <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-600 to-secondary animate-in fade-in slide-in-from-bottom-4 duration-500">
-            Unlock Knowledge with Ulagat
+    <div className="flex flex-col">
+      {/* ---- Hero ---------------------------------------------------------- */}
+      <section className="relative overflow-hidden">
+        {/* Soft, calm brand wash — decorative only. */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute -top-24 left-1/2 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
+          <div className="absolute top-32 right-[-6rem] h-72 w-72 rounded-full bg-amber-300/10 blur-3xl" />
+        </div>
+
+        <div className="container mx-auto max-w-5xl px-4 md:px-6 pt-16 pb-12 md:pt-24 md:pb-16 text-center">
+          <span className="inline-flex items-center gap-2 rounded-full border bg-card/70 px-3.5 py-1.5 text-xs font-semibold text-muted-foreground backdrop-blur">
+            <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
+            {t("landing.badge")}
+          </span>
+
+          <h1 className="mt-6 text-balance text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-foreground">
+            {before}
+            {after !== "" && <span className="text-primary">{accent}</span>}
+            {after}
           </h1>
-          <p className="max-w-[42rem] leading-normal text-muted-foreground sm:text-xl sm:leading-8 mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
-            The ultimate platform for school services, events, and community growth. Find tutors, join competitions, and showcase your skills.
+
+          <p className="mx-auto mt-5 max-w-2xl text-pretty text-base sm:text-lg leading-relaxed text-muted-foreground">
+            {t("landing.subtitle")}
           </p>
-          <div className="space-x-4 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200">
-            <Link
-              href={user ? "/services" : "/register"}
-              className="inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-medium h-11 px-8 shadow-lg hover:bg-primary/90 hover:scale-105 transition-all"
-            >
-              Get Started
-            </Link>
-            <Link
-              href="/services"
-              className="inline-flex items-center justify-center rounded-lg border border-input bg-background/50 backdrop-blur-sm text-sm font-medium h-11 px-8 shadow-sm hover:bg-accent hover:text-accent-foreground transition-all"
-            >
-              Explore Services
-            </Link>
+
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+            {user ? (
+              <Link
+                href="/home"
+                className="inline-flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-primary px-7 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                {t("landing.ctaDashboard")}
+                <ArrowRight className="h-5 w-5" aria-hidden />
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/register"
+                  className="inline-flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-primary px-7 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  {t("landing.ctaStart")}
+                  <ArrowRight className="h-5 w-5" aria-hidden />
+                </Link>
+                <Link
+                  href="/login"
+                  className="inline-flex h-12 w-full sm:w-auto items-center justify-center rounded-xl border bg-card px-7 text-base font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  {t("landing.ctaSignIn")}
+                </Link>
+              </>
+            )}
           </div>
+
+          <p className="mt-6 text-xs text-muted-foreground">{t("landing.trust")}</p>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="container mx-auto space-y-6 py-8 md:py-12 lg:py-24 px-4 md:px-6">
-        <div className="mx-auto grid justify-center gap-6 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-3">
-          <div className="relative overflow-hidden rounded-xl border bg-background/50 backdrop-blur-sm p-2 transition-all hover:shadow-xl hover:-translate-y-1 duration-300">
-            <div className="flex h-[200px] flex-col justify-between rounded-md p-6">
-              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 w-fit rounded-full text-blue-600 dark:text-blue-200">
-                <BookOpen className="h-8 w-8" />
+      {/* ---- Features ------------------------------------------------------ */}
+      <section className="container mx-auto max-w-6xl px-4 md:px-6 py-12 md:py-16">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">{t("landing.featuresTitle")}</h2>
+          <p className="mt-3 text-muted-foreground">{t("landing.featuresSubtitle")}</p>
+        </div>
+
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map((f) => {
+            const Icon = f.icon;
+            return (
+              <div
+                key={f.titleKey}
+                className="group rounded-2xl border bg-card p-6 transition-all hover:-translate-y-0.5 hover:shadow-lg"
+              >
+                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${f.tint}`}>
+                  <Icon className={`h-6 w-6 ${f.color}`} aria-hidden />
+                </div>
+                <h3 className="mt-4 text-lg font-bold text-foreground">{t(f.titleKey)}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{t(f.descKey)}</p>
               </div>
-              <div className="space-y-2">
-                <h3 className="font-bold text-xl">Tutoring Services</h3>
-                <p className="text-sm text-muted-foreground">
-                  Find expert tutors for any subject, from Math to Music history.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="relative overflow-hidden rounded-xl border bg-background/50 backdrop-blur-sm p-2 transition-all hover:shadow-xl hover:-translate-y-1 duration-300">
-            <div className="flex h-[200px] flex-col justify-between rounded-md p-6">
-              <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 w-fit rounded-full text-yellow-600 dark:text-yellow-200">
-                <Trophy className="h-8 w-8" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="font-bold text-xl">School Events</h3>
-                <p className="text-sm text-muted-foreground">
-                  Participate in Olympics, hackathons, and sports competitions.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="relative overflow-hidden rounded-xl border bg-background/50 backdrop-blur-sm p-2 transition-all hover:shadow-xl hover:-translate-y-1 duration-300">
-            <div className="flex h-[200px] flex-col justify-between rounded-md p-6">
-              <div className="p-3 bg-pink-100 dark:bg-pink-900/30 w-fit rounded-full text-pink-600 dark:text-pink-200">
-                <Users className="h-8 w-8" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="font-bold text-xl">Community</h3>
-                <p className="text-sm text-muted-foreground">
-                  Connect with teachers and students. Share knowledge and grow.
-                </p>
-              </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
       </section>
 
-      {/* Decorative gradient blob */}
-      <div className="fixed top-20 left-0 -z-10 h-[300px] w-[300px] rounded-full bg-primary/20 blur-[100px]" />
-      <div className="fixed bottom-0 right-0 -z-10 h-[300px] w-[300px] rounded-full bg-secondary/20 blur-[100px]" />
+      {/* ---- Audiences ----------------------------------------------------- */}
+      <section className="container mx-auto max-w-6xl px-4 md:px-6 pb-12 md:pb-16">
+        <h2 className="text-center text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+          {t("landing.audienceTitle")}
+        </h2>
+        <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          {AUDIENCES.map((a) => {
+            const Icon = a.icon;
+            return (
+              <div key={a.titleKey} className="rounded-2xl border bg-card p-6 text-center sm:text-left">
+                <div className={`mx-auto sm:mx-0 flex h-11 w-11 items-center justify-center rounded-xl ${a.tint}`}>
+                  <Icon className={`h-5 w-5 ${a.color}`} aria-hidden />
+                </div>
+                <h3 className="mt-4 font-bold text-foreground">{t(a.titleKey)}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{t(a.descKey)}</p>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ---- Final CTA ----------------------------------------------------- */}
+      {!user && (
+        <section className="container mx-auto max-w-5xl px-4 md:px-6 pb-20 md:pb-24">
+          <div className="relative overflow-hidden rounded-3xl border bg-card px-6 py-12 text-center">
+            <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+              <div className="absolute left-1/2 top-1/2 h-64 w-[36rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-3xl" />
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">{t("landing.ctaFinalTitle")}</h2>
+            <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                href="/register"
+                className="inline-flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-primary px-7 text-base font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                {t("landing.ctaStart")}
+                <ArrowRight className="h-5 w-5" aria-hidden />
+              </Link>
+              <Link
+                href="/login"
+                className="inline-flex h-12 w-full sm:w-auto items-center justify-center rounded-xl border bg-background px-7 text-base font-semibold text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                {t("landing.ctaSignIn")}
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
