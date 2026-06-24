@@ -31,9 +31,19 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export function Navbar() {
-    const [user, setUser] = useState<AuthUser | null>(null);
-    const [profile, setProfile] = useState<(Profile & { reputation?: number }) | null>(null);
+export function Navbar({
+    initialUserId = null,
+    initialProfile = null,
+}: {
+    initialUserId?: string | null;
+    initialProfile?: (Profile & { reputation?: number }) | null;
+}) {
+    // Seed from server-resolved auth so the first paint shows the correct chrome
+    // (avatar) instead of flashing the guest "Get started / Sign in" buttons.
+    const [user, setUser] = useState<AuthUser | null>(
+        initialUserId ? ({ id: initialUserId } as unknown as AuthUser) : null
+    );
+    const [profile, setProfile] = useState<(Profile & { reputation?: number }) | null>(initialProfile);
     const [pendingFriendRequests, setPendingFriendRequests] = useState(0);
     const [pendingModerationCount, setPendingModerationCount] = useState(0);
     const [isPremium, setIsPremium] = useState(false);

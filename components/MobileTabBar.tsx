@@ -36,9 +36,19 @@ import { useT } from "@/contexts/LocaleContext";
  * It does its own lightweight auth/profile fetch (mirroring the Navbar) so it
  * is fully self-contained.
  */
-export function MobileTabBar() {
-    const [user, setUser] = useState<AuthUser | null>(null);
-    const [profile, setProfile] = useState<Profile | null>(null);
+export function MobileTabBar({
+    initialUserId = null,
+    initialProfile = null,
+}: {
+    initialUserId?: string | null;
+    initialProfile?: Profile | null;
+}) {
+    // Seed from server-resolved auth so the bar renders immediately for logged-in
+    // users (no flash / late mount).
+    const [user, setUser] = useState<AuthUser | null>(
+        initialUserId ? ({ id: initialUserId } as unknown as AuthUser) : null
+    );
+    const [profile, setProfile] = useState<Profile | null>(initialProfile);
     const [pendingFriendRequests, setPendingFriendRequests] = useState(0);
     const [pendingModerationCount, setPendingModerationCount] = useState(0);
     const [isPremium, setIsPremium] = useState(false);
