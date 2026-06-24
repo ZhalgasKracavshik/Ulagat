@@ -985,6 +985,8 @@ export const kk: Dictionary = {
         password: "Құпия сөз",
         forgotPassword: "Құпия сөзді ұмыттыңыз ба?",
         errorPrefix: "Қате:",
+        showPassword: "Құпия сөзді көрсету",
+        hidePassword: "Құпия сөзді жасыру",
         noAccount: "Аккаунтыңыз жоқ па? Тіркеліңіз",
         createAccount: "Аккаунт құру",
         joinCommunity: "Бүгін мектеп қауымдастығына қосылыңыз",

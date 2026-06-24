@@ -985,6 +985,8 @@ export const ru: Dictionary = {
         password: "Пароль",
         forgotPassword: "Забыли пароль?",
         errorPrefix: "Ошибка:",
+        showPassword: "Показать пароль",
+        hidePassword: "Скрыть пароль",
         noAccount: "Нет аккаунта? Зарегистрируйтесь",
         createAccount: "Создать аккаунт",
         joinCommunity: "Присоединяйтесь к школьному сообществу сегодня",

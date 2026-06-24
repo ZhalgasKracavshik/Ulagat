@@ -1019,6 +1019,8 @@ export const en: Dictionary = {
         password: "Password",
         forgotPassword: "Forgot password?",
         errorPrefix: "Error:",
+        showPassword: "Show password",
+        hidePassword: "Hide password",
         noAccount: "Don't have an account? Sign up",
         createAccount: "Create an account",
         joinCommunity: "Join the school community today",

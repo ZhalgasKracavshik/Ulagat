@@ -6,12 +6,14 @@ import { SubmitButton } from '@/components/auth/submit-button'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Eye, EyeOff } from 'lucide-react'
 import { useT } from '@/hooks/useT'
 
 export function LoginForm() {
     const { t } = useT()
     const [error, setError] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(false)
+    const [showPassword, setShowPassword] = useState(false)
     const router = useRouter()
 
     async function handleSubmit(formData: FormData) {
@@ -55,8 +57,12 @@ export function LoginForm() {
                                 name="email"
                                 type="email"
                                 autoComplete="email"
+                                inputMode="email"
+                                autoCapitalize="none"
+                                autoCorrect="off"
+                                spellCheck={false}
                                 required
-                                className="block w-full rounded-lg border border-border bg-gray-50 p-2.5 text-foreground focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+                                className="block h-11 w-full rounded-lg border border-border bg-gray-50 px-3 text-foreground focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
                                 placeholder="name@company.com"
                             />
                         </div>
@@ -65,16 +71,28 @@ export function LoginForm() {
                             <label htmlFor="password" className="mb-2 block text-sm font-medium text-foreground dark:text-white">
                                 {t('auth.password')}
                             </label>
-                            <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                autoComplete="current-password"
-                                required
-                                minLength={6}
-                                className="block w-full rounded-lg border border-border bg-gray-50 p-2.5 text-foreground focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-                                placeholder="••••••••"
-                            />
+                            <div className="relative">
+                                <input
+                                    id="password"
+                                    name="password"
+                                    type={showPassword ? 'text' : 'password'}
+                                    autoComplete="current-password"
+                                    required
+                                    minLength={6}
+                                    className="block h-11 w-full rounded-lg border border-border bg-gray-50 px-3 pr-11 text-foreground focus:border-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+                                    placeholder="••••••••"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword((v) => !v)}
+                                    className="absolute inset-y-0 right-0 flex h-11 w-11 items-center justify-center text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-r-lg"
+                                    aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
+                                    aria-pressed={showPassword}
+                                    tabIndex={-1}
+                                >
+                                    {showPassword ? <EyeOff className="h-5 w-5" aria-hidden /> : <Eye className="h-5 w-5" aria-hidden />}
+                                </button>
+                            </div>
                         </div>
                     </div>
 
