@@ -11,7 +11,7 @@ export function SubmitButton({ children }: { children: React.ReactNode }) {
         <button
             type="submit"
             disabled={pending}
-            className="inline-flex w-full items-center justify-center rounded-lg bg-primary px-8 py-2.5 text-center text-sm font-medium text-white hover:bg-primary/90 focus:outline-none focus:ring-4 focus:ring-primary/20 disabled:opacity-50 transition-all shadow-md"
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-8 text-sm font-semibold text-white shadow-lg shadow-sky-500/25 transition-all hover:shadow-xl hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed"
         >
             {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             {children}

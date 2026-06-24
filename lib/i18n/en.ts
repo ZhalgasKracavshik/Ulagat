@@ -38,6 +38,9 @@ export const en: Dictionary = {
         forStaff: "Teachers & staff",
         forStaffDesc: "Publish changes and reach the right classes in a minute.",
         ctaFinalTitle: "Ready to start your day clearer?",
+        mockToday: "Today",
+        mockChange: "Substitution",
+        mockCurrentLesson: "Lesson in progress",
         trust: "Built for BINOM, Astana · Data handled under KZ privacy law.",
     },
     nav: {

@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
     ShieldCheck,
@@ -39,6 +40,7 @@ export function Navbar() {
     const supabase = createClient();
     const { phase, ready: phaseReady, toggle } = useUIPhase();
     const { t } = useT();
+    const pathname = usePathname();
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -97,6 +99,11 @@ export function Navbar() {
     const primaryFull = [NAV.schedule, NAV.announcements, NAV.events, NAV.clubs];
     const primaryExpress = [NAV.announcements, NAV.schedule];
     const primary = isExpress ? primaryExpress : primaryFull;
+
+    // The landing and auth surfaces have their own full-bleed premium chrome
+    // (fixed light palette) — don't overlay the themed app header on them.
+    const CHROMELESS = ['/', '/login', '/register', '/forgot-password', '/reset-password'];
+    if (CHROMELESS.includes(pathname)) return null;
 
     return (
         <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

@@ -32,6 +32,9 @@ export const ru: Dictionary = {
         forStaff: "Учителя и завучи",
         forStaffDesc: "Опубликуйте изменения и оповестите нужные классы за минуту.",
         ctaFinalTitle: "Готовы начинать день яснее?",
+        mockToday: "Сегодня",
+        mockChange: "Замена",
+        mockCurrentLesson: "Идёт урок",
         trust: "Сделано для BINOM, Астана · Данные — по закону РК о персональных данных.",
     },
     nav: {
