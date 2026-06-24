@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Megaphone, Pin, PlusCircle, Users } from "lucide-react";
 import { CategoryBadge } from "@/components/announcements/CategoryBadge";
 import { DeleteAnnouncementButton } from "@/components/announcements/DeleteAnnouncementButton";
+import { EmptyState } from "@/components/EmptyState";
 import { getViewerGrades, announcementGradeFilter } from "@/lib/announcements/visibility";
 import {
     DEFAULT_LOCALE,
@@ -105,10 +106,12 @@ export default async function AnnouncementsPage() {
                 </div>
 
                 {announcements.length === 0 ? (
-                    <div className="bg-card rounded-xl p-12 text-center text-muted-foreground border border-dashed">
-                        <Megaphone className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                        {t('announcements.empty')}
-                    </div>
+                    <EmptyState
+                        icon={Megaphone}
+                        title={t('announcements.empty')}
+                        tint="bg-indigo-50 dark:bg-indigo-950/40"
+                        iconColor="text-indigo-400"
+                    />
                 ) : (
                     <div className="space-y-4">
                         {announcements.map((announcement) => (
