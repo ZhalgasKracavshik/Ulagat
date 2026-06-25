@@ -124,6 +124,24 @@ export function MobileTabBar({
 
     if (!user) return null;
 
+    // Focus mode: on editor / content-creation screens hide the bottom bar so
+    // the task owns the screen (one screen, one task). Top-level browsing keeps
+    // the bar; these are deliberate "I'm doing one thing now" routes.
+    const FOCUS_ROUTES = [
+        "/schedule/manage",
+        "/schedule/substitutions",
+        "/announcements/new",
+        "/events/new",
+        "/clubs/new",
+        "/lost-found/new",
+        "/olympiad/new",
+        "/services/new",
+        "/profile/edit",
+    ];
+    if (FOCUS_ROUTES.some((r) => pathname === r || pathname.startsWith(r + "/"))) {
+        return null;
+    }
+
     const role = profile?.role ?? null;
     const isStaff = role !== null && STAFF_ROLES.includes(role);
     const hasMoreBadge = pendingFriendRequests > 0 || (isStaff && pendingModerationCount > 0);
