@@ -70,3 +70,33 @@ DROP TRIGGER IF EXISTS enforce_event_registration ON public.event_registrations;
 CREATE TRIGGER enforce_event_registration
   BEFORE INSERT ON public.event_registrations
   FOR EACH ROW EXECUTE FUNCTION public.tr_enforce_event_registration();
+
+-- [MEDIUM] "Organizers can update own events" had no WITH CHECK, so an organizer
+-- (e.g. parliament) could flip their own event's status to 'active', bypassing
+-- moderation. Only staff (admin/moderator) or the service role may CHANGE an
+-- event's status; organizers keep editing all other fields.
+CREATE OR REPLACE FUNCTION public.tr_events_status_change_guard()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $function$
+BEGIN
+  IF NEW.status IS DISTINCT FROM OLD.status THEN
+    IF (auth.jwt() ->> 'role') <> 'service_role'
+       AND NOT EXISTS (
+         SELECT 1 FROM public.profiles
+         WHERE id = auth.uid() AND role IN ('admin', 'moderator')
+       )
+    THEN
+      RAISE EXCEPTION 'Only staff can change an event status' USING ERRCODE = 'check_violation';
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$function$;
+
+DROP TRIGGER IF EXISTS events_status_change_guard ON public.events;
+CREATE TRIGGER events_status_change_guard
+  BEFORE UPDATE ON public.events
+  FOR EACH ROW EXECUTE FUNCTION public.tr_events_status_change_guard();

@@ -73,24 +73,24 @@ export default async function NewEventPage() {
                         <form action={createEvent} className="space-y-6">
                             <div className="space-y-2">
                                 <Label htmlFor="title" className="text-sm font-semibold text-foreground">{t('eventNew.titleLabel')}</Label>
-                                <Input id="title" name="title" placeholder={t('eventNew.titlePlaceholder')} required className="h-11 border-border focus:ring-blue-500 rounded-lg shadow-sm" />
+                                <Input id="title" name="title" placeholder={t('eventNew.titlePlaceholder')} required className="h-12 border-border focus:ring-blue-500 rounded-lg shadow-sm" />
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="event_date" className="text-sm font-semibold text-foreground">{t('eventNew.dateTime')}</Label>
-                                    <Input id="event_date" name="event_date" type="datetime-local" required className="h-11 border-border focus:ring-blue-500 rounded-lg shadow-sm" />
+                                    <Input id="event_date" name="event_date" type="datetime-local" required className="h-12 border-border focus:ring-blue-500 rounded-lg shadow-sm" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="location" className="text-sm font-semibold text-foreground">{t('eventNew.locationLabel')}</Label>
-                                    <Input id="location" name="location" placeholder={t('eventNew.locationPlaceholder')} className="h-11 border-border focus:ring-blue-500 rounded-lg shadow-sm" />
+                                    <Input id="location" name="location" placeholder={t('eventNew.locationPlaceholder')} className="h-12 border-border focus:ring-blue-500 rounded-lg shadow-sm" />
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="registration_deadline" className="text-sm font-semibold text-foreground">{t('eventNew.regDeadline')}</Label>
-                                    <Input id="registration_deadline" name="registration_deadline" type="date" className="h-11 border-border focus:ring-blue-500 rounded-lg shadow-sm" />
+                                    <Input id="registration_deadline" name="registration_deadline" type="date" className="h-12 border-border focus:ring-blue-500 rounded-lg shadow-sm" />
                                     <p className="text-[11px] text-muted-foreground italic">{t('eventNew.regDeadlineHint')}</p>
                                 </div>
                                 <div className="space-y-2">
@@ -111,7 +111,7 @@ export default async function NewEventPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
                                 <div className="space-y-2">
                                     <Label htmlFor="max_students" className="text-sm font-semibold text-foreground">{t('eventNew.maxStudents')}</Label>
-                                    <Input id="max_students" name="max_students" type="number" min="1" placeholder={t('eventNew.maxStudentsPlaceholder')} className="h-11 border-border focus:ring-blue-500 rounded-lg shadow-sm" />
+                                    <Input id="max_students" name="max_students" type="number" min="1" placeholder={t('eventNew.maxStudentsPlaceholder')} className="h-12 border-border focus:ring-blue-500 rounded-lg shadow-sm" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label className="text-sm font-semibold text-foreground text-center block">{t('forms.coverImage')}</Label>
@@ -124,7 +124,7 @@ export default async function NewEventPage() {
                             <div className="space-y-2">
                                 <Label htmlFor="duration" className="text-sm font-semibold text-foreground">{t('eventNew.visibilityDuration')}</Label>
                                 <Select name="duration" defaultValue="30">
-                                    <SelectTrigger className="h-11 border-border rounded-lg shadow-sm">
+                                    <SelectTrigger className="h-12 border-border rounded-lg shadow-sm">
                                         <SelectValue placeholder={t('eventNew.visibilityPlaceholder')} />
                                     </SelectTrigger>
                                     <SelectContent>
