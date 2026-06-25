@@ -1,23 +1,11 @@
-import { createClub } from "../actions";
-import { ImageUpload } from "@/components/shared/ImageUpload";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ClubCreateForm } from "@/components/clubs/ClubCreateForm";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ShieldAlert } from "lucide-react";
-import { CLUB_CATEGORIES, CLUB_CREATOR_ROLES } from "@/lib/clubs";
-import { clubCategoryKey } from "@/lib/clubs-i18n";
+import { CLUB_CREATOR_ROLES } from "@/lib/clubs";
 import { cookies } from "next/headers";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
 
@@ -107,74 +95,7 @@ export default async function NewClubPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <form action={createClub} className="space-y-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="name" className="text-sm font-semibold text-foreground">{t('clubNew.nameLabel')}</Label>
-                                <Input id="name" name="name" placeholder={t('clubNew.namePlaceholder')} required maxLength={120} className="h-11 border-border focus:ring-violet-500 rounded-lg shadow-sm" />
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="category" className="text-sm font-semibold text-foreground">{t('clubNew.categoryLabel')}</Label>
-                                    <Select name="category" required>
-                                        <SelectTrigger id="category" className="h-11 border-border rounded-lg shadow-sm w-full">
-                                            <SelectValue placeholder={t('clubNew.categoryPlaceholder')} />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {CLUB_CATEGORIES.map((category) => (
-                                                <SelectItem key={category} value={category}>
-                                                    {t(clubCategoryKey(category))}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                {isStaff && (
-                                    <div className="space-y-2">
-                                        <Label htmlFor="leader_id" className="text-sm font-semibold text-foreground">{t('clubNew.leaderLabel')}</Label>
-                                        <Select name="leader_id">
-                                            <SelectTrigger id="leader_id" className="h-11 border-border rounded-lg shadow-sm w-full">
-                                                <SelectValue placeholder={t('clubNew.leaderPlaceholder')} />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {leaderCandidates.map((candidate) => (
-                                                    <SelectItem key={candidate.id} value={candidate.id}>
-                                                        {candidate.full_name || t('clubNew.unnamed')}
-                                                        {candidate.role === 'parliament'
-                                                            ? t('clubNew.leaderParliament')
-                                                            : candidate.grade
-                                                                ? `${t('clubNew.leaderGrade', { grade: candidate.grade })}${candidate.class_letter ?? ''}`
-                                                                : t('clubNew.leaderStudent')}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <p className="text-[11px] text-muted-foreground italic">{t('clubNew.leaderHint')}</p>
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="description" className="text-sm font-semibold text-foreground">{t('clubNew.descriptionLabel')}</Label>
-                                <Textarea
-                                    id="description"
-                                    name="description"
-                                    placeholder={t('clubNew.descriptionPlaceholder')}
-                                    className="min-h-[120px] border-border focus:ring-violet-500 resize-none rounded-lg shadow-sm"
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label className="text-sm font-semibold text-foreground">{t('clubNew.logoLabel')}</Label>
-                                <div className="border border-dashed border-border rounded-lg p-2 bg-muted/50">
-                                    <ImageUpload bucketName="club-logos" />
-                                </div>
-                            </div>
-
-                            <Button type="submit" className="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold text-lg h-14 rounded-xl shadow-lg transition-all active:scale-[0.98] mt-4">
-                                {t('clubNew.createClub')}
-                            </Button>
-                        </form>
+                        <ClubCreateForm isStaff={isStaff} leaderCandidates={leaderCandidates} />
                     </CardContent>
                 </Card>
             </div>
