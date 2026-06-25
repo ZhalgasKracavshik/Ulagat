@@ -271,7 +271,9 @@ export default async function ProfilePage({ params }: PageProps) {
                             {/* Social Links */}
                             {profile.social_links && profile.social_links.length > 0 && (
                                 <div className="flex items-center gap-3 pt-1 flex-wrap">
-                                    {(profile.social_links as SocialLink[]).map((link, idx) => (
+                                    {(profile.social_links as SocialLink[])
+                                        .filter((link) => /^https?:\/\//i.test(link.url ?? ""))
+                                        .map((link, idx) => (
                                         <a key={idx} href={link.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors bg-primary/5 px-3 py-1 rounded-full">
                                             <ExternalLink className="w-3 h-3" />
                                             {link.network.charAt(0).toUpperCase() + link.network.slice(1)}

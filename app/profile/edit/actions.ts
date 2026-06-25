@@ -42,8 +42,11 @@ export async function updateProfile(formData: FormData) {
     let social_links: { network?: string; url?: string }[] = [];
     try {
         social_links = JSON.parse(social_links_raw || "[]");
-        // Filter out empty URLs
-        social_links = social_links.filter((link) => link.url && link.url.trim() !== "");
+        // Keep only links with a safe http(s) URL. Blocks stored XSS via a
+        // javascript:/data: scheme in the rendered link href.
+        social_links = social_links
+            .map((link) => ({ ...link, url: (link.url ?? "").trim() }))
+            .filter((link) => /^https?:\/\//i.test(link.url));
     } catch {
         social_links = [];
     }
