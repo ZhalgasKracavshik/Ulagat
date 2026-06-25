@@ -165,10 +165,15 @@ export default async function LostFoundPage({ searchParams }: { searchParams: Pr
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {items.length > 0 ? (
-                    items.map((item) => {
+                    items.map((item, i) => {
                         const CategoryIcon = LOST_ITEM_CATEGORY_ICONS[item.category] ?? Package;
                         return (
-                            <Link key={item.id} href={`/lost-found/${item.id}`} className="group">
+                            <Link
+                                key={item.id}
+                                href={`/lost-found/${item.id}`}
+                                className="group block animate-in fade-in slide-in-from-bottom-2 duration-300 motion-reduce:animate-none"
+                                style={{ animationDelay: `${Math.min(i, 8) * 40}ms`, animationFillMode: 'backwards' }}
+                            >
                                 <Card className="h-full hover:shadow-xl transition-all border-teal-100 overflow-hidden">
                                     <div className="aspect-video w-full bg-muted relative">
                                         {item.photo_url ? (

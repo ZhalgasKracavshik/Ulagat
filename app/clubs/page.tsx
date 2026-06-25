@@ -135,10 +135,14 @@ export default async function ClubsPage({ searchParams }: { searchParams: Promis
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {clubs.length > 0 ? (
-                    clubs.map((club) => {
+                    clubs.map((club, i) => {
                         const CategoryIcon = CLUB_CATEGORY_ICONS[club.category] ?? Sparkles;
                         return (
-                            <Card key={club.id} className="group hover:shadow-xl transition-all border-violet-100 overflow-hidden">
+                            <Card
+                                key={club.id}
+                                style={{ animationDelay: `${Math.min(i, 8) * 40}ms`, animationFillMode: 'backwards' }}
+                                className="group hover:shadow-xl transition-all border-violet-100 overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300 motion-reduce:animate-none"
+                            >
                                 <div className="aspect-video w-full bg-muted relative">
                                     {club.logo_url ? (
                                         // eslint-disable-next-line @next/next/no-img-element

@@ -158,10 +158,14 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {events && events.length > 0 ? (
-                    (events as EventRow[]).map((event) => {
+                    (events as EventRow[]).map((event, i) => {
                         const enrolled = registrationCounts[event.id] || 0;
                         return (
-                            <Card key={event.id} className="group hover:shadow-xl transition-all border-blue-100 overflow-hidden">
+                            <Card
+                                key={event.id}
+                                style={{ animationDelay: `${Math.min(i, 8) * 40}ms`, animationFillMode: 'backwards' }}
+                                className="group hover:shadow-xl transition-all border-blue-100 overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300 motion-reduce:animate-none"
+                            >
                                 <div className="aspect-video w-full bg-muted relative">
                                     {event.image_url ? (
                                         <img src={event.image_url} alt={event.title} className="object-cover w-full h-full" />

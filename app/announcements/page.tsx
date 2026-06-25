@@ -114,10 +114,11 @@ export default async function AnnouncementsPage() {
                     />
                 ) : (
                     <div className="space-y-4">
-                        {announcements.map((announcement) => (
+                        {announcements.map((announcement, i) => (
                             <Card
                                 key={announcement.id}
-                                className={`border-0 shadow-md overflow-hidden ${announcement.pinned ? 'ring-2 ring-indigo-200' : ''}`}
+                                style={{ animationDelay: `${Math.min(i, 8) * 40}ms`, animationFillMode: 'backwards' }}
+                                className={`border-0 shadow-md overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300 motion-reduce:animate-none ${announcement.pinned ? 'ring-2 ring-indigo-200' : ''}`}
                             >
                                 <CardContent className="p-6 space-y-3">
                                     <div className="flex items-start justify-between gap-3">
