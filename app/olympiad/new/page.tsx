@@ -73,14 +73,14 @@ export default async function NewMaterialPage() {
                         <form action={addStudyMaterial} className="space-y-6">
                             <div className="space-y-2">
                                 <Label htmlFor="title" className="text-sm font-semibold text-foreground">{t('olympiadNew.titleLabel')}</Label>
-                                <Input id="title" name="title" placeholder={t('olympiadNew.titlePlaceholder')} required className="h-11 border-border focus:ring-indigo-500 rounded-lg shadow-sm" />
+                                <Input id="title" name="title" placeholder={t('olympiadNew.titlePlaceholder')} required className="h-12 border-border focus:ring-indigo-500 rounded-lg shadow-sm" />
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="category" className="text-sm font-semibold text-foreground">{t('olympiadNew.subject')}</Label>
                                     <Select name="category" required>
-                                        <SelectTrigger className="h-11 border-border rounded-lg shadow-sm">
+                                        <SelectTrigger className="h-12 border-border rounded-lg shadow-sm">
                                             <SelectValue placeholder={t('olympiadNew.subjectPlaceholder')} />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -97,7 +97,7 @@ export default async function NewMaterialPage() {
                                 <div className="space-y-2">
                                     <Label htmlFor="difficulty" className="text-sm font-semibold text-foreground">{t('olympiadNew.difficulty')}</Label>
                                     <Select name="difficulty" defaultValue="medium">
-                                        <SelectTrigger className="h-11 border-border rounded-lg shadow-sm">
+                                        <SelectTrigger className="h-12 border-border rounded-lg shadow-sm">
                                             <SelectValue placeholder={t('olympiadNew.difficultyPlaceholder')} />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -112,7 +112,7 @@ export default async function NewMaterialPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="year" className="text-sm font-semibold text-foreground">{t('olympiadNew.year')}</Label>
-                                    <Input id="year" name="year" type="number" min={1990} max={2100} placeholder={t('olympiadNew.yearPlaceholder')} className="h-11 border-border focus:ring-indigo-500 rounded-lg shadow-sm" />
+                                    <Input id="year" name="year" type="number" min={1990} max={2100} placeholder={t('olympiadNew.yearPlaceholder')} className="h-12 border-border focus:ring-indigo-500 rounded-lg shadow-sm" />
                                     <p className="text-[11px] text-muted-foreground italic">{t('olympiadNew.yearHint')}</p>
                                 </div>
                                 <div className="space-y-2">
@@ -124,7 +124,7 @@ export default async function NewMaterialPage() {
 
                             <div className="space-y-2">
                                 <Label htmlFor="url" className="text-sm font-semibold text-foreground">{t('olympiadNew.url')}</Label>
-                                <Input id="url" name="url" type="url" placeholder="https://docs.google.com/..." className="h-11 border-border focus:ring-indigo-500 rounded-lg shadow-sm" />
+                                <Input id="url" name="url" type="url" placeholder="https://docs.google.com/..." className="h-12 border-border focus:ring-indigo-500 rounded-lg shadow-sm" />
                                 <p className="text-[11px] text-muted-foreground italic">{t('olympiadNew.urlHint')}</p>
                             </div>
 

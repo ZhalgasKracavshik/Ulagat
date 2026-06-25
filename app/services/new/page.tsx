@@ -75,14 +75,14 @@ export default async function NewServicePage() {
                         <form action={createService} className="space-y-6">
                             <div className="space-y-2">
                                 <Label htmlFor="title" className="text-sm font-semibold text-foreground">{t('serviceNew.titleLabel')}</Label>
-                                <Input id="title" name="title" placeholder={t('serviceNew.titlePlaceholder')} required className="h-11 border-border focus:ring-indigo-500 rounded-lg shadow-sm" />
+                                <Input id="title" name="title" placeholder={t('serviceNew.titlePlaceholder')} required className="h-12 border-border focus:ring-indigo-500 rounded-lg shadow-sm" />
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="category" className="text-sm font-semibold text-foreground">{t('serviceNew.categoryLabel')}</Label>
                                     <Select name="category" required>
-                                        <SelectTrigger className="h-11 border-border rounded-lg shadow-sm">
+                                        <SelectTrigger className="h-12 border-border rounded-lg shadow-sm">
                                             <SelectValue placeholder={t('serviceNew.categoryPlaceholder')} />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -96,7 +96,7 @@ export default async function NewServicePage() {
                                 <div className="space-y-2">
                                     <Label htmlFor="duration" className="text-sm font-semibold text-foreground">{t('serviceNew.durationLabel')}</Label>
                                     <Select name="duration" defaultValue="7">
-                                        <SelectTrigger className="h-11 border-border rounded-lg shadow-sm">
+                                        <SelectTrigger className="h-12 border-border rounded-lg shadow-sm">
                                             <SelectValue placeholder={t('serviceNew.durationPlaceholder')} />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -111,7 +111,7 @@ export default async function NewServicePage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
                                 <div className="space-y-2">
                                     <Label htmlFor="price" className="text-sm font-semibold text-foreground">{t('serviceNew.priceLabel')}</Label>
-                                    <Input id="price" name="price" type="number" placeholder="2000" min="0" required className="h-11 border-border rounded-lg shadow-sm" />
+                                    <Input id="price" name="price" type="number" placeholder="2000" min="0" required className="h-12 border-border rounded-lg shadow-sm" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label className="text-sm font-semibold text-foreground">{t('forms.coverImage')}</Label>

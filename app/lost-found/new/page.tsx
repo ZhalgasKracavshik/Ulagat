@@ -98,14 +98,14 @@ export default async function NewLostItemPage() {
 
                             <div className="space-y-2">
                                 <Label htmlFor="title" className="text-sm font-semibold text-foreground">{t('lostFoundNew.titleLabel')}</Label>
-                                <Input id="title" name="title" placeholder={t('lostFoundNew.titlePlaceholder')} required maxLength={120} className="h-11 border-border focus:ring-teal-500 rounded-lg shadow-sm" />
+                                <Input id="title" name="title" placeholder={t('lostFoundNew.titlePlaceholder')} required maxLength={120} className="h-12 border-border focus:ring-teal-500 rounded-lg shadow-sm" />
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <Label htmlFor="category" className="text-sm font-semibold text-foreground">{t('lostFoundNew.categoryLabel')}</Label>
                                     <Select name="category" required>
-                                        <SelectTrigger id="category" className="h-11 border-border rounded-lg shadow-sm w-full">
+                                        <SelectTrigger id="category" className="h-12 border-border rounded-lg shadow-sm w-full">
                                             <SelectValue placeholder={t('lostFoundNew.categoryPlaceholder')} />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -119,7 +119,7 @@ export default async function NewLostItemPage() {
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="location" className="text-sm font-semibold text-foreground">{t('lostFoundNew.locationLabel')}</Label>
-                                    <Input id="location" name="location" placeholder={t('lostFoundNew.locationPlaceholder')} maxLength={160} className="h-11 border-border focus:ring-teal-500 rounded-lg shadow-sm" />
+                                    <Input id="location" name="location" placeholder={t('lostFoundNew.locationPlaceholder')} maxLength={160} className="h-12 border-border focus:ring-teal-500 rounded-lg shadow-sm" />
                                 </div>
                             </div>
 
