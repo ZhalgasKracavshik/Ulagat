@@ -9,14 +9,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { Send } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Send, ChevronDown, Check } from "lucide-react";
 import { useT } from "@/hooks/useT";
 import type { AnnouncementCategory } from "@/types";
 
@@ -39,7 +33,10 @@ export function AnnouncementForm() {
     const [selectedGrades, setSelectedGrades] = useState<number[]>([]);
     const [pinned, setPinned] = useState(false);
     const [expiresAt, setExpiresAt] = useState('');
+    const [categoryOpen, setCategoryOpen] = useState(false);
     const [isSubmitting, startSubmitting] = useTransition();
+
+    const categoryLabel = t(CATEGORY_OPTIONS.find((c) => c.value === category)?.labelKey ?? 'announcementForm.catGeneral');
 
     const toggleGrade = (grade: number) => {
         setSelectedGrades((prev) =>
@@ -101,6 +98,7 @@ export function AnnouncementForm() {
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder={t('announcementForm.titlePlaceholder')}
                     maxLength={200}
+                    className="h-12"
                 />
             </div>
 
@@ -119,16 +117,14 @@ export function AnnouncementForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label className="text-sm font-semibold text-foreground">{t('announcementForm.category')}</Label>
-                    <Select value={category} onValueChange={(v) => setCategory(v as AnnouncementCategory)}>
-                        <SelectTrigger className="w-full">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {CATEGORY_OPTIONS.map((c) => (
-                                <SelectItem key={c.value} value={c.value}>{t(c.labelKey)}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <button
+                        type="button"
+                        onClick={() => setCategoryOpen(true)}
+                        className="flex h-12 w-full items-center justify-between gap-3 rounded-lg border border-border bg-background px-3 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                    >
+                        <span className="truncate text-base font-medium text-foreground">{categoryLabel}</span>
+                        <ChevronDown className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
+                    </button>
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="ann_expires" className="text-sm font-semibold text-foreground">
@@ -139,6 +135,7 @@ export function AnnouncementForm() {
                         type="date"
                         value={expiresAt}
                         onChange={(e) => setExpiresAt(e.target.value)}
+                        className="h-12"
                     />
                     <p className="text-xs text-muted-foreground">{t('announcementForm.visibleUntilHint')}</p>
                 </div>
@@ -197,6 +194,34 @@ export function AnnouncementForm() {
                 <Send className="w-5 h-5" />
                 {isSubmitting ? t('announcementForm.submitting') : t('announcementForm.submit')}
             </Button>
+
+            {/* Category bottom sheet */}
+            <Sheet open={categoryOpen} onOpenChange={setCategoryOpen}>
+                <SheetContent>
+                    <SheetHeader>
+                        <SheetTitle>{t('announcementForm.category')}</SheetTitle>
+                    </SheetHeader>
+                    <div className="space-y-1 pt-1">
+                        {CATEGORY_OPTIONS.map((c) => {
+                            const active = category === c.value;
+                            return (
+                                <button
+                                    key={c.value}
+                                    type="button"
+                                    onClick={() => {
+                                        setCategory(c.value);
+                                        setCategoryOpen(false);
+                                    }}
+                                    className={`flex h-14 w-full items-center gap-3 rounded-xl px-4 text-left text-base transition-colors ${active ? 'bg-indigo-50 font-semibold dark:bg-indigo-950/40' : 'hover:bg-muted'}`}
+                                >
+                                    {t(c.labelKey)}
+                                    {active && <Check className="ml-auto h-5 w-5 shrink-0 text-indigo-600" aria-hidden />}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </SheetContent>
+            </Sheet>
         </div>
     );
 }
