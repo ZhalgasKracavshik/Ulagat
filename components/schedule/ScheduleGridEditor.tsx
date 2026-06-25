@@ -7,13 +7,12 @@ import { deleteScheduleCell, upsertScheduleCell } from "@/app/schedule/manage/ac
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+} from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -254,7 +253,7 @@ export function ScheduleGridEditor() {
                                                             type="button"
                                                             onClick={() => openCell(d.value, bell.period)}
                                                             disabled={!loaded || isLoading}
-                                                            className={`w-full min-h-[56px] rounded-lg border p-2 text-left transition-colors disabled:opacity-50 ${entry
+                                                            className={`w-full min-h-[56px] rounded-lg border p-2 text-left transition-all active:scale-[0.98] disabled:opacity-50 ${entry
                                                                 ? 'border-sky-200 bg-sky-50/60 dark:bg-sky-950/60 hover:bg-sky-100'
                                                                 : 'border-dashed border-border hover:border-sky-300 hover:bg-sky-50/40'
                                                                 }`}
@@ -286,13 +285,13 @@ export function ScheduleGridEditor() {
                 </Card>
             )}
 
-            <Dialog open={draft !== null} onOpenChange={(open) => !open && setDraft(null)}>
-                <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                        <DialogTitle>
+            <Sheet open={draft !== null} onOpenChange={(open) => !open && setDraft(null)}>
+                <SheetContent>
+                    <SheetHeader>
+                        <SheetTitle>
                             {draft?.existingId ? t('scheduleManage.editLesson') : t('scheduleManage.addLesson')}
-                        </DialogTitle>
-                        <DialogDescription>
+                        </SheetTitle>
+                        <SheetDescription>
                             {draftBell
                                 ? t('scheduleManage.dialogSlotTime')
                                     .replace('{day}', draftDayLabel)
@@ -303,83 +302,92 @@ export function ScheduleGridEditor() {
                                 : t('scheduleManage.dialogSlot')
                                     .replace('{day}', draftDayLabel)
                                     .replace('{period}', String(draft?.period ?? ''))}
-                        </DialogDescription>
-                    </DialogHeader>
+                        </SheetDescription>
+                    </SheetHeader>
 
                     {draft && (
-                        <div className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="cell_subject" className="text-sm font-semibold text-foreground">{t('scheduleManage.subject')}</Label>
+                        <div className="space-y-4 overflow-y-auto pt-1">
+                            <div className="space-y-1.5">
+                                <Label htmlFor="cell_subject" className="text-xs font-medium text-muted-foreground">{t('scheduleManage.subject')}</Label>
                                 <Input
                                     id="cell_subject"
                                     value={draft.subject}
                                     onChange={(e) => setDraft({ ...draft, subject: e.target.value })}
                                     placeholder={t('scheduleManage.subjectPlaceholder')}
                                     autoFocus
+                                    className="h-12"
                                 />
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="cell_teacher" className="text-sm font-semibold text-foreground">{t('scheduleManage.teacher')}</Label>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="cell_teacher" className="text-xs font-medium text-muted-foreground">{t('scheduleManage.teacher')}</Label>
                                     <Input
                                         id="cell_teacher"
                                         value={draft.teacher_name}
                                         onChange={(e) => setDraft({ ...draft, teacher_name: e.target.value })}
                                         placeholder={t('scheduleManage.teacherPlaceholder')}
+                                        className="h-12"
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="cell_room" className="text-sm font-semibold text-foreground">{t('scheduleManage.room')}</Label>
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="cell_room" className="text-xs font-medium text-muted-foreground">{t('scheduleManage.room')}</Label>
                                     <Input
                                         id="cell_room"
                                         value={draft.room}
                                         onChange={(e) => setDraft({ ...draft, room: e.target.value })}
                                         placeholder={t('scheduleManage.roomPlaceholder')}
+                                        className="h-12"
                                     />
                                 </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="cell_valid_from" className="text-sm font-semibold text-foreground">{t('scheduleManage.validFrom')}</Label>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="cell_valid_from" className="text-xs font-medium text-muted-foreground">{t('scheduleManage.validFrom')}</Label>
                                     <Input
                                         id="cell_valid_from"
                                         type="date"
                                         value={draft.valid_from}
                                         onChange={(e) => setDraft({ ...draft, valid_from: e.target.value })}
+                                        className="h-12"
                                     />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="cell_valid_until" className="text-sm font-semibold text-foreground">{t('scheduleManage.validUntil')}</Label>
+                                <div className="space-y-1.5">
+                                    <Label htmlFor="cell_valid_until" className="text-xs font-medium text-muted-foreground">{t('scheduleManage.validUntil')}</Label>
                                     <Input
                                         id="cell_valid_until"
                                         type="date"
                                         value={draft.valid_until}
                                         onChange={(e) => setDraft({ ...draft, valid_until: e.target.value })}
+                                        className="h-12"
                                     />
                                 </div>
                             </div>
                         </div>
                     )}
 
-                    <DialogFooter className="gap-2 sm:gap-0">
+                    <div className="flex flex-col gap-2 pt-1">
+                        <Button
+                            onClick={handleSave}
+                            disabled={isSaving}
+                            className="h-12 w-full gap-2 bg-blue-600 transition-transform hover:bg-blue-700 active:scale-[0.99]"
+                        >
+                            <Save className="w-4 h-4" />
+                            {isSaving ? t('scheduleManage.saving') : t('scheduleManage.save')}
+                        </Button>
                         {draft?.existingId && (
                             <Button
                                 variant="outline"
                                 onClick={handleDelete}
                                 disabled={isSaving}
-                                className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 gap-2 mr-auto"
+                                className="h-12 w-full gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
                             >
                                 <Trash2 className="w-4 h-4" />
                                 {t('scheduleManage.delete')}
                             </Button>
                         )}
-                        <Button onClick={handleSave} disabled={isSaving} className="gap-2 bg-blue-600 hover:bg-blue-700">
-                            <Save className="w-4 h-4" />
-                            {isSaving ? t('scheduleManage.saving') : t('scheduleManage.save')}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                    </div>
+                </SheetContent>
+            </Sheet>
         </div>
     );
 }
