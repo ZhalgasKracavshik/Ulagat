@@ -15,6 +15,7 @@ import {
     type LucideIcon,
 } from "lucide-react";
 import { NAV, CAREER_NAV_ROLES, INVITE_PARENT_ROLES } from "@/lib/nav-config";
+import { FEATURES } from "@/lib/features";
 import { useT } from "@/hooks/useT";
 import type { Profile } from "@/types";
 
@@ -66,7 +67,7 @@ export function PersonalCabinet({
         bg: "bg-sky-50 dark:bg-sky-950/40",
     });
 
-    if (CAREER_NAV_ROLES.includes(role)) {
+    if (FEATURES.career && CAREER_NAV_ROLES.includes(role)) {
         actions.push({
             key: "career",
             href: NAV.career.href,
@@ -100,15 +101,17 @@ export function PersonalCabinet({
         });
     }
 
-    actions.push({
-        key: "premium",
-        href: NAV.premium.href,
-        label: isPremium ? t("cabinet.premium") : t("cabinet.goPremium"),
-        hint: isPremium ? t("cabinet.managePremiumHint") : t("hints.premium"),
-        icon: Sparkles,
-        color: "text-amber-500",
-        bg: "bg-amber-50 dark:bg-amber-950/40",
-    });
+    if (FEATURES.premium) {
+        actions.push({
+            key: "premium",
+            href: NAV.premium.href,
+            label: isPremium ? t("cabinet.premium") : t("cabinet.goPremium"),
+            hint: isPremium ? t("cabinet.managePremiumHint") : t("hints.premium"),
+            icon: Sparkles,
+            color: "text-amber-500",
+            bg: "bg-amber-50 dark:bg-amber-950/40",
+        });
+    }
 
     actions.push({
         key: "guide",
@@ -168,7 +171,7 @@ export function PersonalCabinet({
                                         {t("cabinet.class")} {classLabel}
                                     </Badge>
                                 )}
-                                {isPremium && (
+                                {FEATURES.premium && isPremium && (
                                     <Badge className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-200 hover:bg-amber-100 border-amber-200 gap-1">
                                         <Sparkles className="w-3 h-3" />
                                         {t("cabinet.premium")}

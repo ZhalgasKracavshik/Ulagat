@@ -15,6 +15,7 @@ import {
     Building2,
 } from "lucide-react";
 import { almatyTodayIso } from "@/lib/schedule/almaty-time";
+import { FEATURES } from "@/lib/features";
 import {
     entTotal,
     hasAnyScore,
@@ -72,6 +73,8 @@ export default async function CareerPage({
 }: {
     searchParams: Promise<{ user?: string; child?: string }>;
 }) {
+    if (!FEATURES.career) redirect("/home");
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect("/login");

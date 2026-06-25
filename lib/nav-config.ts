@@ -15,6 +15,7 @@ import {
     Star,
 } from "lucide-react";
 import type { UserRole } from "@/types";
+import { FEATURES } from "@/lib/features";
 
 /**
  * Single source of truth for the signature icon + colour system.
@@ -209,7 +210,7 @@ export const MORE_GROUPS: NavGroup[] = [
     },
     {
         label: "Resources",
-        items: [NAV.bulletin, NAV.prep, NAV.lostFound, NAV.career],
+        items: [NAV.bulletin, NAV.prep, NAV.lostFound, ...(FEATURES.career ? [NAV.career] : [])],
     },
     {
         label: "Help",

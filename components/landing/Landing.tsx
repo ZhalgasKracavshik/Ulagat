@@ -21,6 +21,7 @@ import {
     type LucideIcon,
 } from "lucide-react";
 import { useT } from "@/hooks/useT";
+import { FEATURES as FLAGS } from "@/lib/features";
 
 /**
  * Premium, animated, light "EdTech" landing. Intentionally uses a fixed light
@@ -46,7 +47,10 @@ const FEATURES: Feature[] = [
     { icon: Trophy, titleKey: "landing.f3Title", descKey: "landing.f3Desc", color: "text-amber-600", tint: "bg-amber-100" },
     { icon: Users2, titleKey: "landing.f4Title", descKey: "landing.f4Desc", color: "text-violet-600", tint: "bg-violet-100" },
     { icon: Crown, titleKey: "landing.f5Title", descKey: "landing.f5Desc", color: "text-yellow-600", tint: "bg-yellow-100" },
-    { icon: GraduationCap, titleKey: "landing.f6Title", descKey: "landing.f6Desc", color: "text-rose-600", tint: "bg-rose-100" },
+    // Career tracker is hidden for the pilot (see lib/features), so don't advertise it.
+    ...(FLAGS.career
+        ? [{ icon: GraduationCap, titleKey: "landing.f6Title", descKey: "landing.f6Desc", color: "text-rose-600", tint: "bg-rose-100" }]
+        : []),
 ];
 
 const AUDIENCES: { icon: LucideIcon; titleKey: string; descKey: string; color: string; tint: string }[] = [

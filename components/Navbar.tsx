@@ -22,6 +22,7 @@ import { useUIPhase } from "@/hooks/useUIPhase";
 import { useT } from "@/contexts/LocaleContext";
 import { resolvePlan } from "@/lib/subscription-plan";
 import { NAV, MORE_GROUPS, canSee, STAFF_ROLES } from "@/lib/nav-config";
+import { FEATURES } from "@/lib/features";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -83,6 +84,10 @@ export function Navbar({
         fetchUserData();
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            // The server seed + the direct fetchUserData() above already cover the
+            // first load; skip Supabase's synchronous INITIAL_SESSION event so we
+            // don't run the whole fetch cascade twice on mount.
+            if (_event === 'INITIAL_SESSION') return;
             setUser(session?.user ?? null);
             if (!session) {
                 setProfile(null);
@@ -195,12 +200,14 @@ export function Navbar({
                                         <DropdownMenuLabel className="text-[11px] uppercase tracking-wide text-muted-foreground">
                                             {t("nav.account")}
                                         </DropdownMenuLabel>
-                                        <DropdownMenuItem asChild>
-                                            <Link href={NAV.premium.href} className="cursor-pointer">
-                                                <Sparkles className="mr-2 h-4 w-4 text-amber-500" />
-                                                <span>{isPremium ? t("nav.premium") : t("nav.upgrade")}</span>
-                                            </Link>
-                                        </DropdownMenuItem>
+                                        {FEATURES.premium && (
+                                            <DropdownMenuItem asChild>
+                                                <Link href={NAV.premium.href} className="cursor-pointer">
+                                                    <Sparkles className="mr-2 h-4 w-4 text-amber-500" />
+                                                    <span>{isPremium ? t("nav.premium") : t("nav.upgrade")}</span>
+                                                </Link>
+                                            </DropdownMenuItem>
+                                        )}
                                         <DropdownMenuItem asChild>
                                             <Link href="/settings" className="cursor-pointer">
                                                 <Settings className="mr-2 h-4 w-4 text-muted-foreground" />
@@ -238,18 +245,20 @@ export function Navbar({
                 <div className="ml-auto flex items-center gap-2 sm:gap-3">
                     {user ? (
                         <>
-                            {/* Upgrade/Premium pill — subtle, lg+ only (also in More menu). */}
-                            <Link
-                                href={NAV.premium.href}
-                                className={
-                                    isPremium
-                                        ? "hidden lg:flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 dark:bg-amber-950/40 px-3 py-1 text-xs font-semibold text-amber-700"
-                                        : "hidden lg:flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 dark:bg-amber-950/40 px-3 py-1 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-100"
-                                }
-                            >
-                                <Sparkles className="w-3.5 h-3.5" />
-                                <span>{isPremium ? t("nav.premium") : t("nav.upgrade")}</span>
-                            </Link>
+            {/* Upgrade/Premium pill — subtle, lg+ only (also in More menu). */}
+                            {FEATURES.premium && (
+                                <Link
+                                    href={NAV.premium.href}
+                                    className={
+                                        isPremium
+                                            ? "hidden lg:flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 dark:bg-amber-950/40 px-3 py-1 text-xs font-semibold text-amber-700"
+                                            : "hidden lg:flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 dark:bg-amber-950/40 px-3 py-1 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-100"
+                                    }
+                                >
+                                    <Sparkles className="w-3.5 h-3.5" />
+                                    <span>{isPremium ? t("nav.premium") : t("nav.upgrade")}</span>
+                                </Link>
+                            )}
 
                             {/* Reputation pill */}
                             <div className="hidden sm:flex items-center gap-1 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 rounded-full border border-amber-200">

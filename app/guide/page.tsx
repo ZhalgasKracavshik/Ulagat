@@ -15,6 +15,7 @@ import {
     type NavDestination,
     type NavRole,
 } from "@/lib/nav-config";
+import { FEATURES } from "@/lib/features";
 import {
     Sparkles,
     ShieldCheck,
@@ -81,7 +82,7 @@ export default async function GuidePage() {
             label: t("guide.grow"),
             intro: t("guide.growIntro"),
             items: [
-                ...(showCareer ? [NAV.career] : []),
+                ...(FEATURES.career && showCareer ? [NAV.career] : []),
                 NAV.prep,
                 NAV.achievements,
             ],
@@ -94,7 +95,7 @@ export default async function GuidePage() {
         {
             label: t("guide.account"),
             intro: t("guide.accountIntro"),
-            items: [NAV.cabinet, NAV.premium],
+            items: [NAV.cabinet, ...(FEATURES.premium ? [NAV.premium] : [])],
         },
     ];
 

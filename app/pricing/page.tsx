@@ -5,6 +5,7 @@ import { Sparkles } from "lucide-react";
 import { PricingCards } from "@/components/pricing/PricingCards";
 import { CheckoutStatusToast } from "@/components/pricing/CheckoutStatusToast";
 import { getUserPlan } from "@/lib/subscription";
+import { FEATURES } from "@/lib/features";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
@@ -14,6 +15,8 @@ export default async function PricingPage({
 }: {
     searchParams: Promise<{ status?: string }>;
 }) {
+    if (!FEATURES.premium) redirect("/home");
+
     const { status } = await searchParams;
     const supabase = await createClient();
 

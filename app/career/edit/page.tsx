@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ENT_PROFILE_SUBJECTS, ENT_MANDATORY_SUBJECTS, ENT_MAX_TOTAL } from "@/data/universities";
 import { CAREER_VIEWER_ROLES } from "@/lib/career";
+import { FEATURES } from "@/lib/features";
 import { cookies } from "next/headers";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
 import type { CareerTracker, EntScores } from "@/types";
@@ -27,6 +28,8 @@ export default async function CareerEditPage({
 }: {
     searchParams: Promise<{ error?: string }>;
 }) {
+    if (!FEATURES.career) redirect("/home");
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) redirect("/login");

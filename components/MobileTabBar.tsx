@@ -15,6 +15,7 @@ import {
     STAFF_ROLES,
     type NavDestination,
 } from "@/lib/nav-config";
+import { FEATURES } from "@/lib/features";
 import {
     Home,
     CalendarDays,
@@ -88,6 +89,9 @@ export function MobileTabBar({
         fetchUserData();
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            // Seed + direct fetchUserData() cover first load; skip the synchronous
+            // INITIAL_SESSION event to avoid a duplicate fetch cascade on mount.
+            if (_event === 'INITIAL_SESSION') return;
             setUser(session?.user ?? null);
             if (!session) {
                 setProfile(null);
@@ -255,12 +259,14 @@ export function MobileTabBar({
                                 {t("nav.account")}
                             </h2>
                             <div className="grid grid-cols-2 gap-2">
-                                <OverlayTile
-                                    href={NAV.premium.href}
-                                    label={isPremium ? t("nav.premium") : t("nav.upgrade")}
-                                    icon={Sparkles}
-                                    color="text-amber-500"
-                                />
+                                {FEATURES.premium && (
+                                    <OverlayTile
+                                        href={NAV.premium.href}
+                                        label={isPremium ? t("nav.premium") : t("nav.upgrade")}
+                                        icon={Sparkles}
+                                        color="text-amber-500"
+                                    />
+                                )}
                                 <OverlayTile
                                     href="/settings"
                                     label={t("nav.settings")}
