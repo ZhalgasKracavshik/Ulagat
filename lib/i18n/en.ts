@@ -1315,6 +1315,12 @@ export const en: Dictionary = {
         diffEasy: "Easy",
         diffMedium: "Medium",
         diffHard: "Hard",
+        // User management consolidation.
+        manageUsers: "Users & roles",
+        backToDashboard: "Admin panel",
+        confirmRoleTitle: "Confirm role change",
+        confirmRoleBody: "You are assigning the \"{role}\" role to {name}. This role grants elevated access to the control panel. Continue?",
+        confirmRoleGrant: "Grant role",
     },
     // Achievement review queue.
     achievementReview: {

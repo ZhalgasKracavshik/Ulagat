@@ -2,11 +2,10 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShieldAlert, Users, ListFilter, Award } from "lucide-react";
+import { ShieldAlert, Users, ListFilter, Award, Calendar } from "lucide-react";
 import { ServiceReviewTable } from "@/components/admin/ServiceReviewTable";
 import { EventReviewTable } from "@/components/admin/EventReviewTable";
 import { MaterialReviewTable } from "@/components/admin/MaterialReviewTable";
-import { UserManagementTable } from "@/components/admin/UserManagementTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -77,13 +76,6 @@ export default async function AdminPage() {
         .select('*, profiles:owner_id(full_name, role)')
         .order('created_at', { ascending: false });
 
-    // Fetch All Users
-    const { data: allUsers } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100);
-
     return (
         <div className="container mx-auto py-8 space-y-8 px-4 md:px-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -96,14 +88,25 @@ export default async function AdminPage() {
                         <p className="text-muted-foreground">{t('admin.dashboardSubtitle')}</p>
                     </div>
                 </div>
-                {/* Achievement verification lives at /achievements/review (also accessible to parliament) */}
-                <Link href="/achievements/review">
-                    <Button variant="outline" className="gap-2 font-bold">
-                        <Award className="w-4 h-4 text-amber-500" />
-                        {t('admin.reviewAchievements')}
-                        {(pendingAchievements ?? 0) > 0 && <Badge className="bg-red-500">{pendingAchievements}</Badge>}
-                    </Button>
-                </Link>
+                <div className="flex flex-wrap items-center gap-2">
+                    {/* User management is admin-only and lives on its own page (/admin/users). */}
+                    {isAdmin && (
+                        <Link href="/admin/users">
+                            <Button variant="outline" className="gap-2 font-bold">
+                                <Users className="w-4 h-4 text-primary" />
+                                {t('admin.manageUsers')}
+                            </Button>
+                        </Link>
+                    )}
+                    {/* Achievement verification lives at /achievements/review (also accessible to parliament) */}
+                    <Link href="/achievements/review">
+                        <Button variant="outline" className="gap-2 font-bold">
+                            <Award className="w-4 h-4 text-amber-500" />
+                            {t('admin.reviewAchievements')}
+                            {(pendingAchievements ?? 0) > 0 && <Badge className="bg-red-500">{pendingAchievements}</Badge>}
+                        </Button>
+                    </Link>
+                </div>
             </div>
 
             {/* Stats Cards */}
@@ -129,6 +132,7 @@ export default async function AdminPage() {
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">{t('admin.events')}</CardTitle>
+                        <Calendar className="w-4 h-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{eventCount || 0}</div>
@@ -149,7 +153,6 @@ export default async function AdminPage() {
                         {t('admin.tabMaterials')} {pendingMaterials && pendingMaterials.length > 0 && <Badge className="ml-2 bg-red-500">{pendingMaterials.length}</Badge>}
                     </TabsTrigger>
                     <TabsTrigger value="all-services" className="flex-1 md:flex-none">{t('admin.tabAllServices')}</TabsTrigger>
-                    <TabsTrigger value="users" className="flex-1 md:flex-none">{t('admin.tabUsers')}</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="services" className="space-y-4">
@@ -240,18 +243,6 @@ export default async function AdminPage() {
                             ) : (
                                 <p className="text-center py-8 text-muted-foreground">{t('admin.noServices')}</p>
                             )}
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-
-                <TabsContent value="users">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>{t('admin.userDatabase')}</CardTitle>
-                            {!isAdmin && <p className="text-sm text-yellow-600">{t('admin.roleChangeNote')}</p>}
-                        </CardHeader>
-                        <CardContent>
-                            <UserManagementTable users={allUsers || []} currentUserId={user.id} />
                         </CardContent>
                     </Card>
                 </TabsContent>

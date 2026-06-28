@@ -2,7 +2,8 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
-import { ShieldAlert, Users } from 'lucide-react';
+import Link from 'next/link';
+import { ShieldAlert, Users, ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UsersManagementTable } from '@/components/admin/UsersManagementTable';
 import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from '@/lib/i18n';
@@ -69,6 +70,13 @@ export default async function AdminUsersPage() {
 
     return (
         <div className="container mx-auto py-8 space-y-6 px-4 md:px-6">
+            <Link
+                href="/admin"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+            >
+                <ArrowLeft className="h-4 w-4" />
+                {t('admin.backToDashboard')}
+            </Link>
             <div className="flex items-center gap-4">
                 <div className="p-3 bg-primary/10 rounded-full">
                     <Users className="w-8 h-8 text-primary" />

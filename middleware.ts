@@ -38,6 +38,11 @@ const PARENT_BLOCKED_ROUTES = [
 // Routes only accessible to admin/moderator
 const ADMIN_ONLY_ROUTES = ['/admin'];
 
+// Strictly admin-only routes (NOT moderator): user & role management.
+// Checked before ADMIN_ONLY_ROUTES so moderators are redirected to the
+// dashboard instead of reaching a page-level access-denied screen.
+const STRICT_ADMIN_ROUTES = ['/admin/users'];
+
 // Schedule management routes — moderator (завуч) and admin only.
 // /schedule itself stays available to every authenticated user.
 const STAFF_ONLY_ROUTES = ['/schedule/manage', '/schedule/substitutions'];
@@ -127,6 +132,15 @@ export async function middleware(request: NextRequest) {
         .single();
 
     const role = getRole(profile);
+
+    // Strictly admin-only routes (user & role management) — moderators get
+    // redirected to the dashboard rather than a dead-end access screen.
+    if (STRICT_ADMIN_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'))) {
+        if (role !== 'admin') {
+            return NextResponse.redirect(new URL('/admin', request.url));
+        }
+        return sessionResponse;
+    }
 
     // Admin-only routes
     if (ADMIN_ONLY_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'))) {

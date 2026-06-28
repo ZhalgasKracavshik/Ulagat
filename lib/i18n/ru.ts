@@ -1281,6 +1281,12 @@ export const ru: Dictionary = {
         diffEasy: "Лёгкая",
         diffMedium: "Средняя",
         diffHard: "Сложная",
+        // User management consolidation.
+        manageUsers: "Пользователи и роли",
+        backToDashboard: "Админ-панель",
+        confirmRoleTitle: "Подтвердите выдачу роли",
+        confirmRoleBody: "Вы назначаете роль «{role}» пользователю {name}. Эта роль даёт расширенный доступ к панели управления. Продолжить?",
+        confirmRoleGrant: "Выдать роль",
     },
     // Achievement review queue.
     achievementReview: {

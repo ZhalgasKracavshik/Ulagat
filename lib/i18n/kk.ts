@@ -1281,6 +1281,12 @@ export const kk: Dictionary = {
         diffEasy: "Жеңіл",
         diffMedium: "Орташа",
         diffHard: "Қиын",
+        // User management consolidation.
+        manageUsers: "Пайдаланушылар мен рөлдер",
+        backToDashboard: "Әкімші панелі",
+        confirmRoleTitle: "Рөл беруді растаңыз",
+        confirmRoleBody: "Сіз {name} пайдаланушысына «{role}» рөлін бересіз. Бұл рөл басқару панеліне кеңейтілген қол жеткізу береді. Жалғастырасыз ба?",
+        confirmRoleGrant: "Рөл беру",
     },
     // Achievement review queue.
     achievementReview: {

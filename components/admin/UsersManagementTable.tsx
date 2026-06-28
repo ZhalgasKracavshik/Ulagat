@@ -20,8 +20,16 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { updateUserRole, updateUserSkudId } from '@/app/admin/users/actions';
-import { Loader2, Check, X } from 'lucide-react';
+import { Loader2, Check, X, ShieldAlert } from 'lucide-react';
 import { useT } from '@/hooks/useT';
 import type { UserRole, AdminUserRow } from '@/types';
 
@@ -39,22 +47,43 @@ const ROLE_KEYS: Record<string, string> = {
     admin: 'admin.roleAdmin',
 };
 
+// Powerful roles whose assignment requires an explicit confirmation step.
+const ELEVATED_ROLES: UserRole[] = ['admin', 'moderator'];
+
 export function UsersManagementTable({ users, currentUserId }: UsersManagementTableProps) {
     const { t } = useT();
     const roleLabel = (role: string) => (ROLE_KEYS[role] ? t(ROLE_KEYS[role]) : role);
+    const [roleValues, setRoleValues] = useState<Record<string, UserRole>>({});
     const [loadingRole, setLoadingRole] = useState<Record<string, boolean>>({});
     const [loadingSkud, setLoadingSkud] = useState<Record<string, boolean>>({});
     const [skudEditing, setSkudEditing] = useState<Record<string, string>>({});
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [confirm, setConfirm] = useState<{ userId: string; newRole: UserRole; name: string } | null>(null);
 
-    async function handleRoleChange(userId: string, newRole: UserRole) {
+    const effectiveRole = (user: AdminUserRow): UserRole => roleValues[user.id] ?? user.role;
+
+    async function commitRole(userId: string, newRole: UserRole, prevRole: UserRole) {
+        setRoleValues((prev) => ({ ...prev, [userId]: newRole })); // optimistic
         setLoadingRole((prev) => ({ ...prev, [userId]: true }));
         setErrors((prev) => ({ ...prev, [userId]: '' }));
         const result = await updateUserRole(userId, newRole);
         if (result.error) {
             setErrors((prev) => ({ ...prev, [userId]: result.error ?? t('admin.error') }));
+            setRoleValues((prev) => ({ ...prev, [userId]: prevRole })); // revert on failure
         }
         setLoadingRole((prev) => ({ ...prev, [userId]: false }));
+    }
+
+    function requestRoleChange(user: AdminUserRow, newRole: UserRole) {
+        const current = effectiveRole(user);
+        if (newRole === current) return;
+        // Granting a powerful role needs explicit confirmation so an accidental
+        // click cannot silently escalate someone to admin/moderator.
+        if (ELEVATED_ROLES.includes(newRole)) {
+            setConfirm({ userId: user.id, newRole, name: user.full_name || user.id.slice(0, 8) });
+            return;
+        }
+        commitRole(user.id, newRole, current);
     }
 
     async function handleSkudSave(userId: string) {
@@ -210,8 +239,8 @@ export function UsersManagementTable({ users, currentUserId }: UsersManagementTa
                                                 <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                                             )}
                                             <Select
-                                                defaultValue={user.role}
-                                                onValueChange={(val) => handleRoleChange(user.id, val as UserRole)}
+                                                value={effectiveRole(user)}
+                                                onValueChange={(val) => requestRoleChange(user, val as UserRole)}
                                                 disabled={loadingRole[user.id]}
                                             >
                                                 <SelectTrigger className="w-[140px] h-8">
@@ -236,6 +265,41 @@ export function UsersManagementTable({ users, currentUserId }: UsersManagementTa
                     })}
                 </TableBody>
             </Table>
+
+            {/* Elevated-role confirmation (admin / moderator) */}
+            <Dialog open={confirm !== null} onOpenChange={(open) => { if (!open) setConfirm(null); }}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <ShieldAlert className="h-5 w-5 text-amber-500" />
+                            {t('admin.confirmRoleTitle')}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {confirm
+                                ? t('admin.confirmRoleBody', { role: roleLabel(confirm.newRole), name: confirm.name })
+                                : ''}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setConfirm(null)}>
+                            {t('admin.cancel')}
+                        </Button>
+                        <Button
+                            className="bg-amber-600 text-white hover:bg-amber-700"
+                            onClick={() => {
+                                if (confirm) {
+                                    const u = users.find((x) => x.id === confirm.userId);
+                                    const prev = (roleValues[confirm.userId] ?? u?.role ?? 'student') as UserRole;
+                                    commitRole(confirm.userId, confirm.newRole, prev);
+                                }
+                                setConfirm(null);
+                            }}
+                        >
+                            {t('admin.confirmRoleGrant')}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
