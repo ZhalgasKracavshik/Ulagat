@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { generateInviteCode } from '@/app/profile/invite/actions';
 import { Copy, Check, Users, Clock } from 'lucide-react';
+import { useT } from '@/hooks/useT';
 
 interface ExistingToken {
     token: string;
@@ -18,6 +19,7 @@ interface InviteParentSectionProps {
 }
 
 export function InviteParentSection({ studentId, existingTokens }: InviteParentSectionProps) {
+    const { t } = useT();
     const [generatedCode, setGeneratedCode] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -68,14 +70,14 @@ export function InviteParentSection({ studentId, existingTokens }: InviteParentS
     return (
         <Card className="border-dashed border-blue-200 bg-blue-50/40 dark:bg-blue-950/40">
             <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base text-blue-800">
+                <CardTitle className="flex items-center gap-2 text-base text-blue-800 dark:text-blue-300">
                     <Users className="w-4 h-4" />
-                    Invite Parent
+                    {t('cabinet.inviteParent')}
                 </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                    Generate a one-time code for your parent or guardian to register and link to your account.
+                    {t('cabinet.inviteParentDesc')}
                 </p>
 
                 {error && (
@@ -100,15 +102,15 @@ export function InviteParentSection({ studentId, existingTokens }: InviteParentS
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                             <Clock className="w-3 h-3" />
                             {generatedCode
-                                ? 'Expires in 24 hours'
+                                ? t('cabinet.inviteExpires24h')
                                 : activeExpiry
-                                    ? `Expires ${activeExpiry.toLocaleString()}`
-                                    : 'Expires in 24 hours'}
+                                    ? t('cabinet.inviteExpiresAt', { date: activeExpiry.toLocaleString() })
+                                    : t('cabinet.inviteExpires24h')}
                         </div>
                         <p className="text-xs text-muted-foreground">
-                            Share this code with your parent. They can enter it on the{' '}
+                            {t('cabinet.inviteShareBefore')}{' '}
                             <a href={`/register?invite=${activeCode}`} className="text-primary hover:underline">
-                                registration page
+                                {t('cabinet.inviteRegPage')}
                             </a>
                             .
                         </p>
@@ -119,7 +121,7 @@ export function InviteParentSection({ studentId, existingTokens }: InviteParentS
                             disabled={isLoading}
                             className="w-full"
                         >
-                            Generate New Code
+                            {t('cabinet.inviteGenerateNew')}
                         </Button>
                     </div>
                 ) : (
@@ -129,7 +131,7 @@ export function InviteParentSection({ studentId, existingTokens }: InviteParentS
                         className="w-full"
                         size="sm"
                     >
-                        {isLoading ? 'Generating...' : 'Generate Invite Code'}
+                        {isLoading ? t('cabinet.inviteGenerating') : t('cabinet.inviteGenerate')}
                     </Button>
                 )}
             </CardContent>
