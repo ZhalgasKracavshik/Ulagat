@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileSpreadsheet, Loader2, AlertTriangle } from "lucide-react";
 import { bulkUpsertSchedule } from "@/app/schedule/manage/actions";
 import { REGISTRABLE_GRADES } from "@/lib/schedule/class-letter";
+import { extractGrid, parseGridsFromSheet, type SheetResult } from "@/lib/schedule/parse-timetable";
 import { useT } from "@/hooks/useT";
 
 function todayIso(): string {
@@ -17,150 +18,19 @@ function todayIso(): string {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-type ParsedLesson = {
-    day_of_week: number;
-    period: number;
-    subject: string;
-    teacher_name: string;
-    room: string;
-};
-
-type SheetResult = {
-    name: string;
-    grade: string;
-    letter: string;
-    lessons: ParsedLesson[];
-    grouped: boolean;
-};
-
-/** Maps a header cell to a 1-6 weekday, supporting Kazakh, Russian, English and digits. */
-function dayFromHeader(raw: string): number {
-    const s = raw.toLowerCase().replace(/\s+/g, "");
-    if (!s) return 0;
-    if (/^[1-6]$/.test(s)) return Number(s);
-    const prefixes: [string, number][] = [
-        ["дүй", 1], ["дуй", 1], ["пон", 1], ["пн", 1], ["mon", 1],
-        ["сей", 2], ["втор", 2], ["вт", 2], ["tue", 2],
-        ["сәр", 3], ["сар", 3], ["сре", 3], ["ср", 3], ["wed", 3],
-        ["бей", 4], ["чет", 4], ["чт", 4], ["thu", 4],
-        ["жұм", 5], ["жум", 5], ["пят", 5], ["пт", 5], ["fri", 5],
-        ["сен", 6], ["суб", 6], ["сб", 6], ["sat", 6],
-    ];
-    for (const [p, d] of prefixes) if (s.startsWith(p)) return d;
-    return 0;
-}
-
-function parseSubjectCell(text: string): { subject: string; teacher: string; grouped: boolean } {
-    const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
-    if (lines.length === 0) return { subject: "", teacher: "", grouped: false };
-    const grouped = lines.some((l) => /^\d+\./.test(l));
-    const subject = lines[0].replace(/^\d+\.\s*/, "");
-    const teacher = lines[1] && !/^\d+\./.test(lines[1]) ? lines[1] : "";
-    return { subject, teacher, grouped };
-}
-
-function cleanRoom(text: string): string {
-    const first = text.split("\n").map((l) => l.trim()).filter(Boolean)[0] ?? "";
-    return first.replace(/\s*каб\.?$/i, "").trim();
-}
-
-function classFromName(name: string): { grade: string; letter: string } {
-    const m = name.match(/(\d{1,2})\s*([A-Za-zА-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі])/u);
-    return m ? { grade: m[1], letter: m[2].toUpperCase() } : { grade: "", letter: "" };
-}
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
-function cellText(cell: any): string {
-    const v = cell?.value;
-    if (v == null) return "";
-    if (typeof v === "string") return v;
-    if (typeof v === "number") return String(v);
-    if (typeof v === "object") {
-        if (Array.isArray(v.richText)) return v.richText.map((t: any) => t.text ?? "").join("");
-        if (typeof v.text === "string") return v.text;
-        if (v.result != null) return String(v.result);
-    }
-    return "";
-}
-
 async function parseWorkbook(buffer: ArrayBuffer): Promise<SheetResult[]> {
     const mod: any = await import("exceljs");
     const ExcelJS = mod.default ?? mod;
     const wb = new ExcelJS.Workbook();
     await wb.xlsx.load(buffer);
 
+    // One workbook may hold every class as one sheet per class OR as several
+    // grids stacked on a single sheet — parseGridsFromSheet handles both.
     const results: SheetResult[] = [];
-
     wb.eachSheet((ws: any) => {
-        // Build a dense 2D grid of cell text.
-        const grid: string[][] = [];
-        ws.eachRow({ includeEmpty: true }, (row: any, rowNumber: number) => {
-            const arr: string[] = [];
-            row.eachCell({ includeEmpty: true }, (cell: any, colNumber: number) => {
-                arr[colNumber - 1] = cellText(cell);
-            });
-            grid[rowNumber - 1] = arr;
-        });
-        if (grid.length === 0) return;
-
-        // Find the header row with the most weekday matches.
-        let headerRow = -1;
-        let headerDayCols: { col: number; day: number }[] = [];
-        grid.forEach((rowArr, r) => {
-            const cols: { col: number; day: number }[] = [];
-            (rowArr ?? []).forEach((c, ci) => {
-                const day = dayFromHeader(c ?? "");
-                if (day > 0) cols.push({ col: ci, day });
-            });
-            if (cols.length > headerDayCols.length) {
-                headerDayCols = cols;
-                headerRow = r;
-            }
-        });
-        if (headerRow < 0 || headerDayCols.length < 2) return;
-
-        // Detect the period column (numbers 1-8) among the first few columns.
-        let periodCol = 0;
-        let bestHits = -1;
-        for (let c = 0; c < 4; c++) {
-            let hits = 0;
-            for (let r = headerRow + 1; r < grid.length; r++) {
-                const val = (grid[r]?.[c] ?? "").trim();
-                if (/^[1-8]$/.test(val)) hits++;
-            }
-            if (hits > bestHits) {
-                bestHits = hits;
-                periodCol = c;
-            }
-        }
-
-        const lessons: ParsedLesson[] = [];
-        let grouped = false;
-        for (let r = headerRow + 1; r < grid.length; r++) {
-            const periodVal = (grid[r]?.[periodCol] ?? "").trim();
-            if (!/^[1-8]$/.test(periodVal)) continue;
-            const period = Number(periodVal);
-            for (const { col, day } of headerDayCols) {
-                const subjText = grid[r]?.[col] ?? "";
-                const roomText = grid[r]?.[col + 1] ?? "";
-                const parsed = parseSubjectCell(subjText);
-                if (!parsed.subject) continue;
-                if (parsed.grouped) grouped = true;
-                lessons.push({
-                    day_of_week: day,
-                    period,
-                    subject: parsed.subject,
-                    teacher_name: parsed.teacher,
-                    room: cleanRoom(roomText),
-                });
-            }
-        }
-        if (lessons.length === 0) return;
-
-        const cls = classFromName(ws.name ?? "");
-        results.push({ name: ws.name ?? "", grade: cls.grade, letter: cls.letter, lessons, grouped });
+        results.push(...parseGridsFromSheet(extractGrid(ws), ws.name ?? ""));
     });
-
     return results;
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
