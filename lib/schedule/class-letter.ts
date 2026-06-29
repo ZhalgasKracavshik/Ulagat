@@ -17,3 +17,17 @@
 export function normalizeClassLetter(value: string | null | undefined): string {
     return (value ?? '').trim().toUpperCase().slice(0, 3);
 }
+
+/**
+ * Grades offered at registration (BINOM is a 5–11 gymnasium per the PRD).
+ * Kept here so the registration form and any future class pickers agree.
+ */
+export const REGISTRABLE_GRADES = [5, 6, 7, 8, 9, 10, 11] as const;
+
+/**
+ * Canonical Kazakh class-letter set, used as the cold-start fallback at
+ * registration when no real classes exist in the schedule yet. Once the
+ * school has entered its timetable, students pick from the actual existing
+ * classes instead (which guarantees an exact match for substitution emails).
+ */
+export const CLASS_LETTERS = ['А', 'Ә', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж'] as const;

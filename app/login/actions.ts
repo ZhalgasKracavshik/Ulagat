@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { normalizeClassLetter } from '@/lib/schedule/class-letter'
 import { z } from 'zod'
 
 // P0-1 / audit3 #6: the role enum below is the self-registration allowlist.
@@ -60,6 +61,26 @@ export async function signup(formData: FormData) {
     const { email, password, fullName, role } = validatedFields.data
     const inviteCode = formData.get('inviteCode') as string | null
 
+    // Students must provide grade + class so the schedule view and substitution
+    // emails reach them immediately (targeting matches on exact grade +
+    // class_letter). Carried into user_metadata and stored by handle_new_user.
+    let studentGrade: number | null = null
+    let studentClassLetter: string | null = null
+    if (role === 'student') {
+        const rawGrade = formData.get('grade')
+        const parsedGrade = typeof rawGrade === 'string' ? parseInt(rawGrade, 10) : NaN
+        const rawLetter = formData.get('class_letter')
+        const letter = normalizeClassLetter(typeof rawLetter === 'string' ? rawLetter : '')
+        if (!Number.isInteger(parsedGrade) || parsedGrade < 1 || parsedGrade > 11) {
+            return { error: 'Please select your grade.' }
+        }
+        if (!letter) {
+            return { error: 'Please select your class.' }
+        }
+        studentGrade = parsedGrade
+        studentClassLetter = letter
+    }
+
     // If role is parent, pre-validate the invite code for an immediate, friendly
     // error before we create the account. The actual atomic token-claim + family
     // bond is performed by the handle_new_user DB trigger (see below), so the
@@ -110,6 +131,11 @@ export async function signup(formData: FormData) {
             data: {
                 full_name: fullName,
                 role: role,
+                // Stored on the profile by the handle_new_user DB trigger so the
+                // student is reachable by schedule + substitution emails at once.
+                ...(role === 'student' && studentGrade && studentClassLetter
+                    ? { grade: String(studentGrade), class_letter: studentClassLetter }
+                    : {}),
                 // Consumed by the handle_new_user DB trigger, which atomically
                 // claims the token and creates the family_bond at account-insert
                 // time (works even when email confirmation is pending).

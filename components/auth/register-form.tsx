@@ -7,28 +7,55 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { useT } from '@/hooks/useT'
+import { CLASS_LETTERS, REGISTRABLE_GRADES } from '@/lib/schedule/class-letter'
 
 interface RegisterFormProps {
     initialInviteCode?: string
+    /** Classes that exist in the timetable, so a student picks an exact match. */
+    classOptions?: { grade: number; letter: string }[]
 }
 
 const INPUT =
     'block h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/30'
 const LABEL = 'mb-1.5 block text-sm font-medium text-slate-700'
 
-export function RegisterForm({ initialInviteCode }: RegisterFormProps) {
+export function RegisterForm({ initialInviteCode, classOptions = [] }: RegisterFormProps) {
     const { t } = useT()
     const [error, setError] = useState<string | null>(null)
     const [message, setMessage] = useState<string | null>(null)
     const [role, setRole] = useState<string>(initialInviteCode ? 'parent' : 'student')
     const [inviteCode, setInviteCode] = useState<string>((initialInviteCode || '').toUpperCase())
     const [showPassword, setShowPassword] = useState(false)
+    const [studentClass, setStudentClass] = useState<string>('') // "grade|letter" or 'other'
+    const [manualGrade, setManualGrade] = useState<string>('')
+    const [manualLetter, setManualLetter] = useState<string>('')
 
     const isParent = role === 'parent'
+    const isStudent = role === 'student'
+    const hasClassOptions = classOptions.length > 0
+    const useManualClass = !hasClassOptions || studentClass === 'other'
+
+    // Final values submitted via hidden inputs (students only).
+    let finalGrade = ''
+    let finalLetter = ''
+    if (isStudent) {
+        if (useManualClass) {
+            finalGrade = manualGrade
+            finalLetter = manualLetter
+        } else if (studentClass.includes('|')) {
+            const [g, l] = studentClass.split('|')
+            finalGrade = g
+            finalLetter = l
+        }
+    }
 
     async function handleSubmit(formData: FormData) {
         setError(null)
         setMessage(null)
+        if (isStudent && (!finalGrade || !finalLetter)) {
+            setError(t('auth.classRequired'))
+            return
+        }
         const result = await signup(formData)
         if (result?.error) setError(result.error)
         else if (result?.message) setMessage(result.message)
@@ -71,6 +98,57 @@ export function RegisterForm({ initialInviteCode }: RegisterFormProps) {
                         <option value="parent">{t('auth.roleParent')}</option>
                     </select>
                 </div>
+
+                {isStudent && (
+                    <div>
+                        <label className={LABEL}>{t('auth.classLabel')}</label>
+                        {hasClassOptions && (
+                            <select
+                                aria-label={t('auth.classLabel')}
+                                className={INPUT}
+                                value={studentClass}
+                                onChange={(e) => setStudentClass(e.target.value)}
+                            >
+                                <option value="">{t('auth.classPlaceholder')}</option>
+                                {classOptions.map((o) => (
+                                    <option key={`${o.grade}|${o.letter}`} value={`${o.grade}|${o.letter}`}>
+                                        {o.grade}{o.letter}
+                                    </option>
+                                ))}
+                                <option value="other">{t('auth.classOther')}</option>
+                            </select>
+                        )}
+                        {useManualClass && (
+                            <div className={hasClassOptions ? 'mt-2 grid grid-cols-2 gap-3' : 'grid grid-cols-2 gap-3'}>
+                                <select
+                                    aria-label={t('auth.gradePlaceholder')}
+                                    className={INPUT}
+                                    value={manualGrade}
+                                    onChange={(e) => setManualGrade(e.target.value)}
+                                >
+                                    <option value="">{t('auth.gradePlaceholder')}</option>
+                                    {REGISTRABLE_GRADES.map((g) => (
+                                        <option key={g} value={g}>{g}</option>
+                                    ))}
+                                </select>
+                                <select
+                                    aria-label={t('auth.letterPlaceholder')}
+                                    className={INPUT}
+                                    value={manualLetter}
+                                    onChange={(e) => setManualLetter(e.target.value)}
+                                >
+                                    <option value="">{t('auth.letterPlaceholder')}</option>
+                                    {CLASS_LETTERS.map((l) => (
+                                        <option key={l} value={l}>{l}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+                        <p className="mt-1 text-xs text-slate-500">{t('auth.classHint')}</p>
+                        <input type="hidden" name="grade" value={finalGrade} />
+                        <input type="hidden" name="class_letter" value={finalLetter} />
+                    </div>
+                )}
 
                 {isParent && (
                     <div>
