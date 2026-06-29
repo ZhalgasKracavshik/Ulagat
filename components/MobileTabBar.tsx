@@ -192,7 +192,7 @@ export function MobileTabBar({
                         className="relative flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                         aria-haspopup="dialog"
                         aria-expanded={moreOpen}
-                        aria-label="More destinations"
+                        aria-label={t("nav.ariaMore")}
                     >
                         <LayoutGrid className="w-5 h-5" />
                         <span>{t("nav.more")}</span>
@@ -206,7 +206,7 @@ export function MobileTabBar({
                         href="/profile/me"
                         className="flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                         aria-current={isActive("/profile/me") ? "page" : undefined}
-                        aria-label="Open my cabinet"
+                        aria-label={t("nav.ariaCabinet")}
                     >
                         <Avatar className={`h-6 w-6 ring-2 ${isActive("/profile/me") ? "ring-indigo-400" : "ring-transparent"}`}>
                             <AvatarImage src={profile?.avatar_url ?? undefined} />
@@ -225,7 +225,7 @@ export function MobileTabBar({
                     className="md:hidden fixed inset-0 z-[60] flex flex-col bg-background animate-in fade-in-0 duration-150"
                     role="dialog"
                     aria-modal="true"
-                    aria-label="All destinations"
+                    aria-label={t("nav.ariaAllSections")}
                 >
                     <div className="flex items-center justify-between border-b px-4 h-14 shrink-0">
                         <span className="font-black text-lg tracking-tight text-indigo-600">ULAGAT</span>
@@ -233,7 +233,7 @@ export function MobileTabBar({
                             type="button"
                             onClick={() => setMoreOpen(false)}
                             className="inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                            aria-label="Close menu"
+                            aria-label={t("nav.ariaCloseMenu")}
                         >
                             <X className="w-5 h-5" />
                         </button>

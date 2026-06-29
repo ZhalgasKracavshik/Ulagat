@@ -65,6 +65,10 @@ export const ru: Dictionary = {
         staff: "Персонал",
         news: "Новости",
         me: "Я",
+        ariaMore: "Открыть меню навигации",
+        ariaCabinet: "Открыть личный кабинет",
+        ariaAllSections: "Все разделы",
+        ariaCloseMenu: "Закрыть меню",
     },
     hints: {
         home: "Ваша ежедневная панель",
@@ -165,6 +169,7 @@ export const ru: Dictionary = {
         inviteGenerateNew: "Создать новый код",
         inviteGenerate: "Создать код приглашения",
         inviteGenerating: "Создаём…",
+        ariaSection: "Личный кабинет",
         goPremium: "Перейти на Премиум",
         premium: "Премиум",
         managePremiumHint: "Управление подпиской",
@@ -840,6 +845,8 @@ export const ru: Dictionary = {
         emptyTitle: "Материалы не найдены",
         emptyFiltered: "Нет ресурсов по выбранным фильтрам.",
         emptyDefault: "Персонал и парламент скоро добавят учебные материалы!",
+        filterByYear: "Фильтр по году",
+        allYears: "Все годы",
     },
     olympiadNew: {
         accessDeniedBody: "Добавлять учебные материалы могут только администраторы, модераторы и члены парламента.",

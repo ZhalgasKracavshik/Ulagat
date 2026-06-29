@@ -144,7 +144,7 @@ export function PersonalCabinet({
     });
 
     return (
-        <section className="space-y-6" aria-label="Personal cabinet">
+        <section className="space-y-6" aria-label={t("cabinet.ariaSection")}>
             {/* Header */}
             <div className="rounded-2xl border border-border bg-card p-6 md:p-8">
                 <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">

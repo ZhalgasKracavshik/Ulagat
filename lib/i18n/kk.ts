@@ -65,6 +65,10 @@ export const kk: Dictionary = {
         staff: "Қызметкерлер",
         news: "Жаңалықтар",
         me: "Мен",
+        ariaMore: "Навигация мәзірін ашу",
+        ariaCabinet: "Жеке кабинетті ашу",
+        ariaAllSections: "Барлық бөлімдер",
+        ariaCloseMenu: "Мәзірді жабу",
     },
     hints: {
         home: "Күнделікті басқару тақтаңыз",
@@ -165,6 +169,7 @@ export const kk: Dictionary = {
         inviteGenerateNew: "Жаңа код жасау",
         inviteGenerate: "Шақыру кодын жасау",
         inviteGenerating: "Жасалуда…",
+        ariaSection: "Жеке кабинет",
         goPremium: "Премиумға өту",
         premium: "Премиум",
         managePremiumHint: "Жазылымды басқару",
@@ -840,6 +845,8 @@ export const kk: Dictionary = {
         emptyTitle: "Материалдар табылмады",
         emptyFiltered: "Таңдалған сүзгілерге сай ресурстар жоқ.",
         emptyDefault: "Қызметкерлер мен парламент жақын арада оқу материалдарын қосады!",
+        filterByYear: "Жыл бойынша сүзу",
+        allYears: "Барлық жылдар",
     },
     olympiadNew: {
         accessDeniedBody: "Оқу материалдарын тек әкімшілер, модераторлар және парламент мүшелері қоса алады.",

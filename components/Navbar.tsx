@@ -154,7 +154,7 @@ export function Navbar({
                                     <DropdownMenuTrigger asChild>
                                         <button
                                             className="flex items-center gap-1 text-foreground/60 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md relative"
-                                            aria-label="More destinations"
+                                            aria-label={t("nav.ariaMore")}
                                         >
                                             <span>{t("nav.more")}</span>
                                             <ChevronDown className="w-4 h-4" />
@@ -312,7 +312,7 @@ export function Navbar({
                                 mobile where the bottom bar carries the "Me" tab. */}
                             <Link
                                 href="/profile/me"
-                                aria-label="Open my cabinet"
+                                aria-label={t("nav.ariaCabinet")}
                                 className="hidden md:inline-flex rounded-full ring-2 ring-transparent transition hover:ring-indigo-200 focus-visible:outline-none focus-visible:ring-indigo-400"
                             >
                                 <Avatar className="h-8 w-8">

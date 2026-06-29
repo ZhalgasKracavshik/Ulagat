@@ -71,6 +71,10 @@ export const en: Dictionary = {
         staff: "Staff",
         news: "News",
         me: "Me",
+        ariaMore: "Open navigation menu",
+        ariaCabinet: "Open my cabinet",
+        ariaAllSections: "All sections",
+        ariaCloseMenu: "Close menu",
     },
     // One-line hints for each nav destination, keyed by the nav-config `key`.
     // Used by the cabinet quick-action tiles and the /guide feature directory.
@@ -172,6 +176,7 @@ export const en: Dictionary = {
         inviteGenerateNew: "Generate new code",
         inviteGenerate: "Generate invite code",
         inviteGenerating: "Generating…",
+        ariaSection: "Personal cabinet",
         goPremium: "Go Premium",
         premium: "Premium",
         managePremiumHint: "Manage your subscription",
@@ -870,6 +875,8 @@ export const en: Dictionary = {
         emptyTitle: "No Materials Found",
         emptyFiltered: "No resources match the selected filters yet.",
         emptyDefault: "Staff and Parliament will add study materials soon!",
+        filterByYear: "Filter by year",
+        allYears: "All years",
     },
     olympiadNew: {
         accessDeniedBody: "Only Admins, Moderators and Parliament members can add study materials.",
