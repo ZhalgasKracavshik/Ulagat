@@ -1323,6 +1323,19 @@ export const ru: Dictionary = {
         actAnnouncementDesc: "Опубликовать официальное объявление",
         actAchievementsDesc: "Проверить достижения учеников",
         actUsersDesc: "Роли, классы и СКУД пользователей",
+        // Launch readiness panel.
+        launchReadiness: "Готовность к запуску",
+        launchEmail: "Рассылка писем",
+        launchEmailOn: "Настроена",
+        launchEmailOff: "Не настроена, письма не уходят",
+        launchSchedule: "Расписание",
+        launchScheduleEmpty: "Внести расписание",
+        launchLessonsUnit: "уроков",
+        launchNoClass: "Ученики без класса",
+        launchNoClassOk: "У всех указан класс",
+        launchStaff: "Персонал (учителя, завучи, парламент)",
+        launchStaffNone: "Только администратор",
+        launchParents: "Привязки родителей",
     },
     // Achievement review queue.
     achievementReview: {

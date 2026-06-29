@@ -1357,6 +1357,19 @@ export const en: Dictionary = {
         actAnnouncementDesc: "Publish an official announcement",
         actAchievementsDesc: "Review student achievements",
         actUsersDesc: "User roles, classes and SKUD",
+        // Launch readiness panel.
+        launchReadiness: "Launch readiness",
+        launchEmail: "Email delivery",
+        launchEmailOn: "Configured",
+        launchEmailOff: "Not configured, emails will not send",
+        launchSchedule: "Timetable",
+        launchScheduleEmpty: "Add the timetable",
+        launchLessonsUnit: "lessons",
+        launchNoClass: "Students without a class",
+        launchNoClassOk: "All have a class",
+        launchStaff: "Staff (teachers, vice-principals, parliament)",
+        launchStaffNone: "Admin only",
+        launchParents: "Parent links",
     },
     // Achievement review queue.
     achievementReview: {

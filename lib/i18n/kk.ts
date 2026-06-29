@@ -1323,6 +1323,19 @@ export const kk: Dictionary = {
         actAnnouncementDesc: "Ресми хабарландыру жариялау",
         actAchievementsDesc: "Оқушылардың жетістіктерін тексеру",
         actUsersDesc: "Пайдаланушы рөлдері, сыныптар, СКУД",
+        // Launch readiness panel.
+        launchReadiness: "Іске қосуға дайындық",
+        launchEmail: "Хат тарату",
+        launchEmailOn: "Бапталған",
+        launchEmailOff: "Бапталмаған, хаттар жіберілмейді",
+        launchSchedule: "Сабақ кестесі",
+        launchScheduleEmpty: "Кестені енгізу",
+        launchLessonsUnit: "сабақ",
+        launchNoClass: "Сыныбы жоқ оқушылар",
+        launchNoClassOk: "Барлығында сынып бар",
+        launchStaff: "Қызметкерлер (мұғалімдер, оқу ісі, парламент)",
+        launchStaffNone: "Тек әкімші",
+        launchParents: "Ата-ана байланыстары",
     },
     // Achievement review queue.
     achievementReview: {

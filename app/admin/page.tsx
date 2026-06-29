@@ -1,8 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShieldAlert, Users, ListFilter, Award, Calendar, CalendarClock, CalendarDays, Megaphone } from "lucide-react";
+import { ShieldAlert, Users, ListFilter, Award, Calendar, CalendarClock, CalendarDays, Megaphone, CheckCircle2, AlertTriangle } from "lucide-react";
 import { ServiceReviewTable } from "@/components/admin/ServiceReviewTable";
 import { EventReviewTable } from "@/components/admin/EventReviewTable";
 import { MaterialReviewTable } from "@/components/admin/MaterialReviewTable";
@@ -79,6 +80,29 @@ export default async function AdminPage() {
         .from('services')
         .select('*, profiles:owner_id(full_name, role)')
         .order('created_at', { ascending: false });
+
+    // ---- Launch-readiness metrics (pre-pilot visibility for staff) ----
+    // Counted with the service-role client so aggregates are accurate
+    // regardless of per-row RLS (e.g. family_bonds). No PII is surfaced.
+    const adminClient = createAdminClient();
+    const [
+        { count: studentsNoClass },
+        { count: teacherCount },
+        { count: moderatorCount },
+        { count: parliamentCount },
+        { count: familyBondsCount },
+        { count: scheduleRows },
+    ] = await Promise.all([
+        adminClient.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'student').or('grade.is.null,class_letter.is.null'),
+        adminClient.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'teacher'),
+        adminClient.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'moderator'),
+        adminClient.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'parliament'),
+        adminClient.from('family_bonds').select('*', { count: 'exact', head: true }),
+        adminClient.from('schedule').select('*', { count: 'exact', head: true }),
+    ]);
+    const staffCount = (teacherCount ?? 0) + (moderatorCount ?? 0) + (parliamentCount ?? 0);
+    const fromEmail = process.env.RESEND_FROM_EMAIL ?? '';
+    const emailConfigured = Boolean(process.env.RESEND_API_KEY) && Boolean(fromEmail) && !fromEmail.includes('resend.dev');
 
     return (
         <div className="container mx-auto py-8 space-y-8 px-4 md:px-6">
@@ -188,6 +212,66 @@ export default async function AdminPage() {
                             </Link>
                         )}
                     </div>
+                </CardContent>
+            </Card>
+
+            {/* Launch readiness — what still blocks the pilot from working */}
+            <Card>
+                <CardHeader className="pb-3">
+                    <CardTitle className="text-base">{t('admin.launchReadiness')}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <ul className="divide-y divide-border">
+                        <li className="flex items-center justify-between gap-3 py-2.5">
+                            <span className="flex items-center gap-2.5 text-sm">
+                                {emailConfigured ? <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" /> : <AlertTriangle className="h-4 w-4 shrink-0 text-amber-500" />}
+                                <span className="text-foreground">{t('admin.launchEmail')}</span>
+                            </span>
+                            <span className={`text-right text-sm font-medium ${emailConfigured ? 'text-emerald-600' : 'text-amber-600'}`}>
+                                {emailConfigured ? t('admin.launchEmailOn') : t('admin.launchEmailOff')}
+                            </span>
+                        </li>
+                        <li className="flex items-center justify-between gap-3 py-2.5">
+                            <span className="flex items-center gap-2.5 text-sm">
+                                {(scheduleRows ?? 0) > 0 ? <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" /> : <AlertTriangle className="h-4 w-4 shrink-0 text-amber-500" />}
+                                <span className="text-foreground">{t('admin.launchSchedule')}</span>
+                            </span>
+                            {(scheduleRows ?? 0) > 0 ? (
+                                <span className="text-sm font-medium text-emerald-600">{scheduleRows} {t('admin.launchLessonsUnit')}</span>
+                            ) : (
+                                <Link href="/schedule/manage" className="text-sm font-medium text-amber-600 hover:underline">{t('admin.launchScheduleEmpty')}</Link>
+                            )}
+                        </li>
+                        <li className="flex items-center justify-between gap-3 py-2.5">
+                            <span className="flex items-center gap-2.5 text-sm">
+                                {(studentsNoClass ?? 0) === 0 ? <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" /> : <AlertTriangle className="h-4 w-4 shrink-0 text-amber-500" />}
+                                <span className="text-foreground">{t('admin.launchNoClass')}</span>
+                            </span>
+                            {(studentsNoClass ?? 0) === 0 ? (
+                                <span className="text-sm font-medium text-emerald-600">{t('admin.launchNoClassOk')}</span>
+                            ) : isAdmin ? (
+                                <Link href="/admin/users" className="text-sm font-medium text-amber-600 hover:underline">{studentsNoClass}</Link>
+                            ) : (
+                                <span className="text-sm font-medium text-amber-600">{studentsNoClass}</span>
+                            )}
+                        </li>
+                        <li className="flex items-center justify-between gap-3 py-2.5">
+                            <span className="flex items-center gap-2.5 text-sm">
+                                {staffCount > 0 ? <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" /> : <AlertTriangle className="h-4 w-4 shrink-0 text-amber-500" />}
+                                <span className="text-foreground">{t('admin.launchStaff')}</span>
+                            </span>
+                            <span className={`text-sm font-medium ${staffCount > 0 ? 'text-foreground' : 'text-amber-600'}`}>
+                                {staffCount > 0 ? staffCount : t('admin.launchStaffNone')}
+                            </span>
+                        </li>
+                        <li className="flex items-center justify-between gap-3 py-2.5">
+                            <span className="flex items-center gap-2.5 text-sm">
+                                <Users className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                <span className="text-foreground">{t('admin.launchParents')}</span>
+                            </span>
+                            <span className="text-sm font-medium text-foreground">{familyBondsCount ?? 0}</span>
+                        </li>
+                    </ul>
                 </CardContent>
             </Card>
 
