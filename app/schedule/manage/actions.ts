@@ -132,6 +132,135 @@ export async function upsertScheduleCell(input: UpsertScheduleCellInput): Promis
     return { success: true };
 }
 
+export type BulkScheduleRow = {
+    grade: number;
+    class_letter: string;
+    day_of_week: number;
+    period: number;
+    subject: string;
+    teacher_name: string;
+    room: string;
+};
+
+export type BulkScheduleResult = {
+    success: boolean;
+    inserted?: number;
+    error?: string;
+    /** 1-based row numbers (as pasted) that failed validation, with a reason. */
+    rowErrors?: { row: number; reason: string }[];
+};
+
+type ScheduleInsertRow = {
+    grade: number;
+    class_letter: string;
+    day_of_week: number;
+    period: number;
+    subject: string;
+    teacher_name: string | null;
+    room: string;
+    valid_from: string;
+    valid_until: string;
+    created_by: string;
+};
+
+/**
+ * Bulk creates/updates timetable cells from a pasted block, all sharing one
+ * validity window (a term). All-or-nothing: if any row fails validation nothing
+ * is written, so a paste error never half-fills the timetable. Moderator/admin
+ * only. Same conflict key as the single-cell editor, so re-importing updates.
+ */
+export async function bulkUpsertSchedule(
+    rows: BulkScheduleRow[],
+    valid_from: string,
+    valid_until: string
+): Promise<BulkScheduleResult> {
+    const auth = await requireStaff();
+    if (!auth.ok) return { success: false, error: auth.error };
+
+    if (!ISO_DATE.test(valid_from) || !ISO_DATE.test(valid_until)) {
+        return { success: false, error: "Term dates must be valid (yyyy-mm-dd)." };
+    }
+    if (valid_from > valid_until) {
+        return { success: false, error: "'Valid from' must be on or before 'valid until'." };
+    }
+    if (!Array.isArray(rows) || rows.length === 0) {
+        return { success: false, error: "Nothing to import." };
+    }
+    if (rows.length > 2000) {
+        return { success: false, error: "Too many rows at once (max 2000)." };
+    }
+
+    const rowErrors: { row: number; reason: string }[] = [];
+    const seen = new Set<string>();
+    const clean: ScheduleInsertRow[] = [];
+
+    rows.forEach((r, i) => {
+        const n = i + 1;
+        if (!Number.isInteger(r.grade) || r.grade < 1 || r.grade > 11) {
+            rowErrors.push({ row: n, reason: "grade must be 1-11" });
+            return;
+        }
+        const classLetter = normalizeClassLetter(r.class_letter);
+        if (!classLetter) {
+            rowErrors.push({ row: n, reason: "class letter is required" });
+            return;
+        }
+        if (!Number.isInteger(r.day_of_week) || r.day_of_week < 1 || r.day_of_week > 6) {
+            rowErrors.push({ row: n, reason: "day must be 1-6" });
+            return;
+        }
+        if (!Number.isInteger(r.period) || r.period < 1 || r.period > 8) {
+            rowErrors.push({ row: n, reason: "period must be 1-8" });
+            return;
+        }
+        const subject = (r.subject ?? '').trim();
+        if (!subject) {
+            rowErrors.push({ row: n, reason: "subject is required" });
+            return;
+        }
+        const key = `${r.grade}|${classLetter}|${r.day_of_week}|${r.period}`;
+        if (seen.has(key)) {
+            rowErrors.push({ row: n, reason: "duplicate slot in this paste" });
+            return;
+        }
+        seen.add(key);
+        clean.push({
+            grade: r.grade,
+            class_letter: classLetter,
+            day_of_week: r.day_of_week,
+            period: r.period,
+            subject,
+            teacher_name: (r.teacher_name ?? '').trim() || null,
+            room: (r.room ?? '').trim() || '',
+            valid_from,
+            valid_until,
+            created_by: auth.userId,
+        });
+    });
+
+    if (rowErrors.length > 0) {
+        return {
+            success: false,
+            error: "Some rows could not be read. Fix them and import again.",
+            rowErrors,
+        };
+    }
+
+    const supabase = await createClient();
+    const { error } = await supabase
+        .from('schedule')
+        .upsert(clean, { onConflict: 'grade,class_letter,day_of_week,period,valid_from' });
+
+    if (error) {
+        console.error("bulkUpsertSchedule error:", error);
+        return { success: false, error: "Failed to import the timetable." };
+    }
+
+    revalidatePath('/schedule');
+    revalidatePath('/schedule/manage');
+    return { success: true, inserted: clean.length };
+}
+
 /** Deletes one timetable cell by id. Moderator/admin only — verified server-side. */
 export async function deleteScheduleCell(id: string): Promise<ScheduleActionResult> {
     const auth = await requireStaff();

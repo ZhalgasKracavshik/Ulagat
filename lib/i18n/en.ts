@@ -1079,6 +1079,23 @@ export const en: Dictionary = {
         updatePassword: "Update Password",
     },
     // Timetable editor (admin schedule manage).
+    scheduleImport: {
+        title: "Import timetable",
+        hint: "Paste the timetable from Excel or Google Sheets. One lesson per line, columns separated by comma or tab.",
+        format: "Format: grade, letter, day (1-6), period (1-8), subject, teacher, room",
+        validFrom: "Valid from",
+        validUntil: "Valid until",
+        dataLabel: "Data (paste here)",
+        parsed: "Rows detected: {count}",
+        errorsTitle: "Some rows could not be read:",
+        rowLabel: "Row {row}",
+        importBtn: "Import",
+        importing: "Importing…",
+        datesRequired: "Set the validity period.",
+        nothing: "Nothing to import.",
+        done: "Imported {count} lessons",
+        failed: "Import failed.",
+    },
     scheduleManage: {
         accessDenied: "Access Denied",
         accessDeniedBody: "Only moderators and admins can manage the timetable.",

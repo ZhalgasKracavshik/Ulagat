@@ -1045,6 +1045,23 @@ export const kk: Dictionary = {
         updatePassword: "Құпия сөзді жаңарту",
     },
     // Timetable editor (admin schedule manage).
+    scheduleImport: {
+        title: "Кестені импорттау",
+        hint: "Кестені Excel немесе Google Sheets-тен қойыңыз. Әр жолда бір сабақ, бағандар үтір немесе табуляция арқылы.",
+        format: "Пішім: сынып, әріп, күн (1-6), сабақ (1-8), пән, мұғалім, кабинет",
+        validFrom: "Басталуы",
+        validUntil: "Аяқталуы",
+        dataLabel: "Деректер (осы жерге қойыңыз)",
+        parsed: "Танылған жолдар: {count}",
+        errorsTitle: "Кейбір жолдарды оқу мүмкін болмады:",
+        rowLabel: "Жол {row}",
+        importBtn: "Импорттау",
+        importing: "Импортталуда…",
+        datesRequired: "Қолданылу мерзімін көрсетіңіз.",
+        nothing: "Импорттайтын дерек жоқ.",
+        done: "{count} сабақ импортталды",
+        failed: "Импорттау сәтсіз аяқталды.",
+    },
     scheduleManage: {
         accessDenied: "Кіруге тыйым салынған",
         accessDeniedBody: "Кестені тек модераторлар мен әкімшілер басқара алады.",

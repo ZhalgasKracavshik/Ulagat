@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { ShieldAlert } from "lucide-react";
 import { ScheduleGridEditor } from "@/components/schedule/ScheduleGridEditor";
+import { ScheduleBulkImport } from "@/components/schedule/ScheduleBulkImport";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
 
 export const dynamic = 'force-dynamic';
@@ -54,6 +55,7 @@ export default async function ScheduleManagePage() {
                         {t('scheduleManage.subtitle')}
                     </p>
                 </div>
+                <ScheduleBulkImport />
                 <ScheduleGridEditor />
             </div>
         </div>

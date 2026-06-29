@@ -1045,6 +1045,23 @@ export const ru: Dictionary = {
         updatePassword: "Обновить пароль",
     },
     // Timetable editor (admin schedule manage).
+    scheduleImport: {
+        title: "Импорт расписания",
+        hint: "Вставьте расписание из Excel или Google Таблиц. Один урок на строке, колонки через запятую или табуляцию.",
+        format: "Формат: класс, буква, день (1-6), урок (1-8), предмет, учитель, кабинет",
+        validFrom: "Действует с",
+        validUntil: "Действует по",
+        dataLabel: "Данные (вставьте сюда)",
+        parsed: "Распознано строк: {count}",
+        errorsTitle: "Некоторые строки не удалось прочитать:",
+        rowLabel: "Строка {row}",
+        importBtn: "Импортировать",
+        importing: "Импорт…",
+        datesRequired: "Укажите период действия.",
+        nothing: "Нет данных для импорта.",
+        done: "Импортировано уроков: {count}",
+        failed: "Не удалось импортировать.",
+    },
     scheduleManage: {
         accessDenied: "Доступ запрещён",
         accessDeniedBody: "Управлять расписанием могут только модераторы и администраторы.",
