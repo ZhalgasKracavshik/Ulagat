@@ -1376,6 +1376,10 @@ export const kk: Dictionary = {
         launchStaff: "Қызметкерлер (мұғалімдер, оқу ісі, парламент)",
         launchStaffNone: "Тек әкімші",
         launchParents: "Ата-ана байланыстары",
+        searchUsers: "Аты немесе поштасы бойынша іздеу",
+        allRoles: "Барлық рөлдер",
+        showingCount: "{total} ішінен {shown} көрсетілді",
+        noMatches: "Сүзгілерге сәйкес пайдаланушы жоқ.",
     },
     // Achievement review queue.
     achievementReview: {

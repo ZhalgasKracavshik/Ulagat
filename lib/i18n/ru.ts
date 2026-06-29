@@ -1376,6 +1376,10 @@ export const ru: Dictionary = {
         launchStaff: "Персонал (учителя, завучи, парламент)",
         launchStaffNone: "Только администратор",
         launchParents: "Привязки родителей",
+        searchUsers: "Поиск по имени или почте",
+        allRoles: "Все роли",
+        showingCount: "Показано {shown} из {total}",
+        noMatches: "Никого не найдено по фильтрам.",
     },
     // Achievement review queue.
     achievementReview: {

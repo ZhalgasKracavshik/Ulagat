@@ -29,7 +29,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { updateUserRole, updateUserSkudId } from '@/app/admin/users/actions';
-import { Loader2, Check, X, ShieldAlert } from 'lucide-react';
+import { Loader2, Check, X, ShieldAlert, Search } from 'lucide-react';
 import { useT } from '@/hooks/useT';
 import type { UserRole, AdminUserRow } from '@/types';
 
@@ -59,6 +59,8 @@ export function UsersManagementTable({ users, currentUserId }: UsersManagementTa
     const [skudEditing, setSkudEditing] = useState<Record<string, string>>({});
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [confirm, setConfirm] = useState<{ userId: string; newRole: UserRole; name: string } | null>(null);
+    const [query, setQuery] = useState('');
+    const [roleFilter, setRoleFilter] = useState('');
 
     const effectiveRole = (user: AdminUserRow): UserRole => roleValues[user.id] ?? user.role;
 
@@ -121,8 +123,44 @@ export function UsersManagementTable({ users, currentUserId }: UsersManagementTa
         }
     };
 
+    const q = query.trim().toLowerCase();
+    const filteredUsers = users.filter((u) => {
+        if (roleFilter && u.role !== roleFilter) return false;
+        if (!q) return true;
+        return (u.full_name ?? '').toLowerCase().includes(q) || (u.email ?? '').toLowerCase().includes(q);
+    });
+
     return (
-        <div className="overflow-x-auto">
+        <div className="space-y-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <div className="relative flex-1">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+                    <Input
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder={t('admin.searchUsers')}
+                        className="h-10 pl-9"
+                    />
+                </div>
+                <select
+                    aria-label={t('admin.colRole')}
+                    value={roleFilter}
+                    onChange={(e) => setRoleFilter(e.target.value)}
+                    className="h-10 rounded-lg border border-border bg-background px-3 text-sm"
+                >
+                    <option value="">{t('admin.allRoles')}</option>
+                    <option value="student">{t('admin.roleStudent')}</option>
+                    <option value="teacher">{t('admin.roleTeacher')}</option>
+                    <option value="parent">{t('admin.roleParent')}</option>
+                    <option value="parliament">{t('admin.roleParliament')}</option>
+                    <option value="moderator">{t('admin.roleModerator')}</option>
+                    <option value="admin">{t('admin.roleAdmin')}</option>
+                </select>
+            </div>
+            <p className="text-xs text-muted-foreground">
+                {t('admin.showingCount').replace('{shown}', String(filteredUsers.length)).replace('{total}', String(users.length))}
+            </p>
+            <div className="overflow-x-auto">
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -136,7 +174,7 @@ export function UsersManagementTable({ users, currentUserId }: UsersManagementTa
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {users.map((user) => {
+                    {filteredUsers.map((user) => {
                         const isCurrentUser = user.id === currentUserId;
                         const isEditingSkud = skudEditing[user.id] !== undefined;
                         const skudValue = isEditingSkud
@@ -265,6 +303,12 @@ export function UsersManagementTable({ users, currentUserId }: UsersManagementTa
                     })}
                 </TableBody>
             </Table>
+            </div>
+
+            {/* Empty state when filters match nobody */}
+            {filteredUsers.length === 0 && (
+                <p className="py-8 text-center text-sm text-muted-foreground">{t('admin.noMatches')}</p>
+            )}
 
             {/* Elevated-role confirmation (admin / moderator) */}
             <Dialog open={confirm !== null} onOpenChange={(open) => { if (!open) setConfirm(null); }}>

@@ -1410,6 +1410,10 @@ export const en: Dictionary = {
         launchStaff: "Staff (teachers, vice-principals, parliament)",
         launchStaffNone: "Admin only",
         launchParents: "Parent links",
+        searchUsers: "Search by name or email",
+        allRoles: "All roles",
+        showingCount: "Showing {shown} of {total}",
+        noMatches: "No users match the filters.",
     },
     // Achievement review queue.
     achievementReview: {
