@@ -1329,6 +1329,16 @@ export const en: Dictionary = {
         confirmRoleTitle: "Confirm role change",
         confirmRoleBody: "You are assigning the \"{role}\" role to {name}. This role grants elevated access to the control panel. Continue?",
         confirmRoleGrant: "Grant role",
+        // Quick actions (staff control center).
+        quickActions: "Quick actions",
+        actSubstitutions: "Lesson changes",
+        actSubstitutionsDesc: "Add a substitution, cancellation or room change",
+        actTimetable: "Timetable",
+        actTimetableDesc: "Edit a class lesson grid",
+        actAnnouncement: "Announcement",
+        actAnnouncementDesc: "Publish an official announcement",
+        actAchievementsDesc: "Review student achievements",
+        actUsersDesc: "User roles, classes and SKUD",
     },
     // Achievement review queue.
     achievementReview: {

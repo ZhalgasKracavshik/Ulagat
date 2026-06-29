@@ -1295,6 +1295,16 @@ export const ru: Dictionary = {
         confirmRoleTitle: "Подтвердите выдачу роли",
         confirmRoleBody: "Вы назначаете роль «{role}» пользователю {name}. Эта роль даёт расширенный доступ к панели управления. Продолжить?",
         confirmRoleGrant: "Выдать роль",
+        // Quick actions (staff control center).
+        quickActions: "Быстрые действия",
+        actSubstitutions: "Замены уроков",
+        actSubstitutionsDesc: "Внести замену, отмену или смену кабинета",
+        actTimetable: "Расписание",
+        actTimetableDesc: "Редактировать сетку уроков класса",
+        actAnnouncement: "Объявление",
+        actAnnouncementDesc: "Опубликовать официальное объявление",
+        actAchievementsDesc: "Проверить достижения учеников",
+        actUsersDesc: "Роли, классы и СКУД пользователей",
     },
     // Achievement review queue.
     achievementReview: {

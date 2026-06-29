@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShieldAlert, Users, ListFilter, Award, Calendar } from "lucide-react";
+import { ShieldAlert, Users, ListFilter, Award, Calendar, CalendarClock, CalendarDays, Megaphone } from "lucide-react";
 import { ServiceReviewTable } from "@/components/admin/ServiceReviewTable";
 import { EventReviewTable } from "@/components/admin/EventReviewTable";
 import { MaterialReviewTable } from "@/components/admin/MaterialReviewTable";
@@ -21,6 +21,10 @@ type AdminServiceRow = {
     created_at: string;
     profiles?: { full_name: string | null; role: string | null } | null;
 };
+
+// Shared styles for the quick-action tiles (staff control center).
+const ACTION_TILE = "group flex items-start gap-3 rounded-xl border bg-card p-4 transition-all hover:border-primary/40 hover:shadow-sm";
+const ACTION_ICON = "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg";
 
 export default async function AdminPage() {
     const supabase = await createClient();
@@ -88,25 +92,6 @@ export default async function AdminPage() {
                         <p className="text-muted-foreground">{t('admin.dashboardSubtitle')}</p>
                     </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
-                    {/* User management is admin-only and lives on its own page (/admin/users). */}
-                    {isAdmin && (
-                        <Link href="/admin/users">
-                            <Button variant="outline" className="gap-2 font-bold">
-                                <Users className="w-4 h-4 text-primary" />
-                                {t('admin.manageUsers')}
-                            </Button>
-                        </Link>
-                    )}
-                    {/* Achievement verification lives at /achievements/review (also accessible to parliament) */}
-                    <Link href="/achievements/review">
-                        <Button variant="outline" className="gap-2 font-bold">
-                            <Award className="w-4 h-4 text-amber-500" />
-                            {t('admin.reviewAchievements')}
-                            {(pendingAchievements ?? 0) > 0 && <Badge className="bg-red-500">{pendingAchievements}</Badge>}
-                        </Button>
-                    </Link>
-                </div>
             </div>
 
             {/* Stats Cards */}
@@ -139,6 +124,72 @@ export default async function AdminPage() {
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Quick actions — staff control center (the daily tools live on their
+                own pages; this surfaces them in one place on the dashboard). */}
+            <Card>
+                <CardHeader className="pb-3">
+                    <CardTitle className="text-base">{t('admin.quickActions')}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        <Link href="/schedule/substitutions" className={ACTION_TILE}>
+                            <span className={`${ACTION_ICON} bg-amber-100 text-amber-600 dark:bg-amber-950/50`}>
+                                <CalendarClock className="h-5 w-5" />
+                            </span>
+                            <div className="min-w-0">
+                                <p className="font-semibold text-foreground">{t('admin.actSubstitutions')}</p>
+                                <p className="text-sm text-muted-foreground">{t('admin.actSubstitutionsDesc')}</p>
+                            </div>
+                        </Link>
+
+                        <Link href="/schedule/manage" className={ACTION_TILE}>
+                            <span className={`${ACTION_ICON} bg-sky-100 text-sky-600 dark:bg-sky-950/50`}>
+                                <CalendarDays className="h-5 w-5" />
+                            </span>
+                            <div className="min-w-0">
+                                <p className="font-semibold text-foreground">{t('admin.actTimetable')}</p>
+                                <p className="text-sm text-muted-foreground">{t('admin.actTimetableDesc')}</p>
+                            </div>
+                        </Link>
+
+                        <Link href="/announcements/new" className={ACTION_TILE}>
+                            <span className={`${ACTION_ICON} bg-indigo-100 text-indigo-600 dark:bg-indigo-950/50`}>
+                                <Megaphone className="h-5 w-5" />
+                            </span>
+                            <div className="min-w-0">
+                                <p className="font-semibold text-foreground">{t('admin.actAnnouncement')}</p>
+                                <p className="text-sm text-muted-foreground">{t('admin.actAnnouncementDesc')}</p>
+                            </div>
+                        </Link>
+
+                        <Link href="/achievements/review" className={ACTION_TILE}>
+                            <span className={`${ACTION_ICON} bg-emerald-100 text-emerald-600 dark:bg-emerald-950/50`}>
+                                <Award className="h-5 w-5" />
+                            </span>
+                            <div className="min-w-0">
+                                <div className="flex items-center gap-2">
+                                    <p className="font-semibold text-foreground">{t('admin.reviewAchievements')}</p>
+                                    {(pendingAchievements ?? 0) > 0 && <Badge className="bg-red-500">{pendingAchievements}</Badge>}
+                                </div>
+                                <p className="text-sm text-muted-foreground">{t('admin.actAchievementsDesc')}</p>
+                            </div>
+                        </Link>
+
+                        {isAdmin && (
+                            <Link href="/admin/users" className={ACTION_TILE}>
+                                <span className={`${ACTION_ICON} bg-rose-100 text-rose-600 dark:bg-rose-950/50`}>
+                                    <Users className="h-5 w-5" />
+                                </span>
+                                <div className="min-w-0">
+                                    <p className="font-semibold text-foreground">{t('admin.manageUsers')}</p>
+                                    <p className="text-sm text-muted-foreground">{t('admin.actUsersDesc')}</p>
+                                </div>
+                            </Link>
+                        )}
+                    </div>
+                </CardContent>
+            </Card>
 
             {/* Management Tabs */}
             <Tabs defaultValue="services" className="w-full">

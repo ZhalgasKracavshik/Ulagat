@@ -1295,6 +1295,16 @@ export const kk: Dictionary = {
         confirmRoleTitle: "Рөл беруді растаңыз",
         confirmRoleBody: "Сіз {name} пайдаланушысына «{role}» рөлін бересіз. Бұл рөл басқару панеліне кеңейтілген қол жеткізу береді. Жалғастырасыз ба?",
         confirmRoleGrant: "Рөл беру",
+        // Quick actions (staff control center).
+        quickActions: "Жылдам әрекеттер",
+        actSubstitutions: "Сабақ ауыстырулары",
+        actSubstitutionsDesc: "Ауыстыру, болдырмау немесе кабинет ауыстыру",
+        actTimetable: "Кесте",
+        actTimetableDesc: "Сынып сабақ кестесін өңдеу",
+        actAnnouncement: "Хабарландыру",
+        actAnnouncementDesc: "Ресми хабарландыру жариялау",
+        actAchievementsDesc: "Оқушылардың жетістіктерін тексеру",
+        actUsersDesc: "Пайдаланушы рөлдері, сыныптар, СКУД",
     },
     // Achievement review queue.
     achievementReview: {
