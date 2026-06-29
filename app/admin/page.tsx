@@ -193,17 +193,17 @@ export default async function AdminPage() {
 
             {/* Management Tabs */}
             <Tabs defaultValue="services" className="w-full">
-                <TabsList className="w-full md:w-auto">
-                    <TabsTrigger value="services" className="flex-1 md:flex-none">
+                <TabsList className="w-full md:w-auto overflow-x-auto justify-start md:justify-center">
+                    <TabsTrigger value="services" className="shrink-0">
                         {t('admin.tabServices')} {pendingServices && pendingServices.length > 0 && <Badge className="ml-2 bg-red-500">{pendingServices.length}</Badge>}
                     </TabsTrigger>
-                    <TabsTrigger value="events" className="flex-1 md:flex-none">
+                    <TabsTrigger value="events" className="shrink-0">
                         {t('admin.tabEvents')} {pendingEvents && pendingEvents.length > 0 && <Badge className="ml-2 bg-red-500">{pendingEvents.length}</Badge>}
                     </TabsTrigger>
-                    <TabsTrigger value="materials" className="flex-1 md:flex-none">
+                    <TabsTrigger value="materials" className="shrink-0">
                         {t('admin.tabMaterials')} {pendingMaterials && pendingMaterials.length > 0 && <Badge className="ml-2 bg-red-500">{pendingMaterials.length}</Badge>}
                     </TabsTrigger>
-                    <TabsTrigger value="all-services" className="flex-1 md:flex-none">{t('admin.tabAllServices')}</TabsTrigger>
+                    <TabsTrigger value="all-services" className="shrink-0">{t('admin.tabAllServices')}</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="services" className="space-y-4">
