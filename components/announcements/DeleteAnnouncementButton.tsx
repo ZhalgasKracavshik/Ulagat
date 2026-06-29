@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { deleteAnnouncement } from "@/app/announcements/actions";
+import { useT } from "@/hooks/useT";
 
 type DeleteAnnouncementButtonProps = {
     id: string;
@@ -16,6 +17,7 @@ type DeleteAnnouncementButtonProps = {
  * ("Click again to confirm"); it disarms automatically after 3 seconds.
  */
 export function DeleteAnnouncementButton({ id }: DeleteAnnouncementButtonProps) {
+    const { t } = useT();
     const router = useRouter();
     const [isDeleting, startDeleting] = useTransition();
     const [armed, setArmed] = useState(false);
@@ -43,7 +45,7 @@ export function DeleteAnnouncementButton({ id }: DeleteAnnouncementButtonProps) 
                 toast.error(result.error);
                 return;
             }
-            toast.success("Announcement deleted.");
+            toast.success(t("announcementForm.deleted"));
             router.refresh();
         });
     };
@@ -57,10 +59,10 @@ export function DeleteAnnouncementButton({ id }: DeleteAnnouncementButtonProps) 
                 onClick={handleClick}
                 disabled={isDeleting}
                 className="gap-1.5 text-xs"
-                aria-label="Confirm delete announcement"
+                aria-label={t("announcementForm.deleteConfirmAria")}
             >
                 <Trash2 className="w-3.5 h-3.5" />
-                Click again to confirm
+                {t("announcementForm.deleteConfirm")}
             </Button>
         );
     }
@@ -73,7 +75,7 @@ export function DeleteAnnouncementButton({ id }: DeleteAnnouncementButtonProps) 
             onClick={handleClick}
             disabled={isDeleting}
             className="text-red-500 hover:text-red-600 hover:bg-red-50"
-            aria-label="Delete announcement"
+            aria-label={t("announcementForm.deleteAria")}
         >
             <Trash2 className="w-4 h-4" />
         </Button>

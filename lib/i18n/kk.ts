@@ -1196,6 +1196,10 @@ export const kk: Dictionary = {
         emailSkipped: "Хабарландыру жарияланды. Хат жіберу бапталмаған (әзірлеу режимі) — хабарлама журналға жазылды.",
         emailSent: "Хабарландыру жарияланды. {count} оқушы мен ата-ана поштамен хабарландырылды.",
         noRecipients: "Хабарландыру жарияланды. Хабарлама үшін сәйкес алушылар табылмады.",
+        deleteAria: "Хабарландыруды жою",
+        deleteConfirmAria: "Хабарландыруды жоюды растау",
+        deleteConfirm: "Растау үшін қайта басыңыз",
+        deleted: "Хабарландыру жойылды.",
     },
     // Admin dashboard + user management + review tables.
     admin: {

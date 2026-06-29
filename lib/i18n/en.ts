@@ -1230,6 +1230,10 @@ export const en: Dictionary = {
         emailSkipped: "Announcement published. Email sending is not configured (dev mode) — notification was logged instead.",
         emailSent: "Announcement published. {count} student(s) and parent(s) notified by email.",
         noRecipients: "Announcement published. No matching recipients found for email notification.",
+        deleteAria: "Delete announcement",
+        deleteConfirmAria: "Confirm delete announcement",
+        deleteConfirm: "Click again to confirm",
+        deleted: "Announcement deleted.",
     },
     // Admin dashboard + user management + review tables.
     admin: {
