@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { ShieldAlert } from "lucide-react";
 import { ScheduleGridEditor } from "@/components/schedule/ScheduleGridEditor";
+import { ScheduleExcelImport } from "@/components/schedule/ScheduleExcelImport";
 import { ScheduleBulkImport } from "@/components/schedule/ScheduleBulkImport";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
 
@@ -55,6 +56,7 @@ export default async function ScheduleManagePage() {
                         {t('scheduleManage.subtitle')}
                     </p>
                 </div>
+                <ScheduleExcelImport />
                 <ScheduleBulkImport />
                 <ScheduleGridEditor />
             </div>
