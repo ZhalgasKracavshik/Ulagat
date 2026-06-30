@@ -4,6 +4,7 @@ import { getViewerGrades, announcementGradeFilter } from "@/lib/announcements/vi
 import { resolveUserClass } from "@/lib/schedule/resolve-class";
 import { almatyTodayIso, almatyDayOfWeek } from "@/lib/schedule/almaty-time";
 import { HomeView } from "@/components/home/HomeView";
+import { SetupChecklist } from "@/components/home/SetupChecklist";
 import type { FullDashboardData } from "@/components/home/FullDashboard";
 import type { ExpressData } from "@/components/express/ExpressDashboard";
 import type { DayCell } from "@/components/schedule/types";
@@ -159,5 +160,10 @@ export default async function HomePage() {
         announcements,
     };
 
-    return <HomeView full={fullData} express={expressData} />;
+    return (
+        <>
+            <SetupChecklist />
+            <HomeView full={fullData} express={expressData} />
+        </>
+    );
 }
