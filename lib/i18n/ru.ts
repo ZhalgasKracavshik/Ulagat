@@ -116,6 +116,8 @@ export const ru: Dictionary = {
         delete: "Удалить",
         back: "Назад",
         add: "Добавить",
+        deleteTitle: "Удалить?",
+        deleteIrreversible: "Это действие нельзя отменить.",
         // Названия ролей с заглавной буквы для отображения пользователям.
         roles: {
             student: "Ученик",

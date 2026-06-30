@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -93,7 +94,6 @@ export function AchievementsSection({ achievements, isOwner }: AchievementsProps
     }
 
     async function handleDelete(id: string) {
-        if (!confirm(t("achievementsSection.deleteConfirm"))) return;
         try {
             await fetch("/api/achievements", {
                 method: "DELETE",
@@ -234,14 +234,21 @@ export function AchievementsSection({ achievements, isOwner }: AchievementsProps
                                         )}
                                     </div>
                                     {isOwner && (
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-600"
-                                            onClick={() => handleDelete(a.id)}
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
+                                        <ConfirmDialog
+                                            title={t("common.deleteTitle")}
+                                            description={t("achievementsSection.deleteConfirm")}
+                                            confirmLabel={t("common.delete")}
+                                            onConfirm={() => handleDelete(a.id)}
+                                            trigger={
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-600"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            }
+                                        />
                                     )}
                                 </div>
                             </CardContent>

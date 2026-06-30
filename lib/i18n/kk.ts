@@ -116,6 +116,8 @@ export const kk: Dictionary = {
         delete: "Жою",
         back: "Артқа",
         add: "Қосу",
+        deleteTitle: "Жою керек пе?",
+        deleteIrreversible: "Бұл әрекетті қайтару мүмкін емес.",
         // Пайдаланушыларға көрсетілетін рөл атаулары (бас әріппен).
         roles: {
             student: "Оқушы",

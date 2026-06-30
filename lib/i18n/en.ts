@@ -124,6 +124,8 @@ export const en: Dictionary = {
         delete: "Delete",
         back: "Back",
         add: "Add",
+        deleteTitle: "Delete?",
+        deleteIrreversible: "This action cannot be undone.",
         // Capitalized role labels, used wherever a role is displayed to users.
         roles: {
             student: "Student",
