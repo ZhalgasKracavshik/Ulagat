@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Users, Trophy, Star, Tag, PlusCircle, Sparkles } from "lucide-react";
+import { EmptyState } from "@/components/EmptyState";
 import Link from "next/link";
 import {
     CLUB_CATEGORIES,
@@ -189,16 +190,14 @@ export default async function ClubsPage({ searchParams }: { searchParams: Promis
                         );
                     })
                 ) : (
-                    <div className="col-span-full py-20 text-center space-y-4">
-                        <div className="mx-auto w-24 h-24 bg-violet-50 dark:bg-violet-950/40 rounded-full flex items-center justify-center">
-                            <Users className="w-12 h-12 text-violet-300 dark:text-violet-600" />
-                        </div>
-                        <h3 className="text-xl font-bold text-foreground">{t('clubs.noClubsTitle')}</h3>
-                        <p className="text-muted-foreground">
-                            {categoryFilter
-                                ? t('clubs.noClubsCategory', { category: t(clubCategoryKey(categoryFilter)) })
-                                : t('clubs.noClubsDefault')}
-                        </p>
+                    <div className="col-span-full">
+                        <EmptyState
+                            icon={Users}
+                            title={t('clubs.noClubsTitle')}
+                            description={categoryFilter ? t('clubs.noClubsCategory', { category: t(clubCategoryKey(categoryFilter)) }) : t('clubs.noClubsDefault')}
+                            tint="bg-violet-50 dark:bg-violet-950/40"
+                            iconColor="text-violet-300 dark:text-violet-600"
+                        />
                     </div>
                 )}
             </div>

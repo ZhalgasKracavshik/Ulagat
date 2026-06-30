@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MapPin, PlusCircle, Tag, Search, PackageSearch, Clock, Package } from "lucide-react";
+import { EmptyState } from "@/components/EmptyState";
 import { format } from "date-fns";
 import Link from "next/link";
 import {
@@ -218,16 +219,14 @@ export default async function LostFoundPage({ searchParams }: { searchParams: Pr
                         );
                     })
                 ) : (
-                    <div className="col-span-full py-20 text-center space-y-4">
-                        <div className="mx-auto w-24 h-24 bg-teal-50 dark:bg-teal-950/40 rounded-full flex items-center justify-center">
-                            <PackageSearch className="w-12 h-12 text-teal-300 dark:text-teal-600" />
-                        </div>
-                        <h3 className="text-xl font-bold text-foreground">{t('lostFound.emptyTitle')}</h3>
-                        <p className="text-muted-foreground">
-                            {search || statusFilter || categoryFilter
-                                ? t('lostFound.emptyFiltered')
-                                : t('lostFound.emptyDefault')}
-                        </p>
+                    <div className="col-span-full">
+                        <EmptyState
+                            icon={PackageSearch}
+                            title={t('lostFound.emptyTitle')}
+                            description={search || statusFilter || categoryFilter ? t('lostFound.emptyFiltered') : t('lostFound.emptyDefault')}
+                            tint="bg-teal-50 dark:bg-teal-950/40"
+                            iconColor="text-teal-300 dark:text-teal-600"
+                        />
                     </div>
                 )}
             </div>

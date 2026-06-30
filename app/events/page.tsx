@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Trophy, Users, Tag } from "lucide-react";
+import { EmptyState } from "@/components/EmptyState";
 import Link from "next/link";
 import { format } from "date-fns";
 import { CountdownWidget } from "@/components/events/CountdownWidget";
@@ -220,16 +221,14 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
                         );
                     })
                 ) : (
-                    <div className="col-span-full py-20 text-center space-y-4">
-                        <div className="mx-auto w-24 h-24 bg-blue-50 dark:bg-blue-950/40 rounded-full flex items-center justify-center">
-                            <Trophy className="w-12 h-12 text-blue-300" />
-                        </div>
-                        <h3 className="text-xl font-bold text-foreground">{t('events.noEventsTitle')}</h3>
-                        <p className="text-muted-foreground">
-                            {tagFilter
-                                ? t('events.noEventsTagged', { tag: t(eventTagKey(tagFilter)) })
-                                : t('events.noEventsDefault')}
-                        </p>
+                    <div className="col-span-full">
+                        <EmptyState
+                            icon={Trophy}
+                            title={t('events.noEventsTitle')}
+                            description={tagFilter ? t('events.noEventsTagged', { tag: t(eventTagKey(tagFilter)) }) : t('events.noEventsDefault')}
+                            tint="bg-blue-50 dark:bg-blue-950/40"
+                            iconColor="text-blue-300"
+                        />
                     </div>
                 )}
             </div>

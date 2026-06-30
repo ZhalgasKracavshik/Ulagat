@@ -4,8 +4,9 @@ import { cookies } from "next/headers";
 import { ServiceCard } from "@/components/services/ServiceCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, PlusCircle } from "lucide-react";
+import { Search, PlusCircle, Store } from "lucide-react";
 import Link from "next/link";
+import { EmptyState } from "@/components/EmptyState";
 import { SERVICE_CATEGORIES, SERVICE_CREATOR_ROLES } from "@/lib/services";
 import { serviceCategoryKey } from "@/lib/services-i18n";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
@@ -120,13 +121,15 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
                         <ServiceCard key={service.id} service={service} />
                     ))
                 ) : (
-                    <div className="col-span-full py-20 text-center space-y-4">
-                        <div className="text-6xl">🙈</div>
-                        <h3 className="text-xl font-bold">{categoryFilter ? t('servicesList.emptyTitleCategory') : t('servicesList.emptyTitle')}</h3>
-                        <p className="text-muted-foreground">{t('servicesList.emptyBody')}</p>
-                        <Link href="/services/new">
-                            <Button variant="outline" className="mt-4">{t('servicesList.createFirst')}</Button>
-                        </Link>
+                    <div className="col-span-full">
+                        <EmptyState
+                            icon={Store}
+                            title={categoryFilter ? t('servicesList.emptyTitleCategory') : t('servicesList.emptyTitle')}
+                            description={t('servicesList.emptyBody')}
+                            tint="bg-indigo-50 dark:bg-indigo-950/40"
+                            iconColor="text-indigo-400"
+                            action={{ href: '/services/new', label: t('servicesList.createFirst') }}
+                        />
                     </div>
                 )}
             </div>
