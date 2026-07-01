@@ -1,0 +1,57 @@
+name: security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly re-scan so newly-disclosed CVEs in unchanged deps still surface.
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  sca:
+    name: Dependency audit (SCA)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci --ignore-scripts
+      # Fail the build on any high/critical vulnerability in the dependency tree.
+      - name: npm audit (high+)
+        run: npm audit --audit-level=high
+      # Verify npm provenance/signatures where publishers provide them.
+      - name: npm audit signatures
+        run: npm audit signatures || true
+
+  secret-boundary:
+    name: Service-role key must never reach the client
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Fail if the service-role key is referenced in any client component,
+      # or exposed via a NEXT_PUBLIC_ variable.
+      - name: Guard SUPABASE_SERVICE_ROLE_KEY boundary
+        run: |
+          set -e
+          # 1) service-role key must not appear in a "use client" file
+          client_hits=$(grep -rlZ '"use client"' app components 2>/dev/null \
+            | xargs -0 grep -l 'SERVICE_ROLE' 2>/dev/null || true)
+          if [ -n "$client_hits" ]; then
+            echo "::error::SUPABASE_SERVICE_ROLE_KEY referenced in client component(s):"
+            echo "$client_hits"
+            exit 1
+          fi
+          # 2) the service-role key must never be prefixed NEXT_PUBLIC_
+          if grep -rn 'NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY' . \
+              --include='*.ts' --include='*.tsx' --include='*.env*' 2>/dev/null; then
+            echo "::error::Service-role key must not be a NEXT_PUBLIC_ variable"
+            exit 1
+          fi
+          echo "Service-role boundary OK"
