@@ -84,23 +84,38 @@ export default async function AdminPage() {
     // ---- Launch-readiness metrics (pre-pilot visibility for staff) ----
     // Counted with the service-role client so aggregates are accurate
     // regardless of per-row RLS (e.g. family_bonds). No PII is surfaced.
-    const adminClient = createAdminClient();
-    const [
-        { count: studentsNoClass },
-        { count: teacherCount },
-        { count: moderatorCount },
-        { count: parliamentCount },
-        { count: familyBondsCount },
-        { count: scheduleRows },
-    ] = await Promise.all([
-        adminClient.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'student').or('grade.is.null,class_letter.is.null'),
-        adminClient.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'teacher'),
-        adminClient.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'moderator'),
-        adminClient.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'parliament'),
-        adminClient.from('family_bonds').select('*', { count: 'exact', head: true }),
-        adminClient.from('schedule').select('*', { count: 'exact', head: true }),
-    ]);
-    const staffCount = (teacherCount ?? 0) + (moderatorCount ?? 0) + (parliamentCount ?? 0);
+    // Wrapped so a missing/misconfigured service-role key never crashes the
+    // whole dashboard — the moderation tabs must keep working regardless.
+    let studentsNoClass = 0;
+    let familyBondsCount = 0;
+    let scheduleRows = 0;
+    let staffCount = 0;
+    let readinessAvailable = true;
+    try {
+        const adminClient = createAdminClient();
+        const [
+            { count: noClass },
+            { count: teacherCount },
+            { count: moderatorCount },
+            { count: parliamentCount },
+            { count: bonds },
+            { count: sched },
+        ] = await Promise.all([
+            adminClient.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'student').or('grade.is.null,class_letter.is.null'),
+            adminClient.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'teacher'),
+            adminClient.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'moderator'),
+            adminClient.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'parliament'),
+            adminClient.from('family_bonds').select('*', { count: 'exact', head: true }),
+            adminClient.from('schedule').select('*', { count: 'exact', head: true }),
+        ]);
+        studentsNoClass = noClass ?? 0;
+        familyBondsCount = bonds ?? 0;
+        scheduleRows = sched ?? 0;
+        staffCount = (teacherCount ?? 0) + (moderatorCount ?? 0) + (parliamentCount ?? 0);
+    } catch (err) {
+        console.error('[admin] readiness metrics unavailable:', err);
+        readinessAvailable = false;
+    }
     const fromEmail = process.env.RESEND_FROM_EMAIL ?? '';
     const emailConfigured = Boolean(process.env.RESEND_API_KEY) && Boolean(fromEmail) && !fromEmail.includes('resend.dev');
 
@@ -216,6 +231,7 @@ export default async function AdminPage() {
             </Card>
 
             {/* Launch readiness — what still blocks the pilot from working */}
+            {readinessAvailable && (
             <Card>
                 <CardHeader className="pb-3">
                     <CardTitle className="text-base">{t('admin.launchReadiness')}</CardTitle>
@@ -274,6 +290,7 @@ export default async function AdminPage() {
                     </ul>
                 </CardContent>
             </Card>
+            )}
 
             {/* Management Tabs */}
             <Tabs defaultValue="services" className="w-full">

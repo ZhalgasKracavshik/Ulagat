@@ -27,20 +27,32 @@ export async function SetupChecklist() {
     if (role !== "admin" && role !== "moderator") return null;
     const isAdmin = role === "admin";
 
-    const admin = createAdminClient();
-    const [
-        { count: scheduleRows },
-        { count: teacherCount },
-        { count: moderatorCount },
-        { count: parliamentCount },
-    ] = await Promise.all([
-        admin.from("schedule").select("*", { count: "exact", head: true }),
-        admin.from("profiles").select("*", { count: "exact", head: true }).eq("role", "teacher"),
-        admin.from("profiles").select("*", { count: "exact", head: true }).eq("role", "moderator"),
-        admin.from("profiles").select("*", { count: "exact", head: true }).eq("role", "parliament"),
-    ]);
+    let scheduleRows = 0;
+    let staffCount = 0;
+    try {
+        const admin = createAdminClient();
+        const [
+            { count: sched },
+            { count: teacherCount },
+            { count: moderatorCount },
+            { count: parliamentCount },
+        ] = await Promise.all([
+            admin.from("schedule").select("*", { count: "exact", head: true }),
+            admin.from("profiles").select("*", { count: "exact", head: true }).eq("role", "teacher"),
+            admin.from("profiles").select("*", { count: "exact", head: true }).eq("role", "moderator"),
+            admin.from("profiles").select("*", { count: "exact", head: true }).eq("role", "parliament"),
+        ]);
+        scheduleRows = sched ?? 0;
+        staffCount = (teacherCount ?? 0) + (moderatorCount ?? 0) + (parliamentCount ?? 0);
+    } catch (err) {
+        // An optional setup widget must NEVER crash the home page. If the
+        // service-role key is missing/misconfigured in this environment,
+        // createAdminClient throws "supabaseKey is required" — swallow it and
+        // simply don't render the checklist.
+        console.error("[setup-checklist] metrics unavailable:", err);
+        return null;
+    }
 
-    const staffCount = (teacherCount ?? 0) + (moderatorCount ?? 0) + (parliamentCount ?? 0);
     const fromEmail = process.env.RESEND_FROM_EMAIL ?? "";
     const emailDone = Boolean(process.env.RESEND_API_KEY) && Boolean(fromEmail) && !fromEmail.includes("resend.dev");
     const scheduleDone = (scheduleRows ?? 0) > 0;
