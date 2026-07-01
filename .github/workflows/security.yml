@@ -17,7 +17,7 @@ jobs:
     name: Dependency audit (SCA)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -34,7 +34,7 @@ jobs:
     name: Service-role key must never reach the client
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # Fail if the service-role key is referenced in any client component,
       # or exposed via a NEXT_PUBLIC_ variable.
       - name: Guard SUPABASE_SERVICE_ROLE_KEY boundary
