@@ -116,11 +116,21 @@ export function parseGridsFromSheet(grid: string[][], sheetName: string): SheetR
     // Every row that looks like a weekday header (>= 2 day names) starts a grid.
     const headers: { row: number; dayCols: { col: number; day: number }[] }[] = [];
     grid.forEach((rowArr, r) => {
-        const cols: { col: number; day: number }[] = [];
+        const raw: { col: number; day: number }[] = [];
         (rowArr ?? []).forEach((c, ci) => {
             const d = dayFromHeader(c ?? "");
-            if (d > 0) cols.push({ col: ci, day: d });
+            if (d > 0) raw.push({ col: ci, day: d });
         });
+        // A merged day header (e.g. "Дүйсенбі" spanning the Предмет + Каб.
+        // columns) can surface the same day name in the adjacent room
+        // sub-column. Keep only the first column of each such run, otherwise
+        // the room column is mistaken for another day and every lesson doubles.
+        const cols: { col: number; day: number }[] = [];
+        for (const dc of raw) {
+            const prev = cols[cols.length - 1];
+            if (prev && prev.day === dc.day && dc.col === prev.col + 1) continue;
+            cols.push(dc);
+        }
         if (cols.length >= 2) headers.push({ row: r, dayCols: cols });
     });
     if (headers.length === 0) return [];
