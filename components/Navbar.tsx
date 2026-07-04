@@ -1,7 +1,6 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -14,14 +13,12 @@ import {
     ChevronDown,
     Settings,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
-import type { User as AuthUser } from "@supabase/supabase-js";
 import type { Profile } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useUIPhase } from "@/hooks/useUIPhase";
 import { useT } from "@/contexts/LocaleContext";
-import { resolvePlan } from "@/lib/subscription-plan";
-import { NAV, MORE_GROUPS, canSee, STAFF_ROLES } from "@/lib/nav-config";
+import { useNavData } from "@/hooks/useNavData";
+import { NAV, MORE_GROUPS, canSee, STAFF_ROLES, CHROMELESS_ROUTES } from "@/lib/nav-config";
 import { FEATURES } from "@/lib/features";
 import {
     DropdownMenu,
@@ -39,68 +36,15 @@ export function Navbar({
     initialUserId?: string | null;
     initialProfile?: (Profile & { reputation?: number }) | null;
 }) {
-    // Seed from server-resolved auth so the first paint shows the correct chrome
-    // (avatar) instead of flashing the guest "Get started / Sign in" buttons.
-    const [user, setUser] = useState<AuthUser | null>(
-        initialUserId ? ({ id: initialUserId } as unknown as AuthUser) : null
+    // Shared chrome data (seeded from server props, refreshed client-side) — same
+    // hook the desktop Sidebar uses, so the logic lives in one place.
+    const { user, profile, pendingFriendRequests, pendingModerationCount, isPremium } = useNavData(
+        initialUserId,
+        initialProfile
     );
-    const [profile, setProfile] = useState<(Profile & { reputation?: number }) | null>(initialProfile);
-    const [pendingFriendRequests, setPendingFriendRequests] = useState(0);
-    const [pendingModerationCount, setPendingModerationCount] = useState(0);
-    const [isPremium, setIsPremium] = useState(false);
-    const supabase = createClient();
     const { phase, ready: phaseReady, toggle } = useUIPhase();
     const { t } = useT();
     const pathname = usePathname();
-
-    useEffect(() => {
-        const fetchUserData = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            setUser(user);
-
-            if (user) {
-                const [{ data: profileData }, { count: friendshipCount }, { data: subscription }] = await Promise.all([
-                    supabase.from('profiles').select('*').eq('id', user.id).single(),
-                    supabase.from('friendships').select('*', { count: 'exact', head: true }).eq('addressee_id', user.id).eq('status', 'pending'),
-                    supabase.from('subscriptions').select('plan, status, current_period_end').eq('user_id', user.id).maybeSingle()
-                ]);
-                setProfile(profileData);
-                setPendingFriendRequests(friendshipCount || 0);
-
-                // Shared resolver: premium only when active and not expired.
-                setIsPremium(resolvePlan(subscription ?? null, Date.now()) === 'premium');
-
-                if (profileData?.role === 'admin' || profileData?.role === 'moderator') {
-                    const [{ count: sCount }, { count: eCount }, { count: mCount }] = await Promise.all([
-                        supabase.from('services').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-                        supabase.from('events').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-                        supabase.from('study_materials').select('*', { count: 'exact', head: true }).eq('status', 'pending')
-                    ]);
-                    setPendingModerationCount((sCount || 0) + (eCount || 0) + (mCount || 0));
-                }
-            }
-        };
-
-        fetchUserData();
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            // The server seed + the direct fetchUserData() above already cover the
-            // first load; skip Supabase's synchronous INITIAL_SESSION event so we
-            // don't run the whole fetch cascade twice on mount.
-            if (_event === 'INITIAL_SESSION') return;
-            setUser(session?.user ?? null);
-            if (!session) {
-                setProfile(null);
-                setPendingFriendRequests(0);
-                setPendingModerationCount(0);
-            } else {
-                fetchUserData();
-            }
-        });
-
-        return () => subscription.unsubscribe();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     // Express (morning) mode shows a deliberately minimal nav: just the
     // glanceable essentials. Only collapse once the phase has resolved
@@ -117,11 +61,10 @@ export function Navbar({
 
     // The landing and auth surfaces have their own full-bleed premium chrome
     // (fixed light palette) — don't overlay the themed app header on them.
-    const CHROMELESS = ['/', '/login', '/register', '/forgot-password', '/reset-password'];
-    if (CHROMELESS.includes(pathname)) return null;
+    if (CHROMELESS_ROUTES.includes(pathname)) return null;
 
     return (
-        <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <header className="md:hidden sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container mx-auto flex h-14 items-center px-4 md:px-6">
                 <div className="flex items-center gap-6">
                     <Link href={user ? "/home" : "/"} className="flex items-center">

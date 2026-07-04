@@ -5,6 +5,8 @@ import { cookies } from "next/headers";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/server";
 import { Navbar } from "@/components/Navbar";
+import { Sidebar } from "@/components/Sidebar";
+import { MainShell } from "@/components/MainShell";
 import { MobileTabBar } from "@/components/MobileTabBar";
 import { UIPhaseProvider } from "@/contexts/UIPhaseContext";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
@@ -57,10 +59,10 @@ export default async function RootLayout({
           <LocaleProvider initialLocale={initialLocale}>
             <UIPhaseProvider>
               <div className="relative flex min-h-screen flex-col">
+                {/* Mobile: sticky top bar. Desktop: persistent left sidebar. */}
                 <Navbar initialUserId={initialUserId} initialProfile={initialProfile} />
-                <main className="flex-1 pb-20 md:pb-0">
-                  {children}
-                </main>
+                <Sidebar initialUserId={initialUserId} initialProfile={initialProfile} />
+                <MainShell>{children}</MainShell>
                 <MobileTabBar initialUserId={initialUserId} initialProfile={initialProfile} />
               </div>
             </UIPhaseProvider>

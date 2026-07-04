@@ -54,6 +54,13 @@ export const INVITE_PARENT_ROLES: NavRole[] = ["student", "parliament"];
 /** Staff roles that see moderation tools. */
 export const STAFF_ROLES: NavRole[] = ["admin", "moderator"];
 
+/**
+ * Landing + auth surfaces have their own full-bleed premium chrome. The app
+ * navbar/sidebar/main-padding must all skip these routes, so the list lives in
+ * one place to stay in sync.
+ */
+export const CHROMELESS_ROUTES = ["/", "/login", "/register", "/forgot-password", "/reset-password"];
+
 export function canSee(dest: NavDestination, role: NavRole | null): boolean {
     if (!dest.roles) return true;
     if (!role) return false;
