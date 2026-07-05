@@ -21,7 +21,9 @@ import {
     PlusCircle,
 } from "lucide-react";
 import { CategoryBadge } from "@/components/announcements/CategoryBadge";
+import { AchievementFeed } from "@/components/home/AchievementFeed";
 import { effectiveLesson, type DayCell } from "@/components/schedule/types";
+import type { FeedAchievement } from "@/lib/achievements/feed";
 import { getPeriodTime } from "@/lib/schedule/bells";
 import { useT } from "@/hooks/useT";
 import type { Announcement, Profile, SubstitutionType, UserRole } from "@/types";
@@ -59,6 +61,8 @@ export type FullDashboardData = {
     classLabel: string | null;
     /** ISO day of week in Almaty: 1 = Monday … 7 = Sunday. */
     todayDow: number;
+    /** School-wide feed of recent verified achievements (with reactions). */
+    feed: FeedAchievement[];
 };
 
 const ROLE_LABEL_KEY: Record<UserRole, string> = {
@@ -477,6 +481,9 @@ export function FullDashboard({ data }: { data: FullDashboardData }) {
                     )}
                 </section>
             </div>
+
+            {/* School achievement feed — celebrate freshly verified wins */}
+            <AchievementFeed items={data.feed} />
         </div>
     );
 }

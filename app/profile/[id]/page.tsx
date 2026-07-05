@@ -13,6 +13,8 @@ import { ContactTutorButton } from "@/components/shared/ContactTutorButton";
 import { InviteParentSection } from "@/components/profile/InviteParentSection";
 import { PersonalCabinet } from "@/components/profile/PersonalCabinet";
 import { verifyChain } from "@/lib/reputation";
+import { aggregateReactions } from "@/lib/achievements/feed";
+import type { AchievementReactions } from "@/types";
 import { resolvePlan } from "@/lib/subscription-plan";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
@@ -130,6 +132,20 @@ export default async function ProfilePage({ params }: PageProps) {
         achievementsQuery = achievementsQuery.eq('status', 'verified');
     }
     const { data: achievements } = await achievementsQuery;
+
+    // Heart/clap reactions for the visible achievements (verified ones only
+    // can have rows — RLS blocks reacting to pending/rejected).
+    const achievementIds = (achievements ?? []).map((a) => a.id as string);
+    let reactionsById: Record<string, AchievementReactions> = {};
+    if (currentUser && achievementIds.length > 0) {
+        const { data: reactionRows } = await supabase
+            .from('achievement_reactions')
+            .select('achievement_id, user_id, kind')
+            .in('achievement_id', achievementIds);
+        reactionsById = Object.fromEntries(
+            aggregateReactions(reactionRows ?? [], achievementIds, currentUser.id),
+        );
+    }
 
     // Fetch Reputation Stats
     const { data: repBlocks } = await supabase
@@ -337,7 +353,7 @@ export default async function ProfilePage({ params }: PageProps) {
 
                     {/* Achievements Tab */}
                     <TabsContent value="achievements" className="animate-in fade-in-50 duration-300">
-                        <AchievementsSection achievements={achievements || []} isOwner={isOwner} />
+                        <AchievementsSection achievements={achievements || []} isOwner={isOwner} reactionsById={reactionsById} />
                     </TabsContent>
 
                     {/* Services Tab */}

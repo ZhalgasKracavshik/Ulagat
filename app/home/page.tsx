@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { getViewerGrades, announcementGradeFilter } from "@/lib/announcements/visibility";
 import { resolveUserClass } from "@/lib/schedule/resolve-class";
+import { fetchAchievementFeed } from "@/lib/achievements/feed";
 import { almatyTodayIso, almatyDayOfWeek } from "@/lib/schedule/almaty-time";
 import { HomeView } from "@/components/home/HomeView";
 import { SetupChecklist } from "@/components/home/SetupChecklist";
@@ -64,6 +65,9 @@ export default async function HomePage() {
     }
     const { data: announcementRows } = await announcementQuery;
     const announcements = (announcementRows ?? []) as Announcement[];
+
+    // School-wide feed of the latest verified achievements (with reactions).
+    const feed = await fetchAchievementFeed(supabase, user.id, 5);
 
     // ---- Express-mode data: today's schedule + substitutions for the user's class ----
     const todayIso = almatyTodayIso();
@@ -150,6 +154,7 @@ export default async function HomePage() {
         hasClassSet: classLabel !== null,
         classLabel,
         todayDow,
+        feed,
     };
 
     const expressData: ExpressData = {

@@ -12,6 +12,8 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ACHIEVEMENT_TIERS, TIER_POINTS, type AchievementTier } from "@/lib/leaderboard";
 import { useT } from "@/hooks/useT";
+import ReactionButtons from "@/components/achievements/ReactionButtons";
+import type { AchievementReactions } from "@/types";
 
 interface Achievement {
     id: string;
@@ -55,9 +57,11 @@ function StatusBadge({ status, t }: { status: Achievement['status']; t: (key: st
 interface AchievementsProps {
     achievements: Achievement[];
     isOwner: boolean;
+    /** Heart/clap state per achievement id (verified ones only). */
+    reactionsById?: Record<string, AchievementReactions>;
 }
 
-export function AchievementsSection({ achievements, isOwner }: AchievementsProps) {
+export function AchievementsSection({ achievements, isOwner, reactionsById }: AchievementsProps) {
     const { t } = useT();
     const [showForm, setShowForm] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -231,6 +235,11 @@ export function AchievementsSection({ achievements, isOwner }: AchievementsProps
                                             <span className="text-xs text-muted-foreground mt-2 block">
                                                 📅 {new Date(a.achievement_date).toLocaleDateString()}
                                             </span>
+                                        )}
+                                        {a.status === 'verified' && reactionsById?.[a.id] && (
+                                            <div className="mt-3">
+                                                <ReactionButtons achievementId={a.id} initial={reactionsById[a.id]} />
+                                            </div>
                                         )}
                                     </div>
                                     {isOwner && (

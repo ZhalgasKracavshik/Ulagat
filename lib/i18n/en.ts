@@ -166,9 +166,9 @@ export const en: Dictionary = {
         privacy: {
             title: "Privacy",
             description: "Control what others can see about you.",
-            anonymousLabel: "Hide my name on the leaderboard",
+            anonymousLabel: "Hide my name on the leaderboard and achievement feed",
             anonymousHint:
-                "You will appear under a neutral pseudonym like “Anonymous Eagle” instead of your name and photo.",
+                "You will appear under a neutral pseudonym like “Anonymous Eagle” instead of your name and photo — on the leaderboard and in the home achievement feed.",
         },
         account: {
             title: "Account",
@@ -1518,5 +1518,15 @@ export const en: Dictionary = {
         challengeBody: "Enter the code from your authenticator app to open the admin area.",
         verifyCta: "Continue",
         backHome: "Back to home",
+    },
+    feed: {
+        title: "School achievements",
+        heartAria: "Send a heart",
+        clapAria: "Applaud",
+        tier: {
+            school: "School",
+            city: "City",
+            national: "National",
+        },
     },
 };
