@@ -316,6 +316,19 @@ export type AiUsage = {
     question_count: number;
 };
 
+/** SKUD (turnstile) pass direction. */
+export type SkudDirection = 'in' | 'out';
+
+export type SkudEvent = {
+    id: string;
+    user_id: string;
+    external_id: string;
+    direction: SkudDirection;
+    gate: string | null;
+    recorded_at: string;
+    created_at: string;
+};
+
 /** Reaction kinds available on verified achievements (heart / clap). */
 export type ReactionKind = 'heart' | 'clap';
 
