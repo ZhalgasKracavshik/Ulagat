@@ -71,8 +71,9 @@ Server action `recordSkudEvent(studentId, direction, recordedAt?)` in
 - `requireAdmin()` + MFA step-up (same guard pattern as `app/admin/users/actions.ts`).
 - Validates `isUuid(studentId)`, direction enum, timestamp bounds (same as webhook).
 - Writes via service-role client (table has no INSERT policy by design).
-- Small UI section on `/admin/users` (or its own card): student picker, in/out,
-  optional time; default "now".
+- UI: a collapsible «СКУД (тест)» card at the bottom of `/admin/users`:
+  student picker (reuses the existing users list), in/out toggle, optional
+  datetime; default "now".
 
 ## Parent-facing UI
 
