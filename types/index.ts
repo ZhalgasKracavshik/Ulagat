@@ -316,6 +316,17 @@ export type AiUsage = {
     question_count: number;
 };
 
+/** Reaction kinds available on verified achievements (heart / clap). */
+export type ReactionKind = 'heart' | 'clap';
+
+/** Aggregated reaction state for one achievement, shaped for the UI. */
+export type AchievementReactions = {
+    hearts: number;
+    claps: number;
+    myHeart: boolean;
+    myClap: boolean;
+};
+
 /** Subset of Profile used in the admin users management table */
 export type AdminUserRow = {
     id: string;
