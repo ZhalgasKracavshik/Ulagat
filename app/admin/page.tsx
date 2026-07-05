@@ -7,6 +7,7 @@ import { ShieldAlert, Users, ListFilter, Award, Calendar, CalendarClock, Calenda
 import { ServiceReviewTable } from "@/components/admin/ServiceReviewTable";
 import { EventReviewTable } from "@/components/admin/EventReviewTable";
 import { MaterialReviewTable } from "@/components/admin/MaterialReviewTable";
+import { CertificateReviewTable, type AdminCertificateRow } from "@/components/admin/CertificateReviewTable";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -68,11 +69,12 @@ export default async function AdminPage() {
     const { count: eventCount } = await supabase.from('events').select('*', { count: 'exact', head: true });
 
     // Fetch Pending Content
-    const [{ data: pendingServices }, { data: pendingEvents }, { data: pendingMaterials }, { count: pendingAchievements }] = await Promise.all([
+    const [{ data: pendingServices }, { data: pendingEvents }, { data: pendingMaterials }, { count: pendingAchievements }, { data: pendingCertificates }] = await Promise.all([
         supabase.from('services').select('*, profiles:owner_id(full_name)').eq('status', 'pending').order('created_at', { ascending: false }),
         supabase.from('events').select('*, profiles:organizer_id(full_name)').eq('status', 'pending').order('created_at', { ascending: false }),
         supabase.from('study_materials').select('*, profiles:uploaded_by(full_name)').eq('status', 'pending').order('created_at', { ascending: false }),
-        supabase.from('achievements').select('*', { count: 'exact', head: true }).eq('status', 'pending')
+        supabase.from('achievements').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('certificates').select('*, profiles:user_id(full_name, grade, class_letter)').eq('status', 'pending').order('created_at', { ascending: true })
     ]);
 
     // Fetch ALL Services (for moderation tab)
@@ -304,6 +306,9 @@ export default async function AdminPage() {
                     <TabsTrigger value="materials" className="shrink-0">
                         {t('admin.tabMaterials')} {pendingMaterials && pendingMaterials.length > 0 && <Badge className="ml-2 bg-red-500">{pendingMaterials.length}</Badge>}
                     </TabsTrigger>
+                    <TabsTrigger value="certificates" className="shrink-0">
+                        {t('admin.tabCertificates')} {pendingCertificates && pendingCertificates.length > 0 && <Badge className="ml-2 bg-red-500">{pendingCertificates.length}</Badge>}
+                    </TabsTrigger>
                     <TabsTrigger value="all-services" className="shrink-0">{t('admin.tabAllServices')}</TabsTrigger>
                 </TabsList>
 
@@ -336,6 +341,17 @@ export default async function AdminPage() {
                         </CardHeader>
                         <CardContent>
                             <MaterialReviewTable materials={pendingMaterials || []} />
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="certificates" className="space-y-4">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>{t('admin.reviewCertificates')}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <CertificateReviewTable certificates={(pendingCertificates ?? []) as AdminCertificateRow[]} />
                         </CardContent>
                     </Card>
                 </TabsContent>

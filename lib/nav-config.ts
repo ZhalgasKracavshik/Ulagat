@@ -13,6 +13,7 @@ import {
     Home,
     Sparkles,
     Star,
+    FileText,
 } from "lucide-react";
 import type { UserRole } from "@/types";
 import { FEATURES } from "@/lib/features";
@@ -158,6 +159,14 @@ export const NAV = {
         color: "text-teal-500",
         hint: "Report or claim lost items",
     },
+    certificates: {
+        key: "certificates",
+        href: "/certificates",
+        label: "Certificates",
+        icon: FileText,
+        color: "text-cyan-600",
+        hint: "Request official school certificates",
+    },
     career: {
         key: "career",
         href: "/career",
@@ -217,7 +226,7 @@ export const MORE_GROUPS: NavGroup[] = [
     },
     {
         label: "Resources",
-        items: [NAV.bulletin, NAV.prep, NAV.lostFound, ...(FEATURES.career ? [NAV.career] : [])],
+        items: [NAV.bulletin, NAV.prep, NAV.lostFound, NAV.certificates, ...(FEATURES.career ? [NAV.career] : [])],
     },
     {
         label: "Help",

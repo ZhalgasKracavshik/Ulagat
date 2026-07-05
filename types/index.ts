@@ -131,6 +131,23 @@ export type Announcement = {
     expires_at: string | null;
 };
 
+export type CertificateType = 'enrollment' | 'grades' | 'attendance' | 'character';
+
+export type CertificateStatus = 'pending' | 'approved' | 'rejected' | 'ready';
+
+export type Certificate = {
+    id: string;
+    user_id: string;
+    type: CertificateType;
+    purpose: string;
+    status: CertificateStatus;
+    pdf_path: string | null;
+    rejection_reason: string | null;
+    processed_by: string | null;
+    created_at: string;
+    processed_at: string | null;
+};
+
 export type ClubCategory =
     | 'debates'
     | 'it'
