@@ -7,6 +7,7 @@ import { isUuid } from "@/lib/validation";
 import { almatyNow, almatyTodayIso } from "@/lib/schedule/almaty-time";
 import { renderCertificatePdf } from "@/lib/pdf/certificate";
 import { notifyCertificateProcessed } from "@/lib/notifications/certificate";
+import { mfaStepUpRequired, MFA_REQUIRED_ERROR } from "@/lib/security/mfa";
 import type { Certificate, CertificateType } from "@/types";
 
 export type RequestCertificateInput = {
@@ -48,6 +49,10 @@ async function requireStaff(): Promise<
 
     if (!profile || !["admin", "moderator"].includes(profile.role)) {
         return { ok: false, error: "Unauthorized: only moderators and admins can process certificates." };
+    }
+    // Second factor must actually cover the privileged write, not just the page.
+    if (await mfaStepUpRequired(supabase)) {
+        return { ok: false, error: MFA_REQUIRED_ERROR };
     }
     return { ok: true, userId: user.id, fullName: profile.full_name ?? "", role: profile.role };
 }

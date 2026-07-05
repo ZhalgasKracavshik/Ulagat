@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { ACHIEVEMENT_REVIEWER_ROLES } from "@/lib/leaderboard";
+import { mfaStepUpRequired, MFA_REQUIRED_ERROR } from "@/lib/security/mfa";
 
 /** Server-side role check: only parliament, moderator and admin can review. */
 async function checkReviewer() {
@@ -18,6 +19,9 @@ async function checkReviewer() {
 
     if (!profile || !(ACHIEVEMENT_REVIEWER_ROLES as readonly string[]).includes(profile.role)) {
         throw new Error("Unauthorized: only parliament, moderators and admins can review achievements.");
+    }
+    if (await mfaStepUpRequired(supabase)) {
+        throw new Error(MFA_REQUIRED_ERROR);
     }
     return { supabase, user };
 }

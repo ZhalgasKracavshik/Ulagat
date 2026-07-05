@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { notifyAnnouncement } from "@/lib/notifications/announcement";
 import { almatyTodayIso } from "@/lib/schedule/almaty-time";
+import { mfaStepUpRequired, MFA_REQUIRED_ERROR } from "@/lib/security/mfa";
 import type { AnnouncementCategory } from "@/types";
 
 export type CreateAnnouncementInput = {
@@ -52,6 +53,9 @@ async function requireStaff(): Promise<
 
     if (!profile || !['admin', 'moderator'].includes(profile.role)) {
         return { ok: false, error: "Unauthorized: only moderators and admins can manage announcements." };
+    }
+    if (await mfaStepUpRequired(supabase)) {
+        return { ok: false, error: MFA_REQUIRED_ERROR };
     }
     return { ok: true, userId: user.id };
 }

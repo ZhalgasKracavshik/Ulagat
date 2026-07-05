@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
+import { mfaStepUpRequired, MFA_REQUIRED_ERROR } from '@/lib/security/mfa';
 import type { UserRole } from '@/types';
 
 async function requireAdmin() {
@@ -18,6 +19,11 @@ async function requireAdmin() {
 
     if (profile?.role !== 'admin') {
         throw new Error('Admin access required');
+    }
+    // Role management is the most sensitive action — the second factor must
+    // cover the mutation itself, not only the /admin/users page load.
+    if (await mfaStepUpRequired(supabase)) {
+        throw new Error(MFA_REQUIRED_ERROR);
     }
     return { supabase, user };
 }

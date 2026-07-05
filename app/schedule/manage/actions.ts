@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { normalizeClassLetter } from "@/lib/schedule/class-letter";
+import { mfaStepUpRequired, MFA_REQUIRED_ERROR } from "@/lib/security/mfa";
 
 export type UpsertScheduleCellInput = {
     grade: number;
@@ -39,6 +40,9 @@ async function requireStaff(): Promise<
 
     if (!profile || !['admin', 'moderator'].includes(profile.role)) {
         return { ok: false, error: "Unauthorized: only moderators and admins can edit the timetable." };
+    }
+    if (await mfaStepUpRequired(supabase)) {
+        return { ok: false, error: MFA_REQUIRED_ERROR };
     }
     return { ok: true, userId: user.id };
 }

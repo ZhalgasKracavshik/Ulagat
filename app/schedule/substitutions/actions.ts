@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { notifySubstitution } from "@/lib/notifications/substitution";
 import { normalizeClassLetter } from "@/lib/schedule/class-letter";
 import { almatyTodayIso } from "@/lib/schedule/almaty-time";
+import { mfaStepUpRequired, MFA_REQUIRED_ERROR } from "@/lib/security/mfa";
 import type { SubstitutionType } from "@/types";
 
 export type CreateSubstitutionInput = {
@@ -54,6 +55,9 @@ async function requireStaff(): Promise<
 
     if (!profile || !['admin', 'moderator'].includes(profile.role)) {
         return { ok: false, error: "Unauthorized: only moderators and admins can manage substitutions." };
+    }
+    if (await mfaStepUpRequired(supabase)) {
+        return { ok: false, error: MFA_REQUIRED_ERROR };
     }
     return { ok: true, userId: user.id };
 }

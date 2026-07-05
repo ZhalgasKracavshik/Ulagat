@@ -3,6 +3,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { mfaStepUpRequired, MFA_REQUIRED_ERROR } from "@/lib/security/mfa";
 
 // Check if current user is admin/moderator
 async function checkPermission() {
@@ -18,6 +19,9 @@ async function checkPermission() {
 
     if (profile?.role !== 'admin' && profile?.role !== 'moderator') {
         throw new Error("Unauthorized");
+    }
+    if (await mfaStepUpRequired(supabase)) {
+        throw new Error(MFA_REQUIRED_ERROR);
     }
     return { supabase, user, role: profile.role };
 }

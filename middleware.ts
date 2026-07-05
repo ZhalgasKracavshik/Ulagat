@@ -34,6 +34,18 @@ const PROTECTED_ROUTES = [
 // Upstash env vars exist — see lib/security/rate-limit.ts.
 const RATE_LIMITED_AUTH_PATHS = ['/login', '/register', '/forgot-password', '/reset-password'];
 
+// Privileged staff surfaces that require a second factor (AAL2) once the
+// account has enrolled TOTP. The server actions behind these pages enforce
+// the same check (lib/security/mfa) so the page gate can't be bypassed by a
+// direct POST; this navigation gate is the UX half (triggers the challenge).
+const MFA_STEP_UP_ROUTES = [
+    '/admin',
+    '/schedule/manage',
+    '/schedule/substitutions',
+    '/announcements/new',
+    '/achievements/review',
+];
+
 // Routes that parents CANNOT access (creation / submission routes)
 const PARENT_BLOCKED_ROUTES = [
     '/services/new',
@@ -167,11 +179,13 @@ export async function middleware(request: NextRequest) {
 
     const role = getRole(profile);
 
-    // MFA step-up for the admin area: accounts that have enrolled a verified
-    // TOTP factor must present it this session (AAL2) before opening /admin.
-    // Accounts without factors are unaffected, so staff aren't locked out
-    // before they enroll in Settings.
-    if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+    // MFA step-up for privileged surfaces: accounts that have enrolled a
+    // verified TOTP factor must present it this session (AAL2) before opening
+    // the staff tools that mutate school data. Accounts without factors are
+    // unaffected (nextLevel stays 'aal1'), so staff aren't locked out before
+    // they enroll in Settings. The matching server actions also enforce this
+    // (lib/security/mfa) so a direct POST can't skip the page gate.
+    if (MFA_STEP_UP_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'))) {
         const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
         if (aal && aal.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') {
             const mfaUrl = new URL('/mfa', request.url);
