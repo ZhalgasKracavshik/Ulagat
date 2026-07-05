@@ -1485,6 +1485,17 @@ export const kk: Dictionary = {
         verifyCta: "Жалғастыру",
         backHome: "Басты бетке оралу",
     },
+    skud: {
+        tabTitle: "Қатысу",
+        empty: "Турникеттен дерек әлі жоқ.",
+        in: "Кіру",
+        out: "Шығу",
+        testTitle: "СКУД (тест)",
+        testStudent: "Оқушы",
+        testDirection: "Бағыт",
+        testSubmit: "Жазу",
+        testSaved: "Оқиға жазылды.",
+    },
     feed: {
         title: "Мектеп жетістіктері",
         heartAria: "Жүрекше қою",

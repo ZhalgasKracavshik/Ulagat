@@ -14,7 +14,8 @@ import { InviteParentSection } from "@/components/profile/InviteParentSection";
 import { PersonalCabinet } from "@/components/profile/PersonalCabinet";
 import { verifyChain } from "@/lib/reputation";
 import { aggregateReactions } from "@/lib/achievements/feed";
-import type { AchievementReactions } from "@/types";
+import { AttendanceSection } from "@/components/profile/AttendanceSection";
+import type { AchievementReactions, SkudEvent } from "@/types";
 import { resolvePlan } from "@/lib/subscription-plan";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
@@ -108,6 +109,35 @@ export default async function ProfilePage({ params }: PageProps) {
         viewerRole = viewerProfile?.role ?? null;
     }
     const canSeeAllAchievements = isOwner || (!!viewerRole && ['admin', 'moderator'].includes(viewerRole));
+
+    // SKUD attendance is parents-only (+ admin debug). RLS enforces the same
+    // rule; this flag only decides whether to render the tab at all.
+    let canSeeAttendance = false;
+    if (currentUser && !isOwner) {
+        if (viewerRole === 'admin') {
+            canSeeAttendance = true;
+        } else {
+            const { data: bond } = await supabase
+                .from('family_bonds')
+                .select('id')
+                .eq('parent_id', currentUser.id)
+                .eq('student_id', id)
+                .maybeSingle();
+            canSeeAttendance = !!bond;
+        }
+    }
+
+    let skudEvents: SkudEvent[] = [];
+    if (canSeeAttendance) {
+        const since = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+        const { data: skudRows } = await supabase
+            .from('skud_events')
+            .select('*')
+            .eq('user_id', id)
+            .gte('recorded_at', since)
+            .order('recorded_at', { ascending: false });
+        skudEvents = (skudRows ?? []) as SkudEvent[];
+    }
 
     // Fetch Services
     const { data: services } = await supabase
@@ -349,6 +379,11 @@ export default async function ProfilePage({ params }: PageProps) {
                         <TabsTrigger value="services" className="rounded-md px-6 py-2">{t('profile.tabServices')}</TabsTrigger>
                         {profile.role !== 'student' && <TabsTrigger value="events" className="rounded-md px-6 py-2">{t('profile.tabEvents')}</TabsTrigger>}
                         <TabsTrigger value="friends" className="rounded-md px-6 py-2">{t('profile.tabFriends')}</TabsTrigger>
+                        {canSeeAttendance && (
+                            <TabsTrigger value="attendance" className="rounded-md px-6 py-2">
+                                {t('skud.tabTitle')}
+                            </TabsTrigger>
+                        )}
                     </TabsList>
 
                     {/* Achievements Tab */}
@@ -428,6 +463,12 @@ export default async function ProfilePage({ params }: PageProps) {
                             )}
                         </div>
                     </TabsContent>
+
+                    {canSeeAttendance && (
+                        <TabsContent value="attendance" className="animate-in fade-in-50 duration-300">
+                            <AttendanceSection events={skudEvents} />
+                        </TabsContent>
+                    )}
                 </Tabs>
             </div>
         </div>

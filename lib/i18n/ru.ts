@@ -1485,6 +1485,17 @@ export const ru: Dictionary = {
         verifyCta: "Продолжить",
         backHome: "Вернуться на главную",
     },
+    skud: {
+        tabTitle: "Посещаемость",
+        empty: "Пока нет данных с турникета.",
+        in: "Вход",
+        out: "Выход",
+        testTitle: "СКУД (тест)",
+        testStudent: "Ученик",
+        testDirection: "Направление",
+        testSubmit: "Записать",
+        testSaved: "Событие записано.",
+    },
     feed: {
         title: "Достижения школы",
         heartAria: "Поставить сердечко",

@@ -1519,6 +1519,17 @@ export const en: Dictionary = {
         verifyCta: "Continue",
         backHome: "Back to home",
     },
+    skud: {
+        tabTitle: "Attendance",
+        empty: "No turnstile data yet.",
+        in: "Entry",
+        out: "Exit",
+        testTitle: "SKUD (test)",
+        testStudent: "Student",
+        testDirection: "Direction",
+        testSubmit: "Record",
+        testSaved: "Event recorded.",
+    },
     feed: {
         title: "School achievements",
         heartAria: "Send a heart",
