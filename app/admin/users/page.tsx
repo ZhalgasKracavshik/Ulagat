@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ShieldAlert, Users, ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UsersManagementTable } from '@/components/admin/UsersManagementTable';
+import { SkudTestCard } from '@/components/admin/SkudTestCard';
 import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from '@/lib/i18n';
 import type { AdminUserRow } from '@/types';
 
@@ -97,6 +98,12 @@ export default async function AdminUsersPage() {
                     <UsersManagementTable users={users} currentUserId={user.id} />
                 </CardContent>
             </Card>
+
+            <SkudTestCard
+                students={users
+                    .filter((u) => u.role === 'student')
+                    .map((u) => ({ id: u.id, full_name: u.full_name }))}
+            />
         </div>
     );
 }
