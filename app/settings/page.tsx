@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SettingsClient } from "./SettingsClient";
+import { MfaSection } from "@/components/settings/MfaSection";
 
 export const metadata = {
     title: "Settings — Ulagat",
@@ -24,16 +25,22 @@ export default async function SettingsPage() {
 
     const { data: profile } = await supabase
         .from("profiles")
-        .select("leaderboard_anonymous")
+        .select("leaderboard_anonymous, role")
         .eq("id", user.id)
         .single();
 
+    // Two-factor auth is surfaced for staff only — the middleware requires
+    // AAL2 on /admin once a factor is enrolled, so this is where staff set
+    // it up. Students keep a simpler settings page.
+    const isStaff = profile?.role === "admin" || profile?.role === "moderator";
+
     return (
         <div className="min-h-screen bg-background">
-            <div className="container mx-auto max-w-2xl px-4 py-8 md:py-12">
+            <div className="container mx-auto max-w-2xl space-y-6 px-4 py-8 md:py-12">
                 <SettingsClient
                     initialAnonymous={Boolean(profile?.leaderboard_anonymous)}
                 />
+                {isStaff && <MfaSection />}
             </div>
         </div>
     );

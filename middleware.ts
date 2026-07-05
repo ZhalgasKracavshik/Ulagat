@@ -2,6 +2,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/session";
 import { createServerClient } from "@supabase/ssr";
+import { checkAuthRateLimit } from "@/lib/security/rate-limit";
+import { buildCsp, generateNonce } from "@/lib/security/csp";
 
 // Routes that require authentication (any logged-in user)
 const PROTECTED_ROUTES = [
@@ -24,7 +26,13 @@ const PROTECTED_ROUTES = [
     '/pricing',
     '/guide',
     '/settings',
+    '/mfa',
 ];
+
+// Auth surfaces whose POSTs (server actions: sign-in, sign-up, password
+// reset, invite-code checks) are rate-limited per IP. No-op until the
+// Upstash env vars exist — see lib/security/rate-limit.ts.
+const RATE_LIMITED_AUTH_PATHS = ['/login', '/register', '/forgot-password', '/reset-password'];
 
 // Routes that parents CANNOT access (creation / submission routes)
 const PARENT_BLOCKED_ROUTES = [
@@ -79,10 +87,36 @@ function getRole(profile: { role: string } | null): string {
 }
 
 export async function middleware(request: NextRequest) {
-    // First refresh the auth session
-    const sessionResponse = await updateSession(request);
-
     const { pathname } = request.nextUrl;
+
+    // ---- Rate limiting (before any other work) ---------------------------
+    // Credential stuffing / brute force hits these paths as POSTs (server
+    // actions). GETs are unlimited — pages themselves are cheap and public.
+    if (
+        request.method === 'POST' &&
+        RATE_LIMITED_AUTH_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'))
+    ) {
+        const verdict = await checkAuthRateLimit(request);
+        if (!verdict.allowed) {
+            return new NextResponse('Too many attempts. Try again shortly.', {
+                status: 429,
+                headers: { 'Retry-After': String(verdict.retryAfterSeconds) },
+            });
+        }
+    }
+
+    // ---- CSP nonce (Report-Only) -----------------------------------------
+    // The nonce must be on the REQUEST headers before updateSession builds the
+    // response, so Next.js applies it to its own inline scripts. The policy is
+    // mirrored on the response below so the browser reports (not blocks).
+    const nonce = generateNonce();
+    const csp = buildCsp(nonce);
+    request.headers.set('x-nonce', nonce);
+    request.headers.set('content-security-policy-report-only', csp);
+
+    // Refresh the auth session
+    const sessionResponse = await updateSession(request);
+    sessionResponse.headers.set('Content-Security-Policy-Report-Only', csp);
 
     // Skip role checks for public/auth routes
     const publicPaths = ['/', '/login', '/register', '/forgot-password', '/reset-password'];
@@ -132,6 +166,19 @@ export async function middleware(request: NextRequest) {
         .single();
 
     const role = getRole(profile);
+
+    // MFA step-up for the admin area: accounts that have enrolled a verified
+    // TOTP factor must present it this session (AAL2) before opening /admin.
+    // Accounts without factors are unaffected, so staff aren't locked out
+    // before they enroll in Settings.
+    if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+        const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (aal && aal.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') {
+            const mfaUrl = new URL('/mfa', request.url);
+            mfaUrl.searchParams.set('next', pathname);
+            return NextResponse.redirect(mfaUrl);
+        }
+    }
 
     // Strictly admin-only routes (user & role management) — moderators get
     // redirected to the dashboard rather than a dead-end access screen.
