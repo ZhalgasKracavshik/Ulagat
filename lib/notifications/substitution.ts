@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getPeriodTime } from '@/lib/schedule/bells';
 import { escapeHtml, resolveEmails, sendBatchEmails, type NotifyResult } from '@/lib/notifications/shared';
+import { sendPushToUsers } from '@/lib/push/send';
 import type { ScheduleEntry, Substitution } from '@/types';
 
 const TYPE_LABELS: Record<Substitution['type'], string> = {
@@ -145,6 +146,15 @@ export async function notifySubstitution(substitutionId: string): Promise<Notify
         );
         return { sent: 0, skipped: false, failed };
     }
+
+    // Web push to the same class + parents — the morning use case (phones are
+    // confiscated during the day, so a push before school is the point).
+    // Independent of email, never throws, no-op without VAPID keys.
+    await sendPushToUsers(Array.from(recipientIds), {
+        title: `${TYPE_LABELS[substitution.type]} — ${substitution.grade}${substitution.class_letter}`,
+        body: `${formatDateRu(substitution.date)}, ${substitution.period} урок`,
+        url: '/schedule',
+    });
 
     // 5. Resolve emails via the auth admin API (profiles don't store emails).
     const resolved = await resolveEmails(admin, recipientIds, '[notify-substitution]');
