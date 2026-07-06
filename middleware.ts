@@ -117,18 +117,19 @@ export async function middleware(request: NextRequest) {
         }
     }
 
-    // ---- CSP nonce (Report-Only) -----------------------------------------
+    // ---- CSP nonce (enforcing) -------------------------------------------
     // The nonce must be on the REQUEST headers before updateSession builds the
     // response, so Next.js applies it to its own inline scripts. The policy is
-    // mirrored on the response below so the browser reports (not blocks).
+    // mirrored on the response below so the browser ENFORCES it (violations are
+    // still reported to /api/csp-report via report-uri).
     const nonce = generateNonce();
     const csp = buildCsp(nonce);
     request.headers.set('x-nonce', nonce);
-    request.headers.set('content-security-policy-report-only', csp);
+    request.headers.set('content-security-policy', csp);
 
     // Refresh the auth session
     const sessionResponse = await updateSession(request);
-    sessionResponse.headers.set('Content-Security-Policy-Report-Only', csp);
+    sessionResponse.headers.set('Content-Security-Policy', csp);
 
     // Skip role checks for public/auth routes
     const publicPaths = ['/', '/login', '/register', '/forgot-password', '/reset-password'];
