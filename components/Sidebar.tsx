@@ -26,7 +26,7 @@ export function Sidebar({
     initialUserId?: string | null;
     initialProfile?: (Profile & { reputation?: number }) | null;
 }) {
-    const { user, profile, pendingFriendRequests, pendingModerationCount, isPremium } = useNavData(
+    const { user, profile, pendingFriendRequests, pendingModerationCount, unreadAnnouncements, isPremium } = useNavData(
         initialUserId,
         initialProfile
     );
@@ -77,7 +77,11 @@ export function Sidebar({
             <nav className="flex-1 overflow-y-auto px-3 py-4">
                 <div className="space-y-1">
                     {PRIMARY.map((item) => (
-                        <NavRow key={item.key} item={item} />
+                        <NavRow
+                            key={item.key}
+                            item={item}
+                            badge={item.key === "announcements" && unreadAnnouncements > 0 ? unreadAnnouncements : undefined}
+                        />
                     ))}
                 </div>
 

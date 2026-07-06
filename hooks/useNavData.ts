@@ -11,6 +11,7 @@ export type NavData = {
     profile: (Profile & { reputation?: number }) | null;
     pendingFriendRequests: number;
     pendingModerationCount: number;
+    unreadAnnouncements: number;
     isPremium: boolean;
 };
 
@@ -31,6 +32,7 @@ export function useNavData(
     const [profile, setProfile] = useState<(Profile & { reputation?: number }) | null>(initialProfile);
     const [pendingFriendRequests, setPendingFriendRequests] = useState(0);
     const [pendingModerationCount, setPendingModerationCount] = useState(0);
+    const [unreadAnnouncements, setUnreadAnnouncements] = useState(0);
     const [isPremium, setIsPremium] = useState(false);
 
     useEffect(() => {
@@ -50,6 +52,15 @@ export function useNavData(
             setProfile(profileData);
             setPendingFriendRequests(friendshipCount || 0);
             setIsPremium(resolvePlan(subscription ?? null, Date.now()) === "premium");
+
+            // Unread official announcements — computed server-side (grade
+            // targeting + parent visibility) so we don't replicate that logic.
+            try {
+                const res = await fetch("/api/announcements/unread-count", { cache: "no-store" });
+                if (res.ok) setUnreadAnnouncements((await res.json()).count ?? 0);
+            } catch {
+                // Non-fatal: the badge just stays at its previous value.
+            }
 
             if (profileData?.role === "admin" || profileData?.role === "moderator") {
                 const [{ count: sCount }, { count: eCount }, { count: mCount }] = await Promise.all([
@@ -72,6 +83,7 @@ export function useNavData(
                 setProfile(null);
                 setPendingFriendRequests(0);
                 setPendingModerationCount(0);
+                setUnreadAnnouncements(0);
                 setIsPremium(false);
             } else {
                 fetchUserData();
@@ -82,5 +94,5 @@ export function useNavData(
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    return { user, profile, pendingFriendRequests, pendingModerationCount, isPremium };
+    return { user, profile, pendingFriendRequests, pendingModerationCount, unreadAnnouncements, isPremium };
 }

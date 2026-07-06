@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Megaphone, Pin, PlusCircle, Users } from "lucide-react";
 import { CategoryBadge } from "@/components/announcements/CategoryBadge";
 import { DeleteAnnouncementButton } from "@/components/announcements/DeleteAnnouncementButton";
+import { MarkAnnouncementsRead } from "@/components/announcements/MarkAnnouncementsRead";
 import { EmptyState } from "@/components/EmptyState";
 import { getViewerGrades, announcementGradeFilter } from "@/lib/announcements/visibility";
 import {
@@ -84,6 +85,8 @@ export default async function AnnouncementsPage() {
 
     return (
         <div className="min-h-screen bg-muted/50 py-12 px-4">
+            {/* Clears the nav unread badge once the list is viewed */}
+            <MarkAnnouncementsRead />
             <div className="max-w-3xl mx-auto space-y-8">
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                     <div className="space-y-2">

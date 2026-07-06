@@ -52,6 +52,7 @@ export function MobileTabBar({
     const [profile, setProfile] = useState<Profile | null>(initialProfile);
     const [pendingFriendRequests, setPendingFriendRequests] = useState(0);
     const [pendingModerationCount, setPendingModerationCount] = useState(0);
+    const [unreadAnnouncements, setUnreadAnnouncements] = useState(0);
     const [isPremium, setIsPremium] = useState(false);
     const [moreOpen, setMoreOpen] = useState(false);
     const supabase = createClient();
@@ -73,6 +74,13 @@ export function MobileTabBar({
                 setPendingFriendRequests(friendshipCount || 0);
                 setIsPremium(resolvePlan(subscription ?? null, Date.now()) === 'premium');
 
+                try {
+                    const res = await fetch('/api/announcements/unread-count', { cache: 'no-store' });
+                    if (res.ok) setUnreadAnnouncements((await res.json()).count ?? 0);
+                } catch {
+                    // Non-fatal — badge keeps its previous value.
+                }
+
                 if (profileData?.role === 'admin' || profileData?.role === 'moderator') {
                     const [{ count: sCount }, { count: eCount }, { count: mCount }] = await Promise.all([
                         supabase.from('services').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
@@ -83,6 +91,7 @@ export function MobileTabBar({
                 }
             } else {
                 setProfile(null);
+                setUnreadAnnouncements(0);
             }
         };
 
@@ -174,10 +183,17 @@ export function MobileTabBar({
                             <Link
                                 key={tab.key}
                                 href={tab.href}
-                                className="flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                                className="relative flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                                 aria-current={active ? "page" : undefined}
                             >
-                                <Icon className={`w-5 h-5 ${active ? tab.color : "text-muted-foreground"}`} />
+                                <div className="relative">
+                                    <Icon className={`w-5 h-5 ${active ? tab.color : "text-muted-foreground"}`} />
+                                    {tab.key === "announcements" && unreadAnnouncements > 0 && (
+                                        <span className="absolute -right-2 -top-1.5 min-w-[16px] rounded-full bg-red-500 px-1 text-center text-[9px] font-bold leading-4 text-white">
+                                            {unreadAnnouncements > 9 ? "9+" : unreadAnnouncements}
+                                        </span>
+                                    )}
+                                </div>
                                 <span className={active ? "text-foreground" : "text-muted-foreground"}>
                                     {t(tab.labelKey)}
                                 </span>
