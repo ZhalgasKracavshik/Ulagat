@@ -6,6 +6,7 @@ import {
     sendBatchEmails,
     type NotifyResult,
 } from '@/lib/notifications/shared';
+import { sendPushToUsers } from '@/lib/push/send';
 import type { Announcement, AnnouncementCategory } from '@/types';
 
 const CATEGORY_LABELS_RU: Record<AnnouncementCategory, string> = {
@@ -103,6 +104,14 @@ export async function notifyAnnouncement(announcementId: string): Promise<Notify
         console.log(`[notify-announcement] no recipients for announcement "${announcement.title}"`);
         return { sent: 0, skipped: false, failed };
     }
+
+    // Web push to the same recipients — independent of email, never throws,
+    // no-op without VAPID keys.
+    await sendPushToUsers(Array.from(recipientIds), {
+        title: `${CATEGORY_LABELS_RU[announcement.category]}: ${announcement.title}`,
+        body: announcement.body.slice(0, 140),
+        url: '/announcements',
+    });
 
     // 4. Resolve emails via the auth admin API (profiles don't store emails).
     const resolved = await resolveEmails(admin, recipientIds, '[notify-announcement]');

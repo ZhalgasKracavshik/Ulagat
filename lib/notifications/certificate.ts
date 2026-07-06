@@ -5,6 +5,7 @@ import {
     sendBatchEmails,
     type NotifyResult,
 } from '@/lib/notifications/shared';
+import { sendPushToUsers } from '@/lib/push/send';
 import type { Certificate, CertificateType } from '@/types';
 
 const TYPE_LABEL: Record<CertificateType, string> = {
@@ -78,6 +79,17 @@ export async function notifyCertificateProcessed(certificateId: string): Promise
         console.log('[notify-certificate] status not final, skipping:', cert.status);
         return { sent: 0, skipped: false, failed: false };
     }
+
+    // Web push to the requester — independent of email, never throws.
+    const typeLabel = TYPE_LABEL[cert.type] ?? cert.type;
+    await sendPushToUsers([cert.user_id], {
+        title: cert.status === 'ready' ? 'Справка готова' : 'Запрос справки отклонён',
+        body:
+            cert.status === 'ready'
+                ? `Справка (${typeLabel}) готова — скачайте в разделе «Справки».`
+                : `Запрос справки (${typeLabel}) отклонён.`,
+        url: '/certificates',
+    });
 
     const resolved = await resolveEmails(admin, new Set([cert.user_id]), '[notify-certificate]');
     if (resolved.emails.length === 0) {

@@ -5,6 +5,7 @@ import {
     sendBatchEmails,
     type NotifyResult,
 } from '@/lib/notifications/shared';
+import { sendPushToUsers } from '@/lib/push/send';
 
 export type ReminderEvent = {
     id: string;
@@ -67,6 +68,13 @@ export async function notifyEventReminder(
         console.log(`[event-reminder] no registrations for "${event.title}" — nothing to send`);
         return { sent: 0, skipped: false, failed: false };
     }
+
+    // Web push to the same registrants — independent of email, never throws.
+    await sendPushToUsers(Array.from(recipientIds), {
+        title: `Завтра: ${event.title}`,
+        body: 'Напоминание о мероприятии, на которое вы зарегистрированы.',
+        url: `/events/${event.id}`,
+    });
 
     const resolved = await resolveEmails(admin, recipientIds, '[event-reminder]');
     if (resolved.emails.length === 0) {
