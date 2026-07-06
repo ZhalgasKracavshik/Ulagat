@@ -316,6 +316,24 @@ export type AiUsage = {
     question_count: number;
 };
 
+/** A stored browser Web Push subscription. */
+export type PushSubscriptionRow = {
+    id: string;
+    user_id: string;
+    endpoint: string;
+    p256dh: string;
+    auth: string;
+    user_agent: string | null;
+    created_at: string;
+};
+
+/** Payload delivered to the service worker. `url` is a same-origin app path. */
+export type PushPayload = {
+    title: string;
+    body: string;
+    url: string;
+};
+
 /** SKUD (turnstile) pass direction. */
 export type SkudDirection = 'in' | 'out';
 
