@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SettingsClient } from "./SettingsClient";
 import { MfaSection } from "@/components/settings/MfaSection";
+import { PushToggle } from "@/components/settings/PushToggle";
 
 export const metadata = {
     title: "Settings — Ulagat",
@@ -40,6 +41,7 @@ export default async function SettingsPage() {
                 <SettingsClient
                     initialAnonymous={Boolean(profile?.leaderboard_anonymous)}
                 />
+                <PushToggle />
                 {isStaff && <MfaSection />}
             </div>
         </div>

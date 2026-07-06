@@ -1519,6 +1519,18 @@ export const en: Dictionary = {
         verifyCta: "Continue",
         backHome: "Back to home",
     },
+    push: {
+        title: "Push notifications",
+        body: "Get notified about announcements, ready certificates and event reminders — even when the app is closed.",
+        enable: "Enable notifications",
+        disable: "Disable notifications",
+        enabled: "Notifications enabled.",
+        disabled: "Notifications disabled.",
+        failed: "Could not enable notifications.",
+        blocked: "Notifications are blocked in your browser settings. Allow them for this site.",
+        iosInstall: "On iPhone/iPad, first add Ulagat to your home screen (Share → Add to Home Screen), then open the app from there and enable notifications here.",
+        statusOn: "On",
+    },
     skud: {
         tabTitle: "Attendance",
         empty: "No turnstile data yet.",
