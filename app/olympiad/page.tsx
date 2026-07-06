@@ -1,5 +1,6 @@
 
 import { createClient } from "@/lib/supabase/server";
+import { safeHttpUrl } from "@/lib/validation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -238,8 +239,8 @@ export default async function OlympiadPrepPage({ searchParams }: { searchParams:
                                                 </InteractiveButton>
                                             </a>
                                         )}
-                                        {material.url && (
-                                            <a href={material.url} target="_blank" rel="noopener noreferrer">
+                                        {safeHttpUrl(material.url) && (
+                                            <a href={safeHttpUrl(material.url)!} target="_blank" rel="noopener noreferrer">
                                                 <InteractiveButton
                                                     size="sm"
                                                     variant="outline"

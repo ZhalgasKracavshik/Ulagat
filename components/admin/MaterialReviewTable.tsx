@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import { safeHttpUrl } from "@/lib/validation";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -139,7 +140,7 @@ export function MaterialReviewTable({ materials }: MaterialReviewTableProps) {
                                                     </div>
                                                 </div>
                                                 <Button size="sm" asChild>
-                                                    <a href={material.url} target="_blank" rel="noopener noreferrer">
+                                                    <a href={safeHttpUrl(material.url) ?? undefined} target="_blank" rel="noopener noreferrer">
                                                         <Download className="w-4 h-4 mr-2" />
                                                         {t('admin.openResource')}
                                                     </a>

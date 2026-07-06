@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { MATERIAL_UPLOADER_ROLES, MAX_PDF_BYTES, isMaterialDifficulty } from "@/lib/olympiad";
+import { safeHttpUrl } from "@/lib/validation";
 
 export async function addStudyMaterial(formData: FormData) {
     const supabase = await createClient();
@@ -22,13 +23,22 @@ export async function addStudyMaterial(formData: FormData) {
 
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
-    const url = formData.get("url") as string;
+    const rawUrl = formData.get("url");
     const category = formData.get("category") as string;
     const difficultyRaw = (formData.get("difficulty") as string) || 'medium';
     const difficulty = isMaterialDifficulty(difficultyRaw) ? difficultyRaw : 'medium';
 
     if (!title || !category) {
         throw new Error("Title and category are required");
+    }
+
+    // Only accept http(s) resource links. A javascript:/data: value here gets
+    // rendered into an anchor href for the reviewing admin and, once approved,
+    // every student on /olympiad — reject non-http(s) at the source (XSS).
+    let url: string | null = null;
+    if (typeof rawUrl === "string" && rawUrl.trim()) {
+        url = safeHttpUrl(rawUrl);
+        if (!url) throw new Error("Resource URL must start with http:// or https://");
     }
 
     // Phase 4: olympiad year (optional)
@@ -74,7 +84,7 @@ export async function addStudyMaterial(formData: FormData) {
     const { error } = await supabase.from("study_materials").insert({
         title,
         description: description || null,
-        url: url || null,
+        url,
         category,
         difficulty,
         year,

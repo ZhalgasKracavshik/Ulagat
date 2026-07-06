@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { Heart } from "lucide-react";
 import { toggleReaction } from "@/app/achievements/reactions-actions";
 import { useT } from "@/hooks/useT";
@@ -30,15 +30,21 @@ type Props = {
 export default function ReactionButtons({ achievementId, initial, compact }: Props) {
     const { t } = useT();
     const [state, setState] = useState(initial);
-    const [, startTransition] = useTransition();
+    // Per-kind in-flight guard: ignore rapid repeat clicks so two concurrent
+    // toggles can't cancel out on the client while the DB keeps one row (the
+    // bug the server's `active` return exists to resolve).
+    const [busy, setBusy] = useState<Record<ReactionKind, boolean>>({ heart: false, clap: false });
 
-    function toggle(kind: ReactionKind) {
-        // Optimistic flip; rolled back if the server action reports failure.
-        setState((s) => flip(s, kind));
-        startTransition(async () => {
-            const result = await toggleReaction(achievementId, kind);
-            if (!result.success) setState((s) => flip(s, kind));
-        });
+    async function toggle(kind: ReactionKind) {
+        if (busy[kind]) return;
+        const current = kind === "heart" ? state.myHeart : state.myClap;
+        setBusy((b) => ({ ...b, [kind]: true }));
+        setState((s) => setKind(s, kind, !current)); // optimistic
+        const result = await toggleReaction(achievementId, kind);
+        // Reconcile to the server's authoritative truth (revert on failure).
+        const truth = result.success ? result.active : current;
+        setState((s) => setKind(s, kind, truth));
+        setBusy((b) => ({ ...b, [kind]: false }));
     }
 
     const base = `inline-flex items-center gap-1 rounded-full border transition-colors ${
@@ -80,9 +86,13 @@ export default function ReactionButtons({ achievementId, initial, compact }: Pro
     );
 }
 
-function flip(s: AchievementReactions, kind: ReactionKind): AchievementReactions {
+/** Force a kind's on/off state to `active`, keeping the count consistent.
+ *  Idempotent: reconciling to a value the state already holds is a no-op. */
+function setKind(s: AchievementReactions, kind: ReactionKind, active: boolean): AchievementReactions {
     if (kind === "heart") {
-        return { ...s, myHeart: !s.myHeart, hearts: s.hearts + (s.myHeart ? -1 : 1) };
+        if (s.myHeart === active) return s;
+        return { ...s, myHeart: active, hearts: Math.max(0, s.hearts + (active ? 1 : -1)) };
     }
-    return { ...s, myClap: !s.myClap, claps: s.claps + (s.myClap ? -1 : 1) };
+    if (s.myClap === active) return s;
+    return { ...s, myClap: active, claps: Math.max(0, s.claps + (active ? 1 : -1)) };
 }

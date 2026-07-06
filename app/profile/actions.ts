@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { safeHttpUrl } from "@/lib/validation";
 
 export async function addAchievement(formData: FormData) {
     const supabase = await createClient();
@@ -12,16 +13,25 @@ export async function addAchievement(formData: FormData) {
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
     const achievement_date = formData.get("achievement_date") as string;
-    const image_url = formData.get("image_url") as string;
+    const rawImageUrl = formData.get("image_url");
 
     if (!title) throw new Error("Title is required");
+
+    // Only accept http(s) image links. A javascript:/data: value here would be
+    // rendered into an anchor href on the reviewer queue and run script in a
+    // moderator's session (stored XSS) — reject it at the source.
+    let image_url: string | null = null;
+    if (typeof rawImageUrl === "string" && rawImageUrl.trim()) {
+        image_url = safeHttpUrl(rawImageUrl);
+        if (!image_url) throw new Error("Image URL must start with http:// or https://");
+    }
 
     const { error } = await supabase.from("achievements").insert({
         user_id: user.id,
         title,
         description: description || null,
         achievement_date: achievement_date || null,
-        image_url: image_url || null,
+        image_url,
     });
 
     if (error) {

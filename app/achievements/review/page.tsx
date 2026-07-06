@@ -1,6 +1,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { safeHttpUrl } from "@/lib/validation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -124,10 +125,10 @@ export default async function AchievementReviewPage() {
                         <Card key={a.id} className="overflow-hidden">
                             <CardContent className="p-5 space-y-4">
                                 <div className="flex flex-col sm:flex-row gap-4">
-                                    {a.image_url && (
-                                        <a href={a.image_url} target="_blank" rel="noopener noreferrer" className="shrink-0">
+                                    {safeHttpUrl(a.image_url) && (
+                                        <a href={safeHttpUrl(a.image_url)!} target="_blank" rel="noopener noreferrer" className="shrink-0">
                                             <img
-                                                src={a.image_url}
+                                                src={safeHttpUrl(a.image_url)!}
                                                 alt={a.title}
                                                 className="w-full sm:w-36 h-28 object-cover rounded-lg border hover:opacity-90 transition-opacity"
                                             />
