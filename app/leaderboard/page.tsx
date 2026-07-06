@@ -34,6 +34,11 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
     const rawGrade = typeof params?.grade === 'string' ? Number(params.grade) : NaN;
     const gradeFilter = Number.isInteger(rawGrade) && rawGrade >= 1 && rawGrade <= 11 ? rawGrade : null;
 
+    // Current viewer — used to highlight their row and show "your position"
+    // when they rank outside the visible top 10.
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    const currentUserId = authUser?.id ?? null;
+
     // Server component: resolve locale from cookie and translate via dictionary.
     const cookieStore = await cookies();
     const cookieLocale = cookieStore.get(LOCALE_COOKIE)?.value;
@@ -81,14 +86,20 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
         });
     }
 
-    // 4. Combine and Sort
-    const leaderboard = profiles
+    // 4. Combine and Sort (full ranking, so we can locate the viewer's rank)
+    const rankedAll = profiles
         .map(profile => ({
             ...profile,
             points: scores[profile.id] || 0
         }))
-        .sort((a, b) => b.points - a.points)
-        .slice(0, 10); // Top 10
+        .sort((a, b) => b.points - a.points);
+    const leaderboard = rankedAll.slice(0, 10); // Top 10
+
+    // Viewer's rank within the current (optionally grade-filtered) ranking.
+    const myIndex = currentUserId ? rankedAll.findIndex((u) => u.id === currentUserId) : -1;
+    const myRank = myIndex >= 0 ? myIndex + 1 : null;
+    const myEntry = myIndex >= 0 ? rankedAll[myIndex] : null;
+    const showMyPosition = myEntry !== null && myRank !== null && myRank > 10;
 
     return (
         <div className="container mx-auto py-8 space-y-8 px-4 md:px-6">
@@ -126,6 +137,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
                 {leaderboard.length > 0 ? (
                     leaderboard.map((user, index) => {
                         const isAnonymous = Boolean(user.leaderboard_anonymous);
+                        const isMe = currentUserId !== null && user.id === currentUserId;
                         const displayName = isAnonymous
                             ? anonymousPseudonym(user.id)
                             : user.full_name || t('leaderboard.unknown');
@@ -143,6 +155,11 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
                                     <h3 className="font-extrabold text-lg sm:text-xl truncate flex items-center gap-2 text-foreground group-hover/user:text-primary transition-colors">
                                         {displayName}
                                         <ShieldCheck className="w-4 h-4 text-primary opacity-80" />
+                                        {isMe && (
+                                            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+                                                {t('leaderboard.you')}
+                                            </span>
+                                        )}
                                     </h3>
                                     <p className="text-sm text-muted-foreground font-medium">
                                         {t(`common.roles.${user.role}`)}
@@ -160,6 +177,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
                                 ${index === 1 ? 'border-border dark:border-slate-600 bg-muted/50 dark:bg-muted shadow-md' : ''}
                                 ${index === 2 ? 'border-orange-300 bg-orange-50/50 dark:bg-orange-950/20 shadow-md' : ''}
                                 ${index > 2 ? 'border-transparent hover:border-border' : ''}
+                                ${isMe ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}
                             `}>
                                 <CardContent className="flex items-center p-4 sm:p-6 gap-4 sm:gap-6">
                                     <div className="flex-shrink-0 w-10 text-center font-bold text-xl text-muted-foreground">
@@ -202,6 +220,52 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
                                 : t('leaderboard.emptyDefault')}
                         </p>
                     </div>
+                )}
+
+                {/* "Your position" — only when the viewer ranks below the visible top 10 */}
+                {showMyPosition && myEntry && (
+                    <>
+                        <div className="flex items-center gap-3 pt-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                            <div className="h-px flex-grow bg-border" />
+                            {t('leaderboard.yourPosition')}
+                            <div className="h-px flex-grow bg-border" />
+                        </div>
+                        <Card className="border-2 border-primary/40 bg-primary/5">
+                            <CardContent className="flex items-center p-4 sm:p-6 gap-4 sm:gap-6">
+                                <div className="w-10 flex-shrink-0 text-center text-xl font-bold text-primary tabular-nums">
+                                    #{myRank}
+                                </div>
+                                <Link
+                                    href={`/profile/${myEntry.id}`}
+                                    className="flex min-w-0 flex-grow items-center gap-4 sm:gap-6 group/user"
+                                >
+                                    <Avatar className="w-12 h-12 border-2 border-card shadow-sm">
+                                        <AvatarImage src={myEntry.avatar_url ?? undefined} />
+                                        <AvatarFallback className="bg-muted">{myEntry.full_name?.[0]}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="min-w-0 flex-grow">
+                                        <h3 className="flex items-center gap-2 truncate text-lg font-extrabold text-foreground">
+                                            {myEntry.full_name || t('leaderboard.unknown')}
+                                            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+                                                {t('leaderboard.you')}
+                                            </span>
+                                        </h3>
+                                        <p className="text-sm font-medium text-muted-foreground">
+                                            {t('leaderboard.yourRank', { rank: myRank, total: rankedAll.length })}
+                                        </p>
+                                    </div>
+                                </Link>
+                                <div className="pl-4 text-right">
+                                    <div className="text-2xl font-black tabular-nums tracking-tight text-primary sm:text-3xl">
+                                        {myEntry.points}
+                                    </div>
+                                    <div className="mt-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                                        {t('leaderboard.points')}
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </>
                 )}
             </div>
         </div>
