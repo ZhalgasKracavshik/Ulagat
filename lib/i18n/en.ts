@@ -336,6 +336,7 @@ export const en: Dictionary = {
         breakNext: "Break — next lesson in {min} min",
         lessonN: "Lesson {n}",
         bellIn: "bell in {min} min",
+        nextUp: "Next",
     },
     announcements: {
         title: "Announcements",

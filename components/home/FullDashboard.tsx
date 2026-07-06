@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { CategoryBadge } from "@/components/announcements/CategoryBadge";
 import { AchievementFeed } from "@/components/home/AchievementFeed";
+import { CurrentLessonWidget } from "@/components/schedule/CurrentLessonWidget";
 import { effectiveLesson, type DayCell } from "@/components/schedule/types";
 import type { FeedAchievement } from "@/lib/achievements/feed";
 import { getPeriodTime } from "@/lib/schedule/bells";
@@ -205,6 +206,9 @@ export function FullDashboard({ data }: { data: FullDashboardData }) {
                     </div>
                 ) : (
                     <div className="space-y-3">
+                        {/* Live "right now" indicator: current/next lesson + countdown */}
+                        <CurrentLessonWidget todayCells={todayCells} />
+
                         {substitutionCount > 0 && (
                             <Link
                                 href="/schedule"

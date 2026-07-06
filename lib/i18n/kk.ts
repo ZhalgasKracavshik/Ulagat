@@ -324,6 +324,7 @@ export const kk: Dictionary = {
         breakNext: "Үзіліс — келесі сабақ {min} минуттан кейін",
         lessonN: "{n}-сабақ",
         bellIn: "қоңырауға {min} мин қалды",
+        nextUp: "Келесі",
     },
     announcements: {
         title: "Хабарландырулар",

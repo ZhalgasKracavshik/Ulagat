@@ -18,6 +18,33 @@ function findCell(cells: DayCell[], period: number): DayCell | null {
     return cells.find((c) => c.period === period) ?? null;
 }
 
+/** Thin progress bar showing how far through the current lesson/break we are. */
+function PhaseProgress({ info, colorClass }: { info: CurrentPeriodInfo; colorClass: string }) {
+    if (!info.totalMinutes || info.totalMinutes <= 0) return null;
+    const elapsed = info.totalMinutes - info.minutesLeft;
+    const pct = Math.max(0, Math.min(100, (elapsed / info.totalMinutes) * 100));
+    return (
+        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+            <div className={`h-full rounded-full transition-all duration-500 ${colorClass}`} style={{ width: `${pct}%` }} />
+        </div>
+    );
+}
+
+/** Compact "next: <subject>" preview for the lesson after the current one. */
+function NextUp({ cells, period }: { cells: DayCell[]; period: number }) {
+    const { t } = useT();
+    const nextCell = findCell(cells, period + 1);
+    if (!nextCell) return null;
+    const effective = effectiveLesson(nextCell);
+    if (!effective.subject || effective.cancelled) return null;
+    return (
+        <p className="mt-1.5 text-xs text-muted-foreground">
+            {t('schedule.nextUp')}: <span className="font-semibold text-foreground">{effective.subject}</span>
+            {effective.room ? ` · ${t('schedule.room')} ${effective.room}` : ''}
+        </p>
+    );
+}
+
 function LessonLine({ cell }: { cell: DayCell }) {
     const { t } = useT();
     const effective = effectiveLesson(cell);
@@ -112,6 +139,7 @@ export function CurrentLessonWidget({ todayCells }: CurrentLessonWidgetProps) {
                     {t('schedule.breakNext', { min: info.minutesLeft })}{time && <> ({time.start})</>}
                 </div>
                 {nextCell && <LessonLine cell={nextCell} />}
+                <PhaseProgress info={info} colorClass="bg-emerald-500" />
             </div>
         );
     } else {
@@ -124,6 +152,8 @@ export function CurrentLessonWidget({ todayCells }: CurrentLessonWidgetProps) {
                     {t('schedule.lessonN', { n: info.period })}{time && <> ({time.start}–{time.end})</>} — {t('schedule.bellIn', { min: info.minutesLeft })}
                 </div>
                 {cell ? <LessonLine cell={cell} /> : <span className="text-lg font-bold text-foreground">{t('schedule.freePeriod')}</span>}
+                <PhaseProgress info={info} colorClass="bg-blue-500" />
+                <NextUp cells={todayCells} period={info.period} />
             </div>
         );
     }

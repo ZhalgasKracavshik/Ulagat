@@ -324,6 +324,7 @@ export const ru: Dictionary = {
         breakNext: "Перемена — следующий урок через {min} мин",
         lessonN: "Урок {n}",
         bellIn: "звонок через {min} мин",
+        nextUp: "Далее",
     },
     announcements: {
         title: "Объявления",

@@ -24,6 +24,8 @@ export type CurrentPeriodInfo = {
     status: PeriodStatus;
     /** Minutes until the next bell: lesson → until it ends; break/before → until the next lesson starts; after → 0. */
     minutesLeft: number;
+    /** Total minutes of the current phase (lesson length, or break length) — for a progress bar. Undefined for before/after. */
+    totalMinutes?: number;
 };
 
 function toMinutes(hhmm: string): number {
@@ -58,11 +60,12 @@ export function getCurrentPeriod(now: Date): CurrentPeriodInfo {
             period: current.period,
             status: 'lesson',
             minutesLeft: toMinutes(current.end) - minutes,
+            totalMinutes: toMinutes(current.end) - toMinutes(current.start),
         };
     }
 
-    const next = BELL_SCHEDULE.find((p) => minutes < toMinutes(p.start));
-    if (!next) {
+    const nextIdx = BELL_SCHEDULE.findIndex((p) => minutes < toMinutes(p.start));
+    if (nextIdx === -1) {
         return {
             period: BELL_SCHEDULE[BELL_SCHEDULE.length - 1].period,
             status: 'after',
@@ -70,9 +73,14 @@ export function getCurrentPeriod(now: Date): CurrentPeriodInfo {
         };
     }
 
+    const next = BELL_SCHEDULE[nextIdx];
+    const isBefore = next.period === BELL_SCHEDULE[0].period;
+    const prev = nextIdx > 0 ? BELL_SCHEDULE[nextIdx - 1] : null;
     return {
         period: next.period,
-        status: next.period === BELL_SCHEDULE[0].period ? 'before' : 'break',
+        status: isBefore ? 'before' : 'break',
         minutesLeft: toMinutes(next.start) - minutes,
+        // Break length = gap between the previous lesson's end and the next start.
+        totalMinutes: !isBefore && prev ? toMinutes(next.start) - toMinutes(prev.end) : undefined,
     };
 }
