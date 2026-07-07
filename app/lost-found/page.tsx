@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MapPin, PlusCircle, Tag, Search, PackageSearch, Clock, Package } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
-import { format } from "date-fns";
+import { formatDayMonthLocalized } from "@/lib/format-date";
 import Link from "next/link";
 import {
     LOST_ITEM_CATEGORIES,
@@ -211,7 +211,7 @@ export default async function LostFoundPage({ searchParams }: { searchParams: Pr
                                         </span>
                                         <span className="flex items-center gap-1 shrink-0">
                                             <Clock className="w-3.5 h-3.5" />
-                                            {format(new Date(item.created_at), 'MMM d')}
+                                            {formatDayMonthLocalized(item.created_at, locale)}
                                         </span>
                                     </CardFooter>
                                 </Card>

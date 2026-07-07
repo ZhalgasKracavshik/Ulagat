@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { format } from "date-fns";
+import { formatDateLocalized } from "@/lib/format-date";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -274,7 +274,7 @@ export default async function ManageClubPage({ params }: { params: Promise<{ id:
                                 meetings.map((meeting) => (
                                     <div key={meeting.id} className="flex items-center gap-3 p-2.5 rounded-lg border border-border bg-muted/50">
                                         <span className="font-bold text-foreground text-sm tabular-nums shrink-0">
-                                            {format(new Date(meeting.date + 'T00:00:00'), 'MMM d, yyyy')}
+                                            {formatDateLocalized(meeting.date, locale)}
                                         </span>
                                         <span className="flex-grow min-w-0 text-sm text-muted-foreground truncate">
                                             {meeting.notes || t('clubManage.clubMeeting')}
@@ -331,7 +331,7 @@ export default async function ManageClubPage({ params }: { params: Promise<{ id:
                                             </Link>
                                         </TableCell>
                                         <TableCell className="text-sm text-muted-foreground">
-                                            {format(new Date(member.joined_at), 'MMM d, yyyy')}
+                                            {formatDateLocalized(member.joined_at, locale)}
                                         </TableCell>
                                         <TableCell className="text-right font-bold tabular-nums">
                                             {member.total_attendance}

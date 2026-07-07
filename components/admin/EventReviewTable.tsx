@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Check, X, Eye, Calendar, MapPin, FileText } from "lucide-react";
 import { approveEvent, rejectEvent } from "@/app/admin/actions";
 import Image from "next/image";
-import { format } from "date-fns";
+import { formatDateTimeLocalized } from "@/lib/format-date";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useT } from "@/hooks/useT";
@@ -29,7 +29,7 @@ interface EventReviewTableProps {
 }
 
 export function EventReviewTable({ events }: EventReviewTableProps) {
-    const { t } = useT();
+    const { t, locale } = useT();
     const [isLoading, setIsLoading] = useState(false);
     const [rejectionReason, setRejectionReason] = useState("");
     const [showRejectDialog, setShowRejectDialog] = useState(false);
@@ -71,7 +71,7 @@ export function EventReviewTable({ events }: EventReviewTableProps) {
                     <TableRow key={event.id}>
                         <TableCell className="font-medium">{event.title}</TableCell>
                         <TableCell className="whitespace-nowrap">
-                            {format(new Date(event.event_date), 'MMM d, h:mm a')}
+                            {formatDateTimeLocalized(event.event_date, locale)}
                         </TableCell>
                         <TableCell>{event.location || t('admin.schoolHall')}</TableCell>
                         <TableCell>{event.profiles?.full_name}</TableCell>
@@ -102,7 +102,7 @@ export function EventReviewTable({ events }: EventReviewTableProps) {
                                             <div className="flex flex-col gap-2">
                                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                     <Calendar className="w-4 h-4 text-blue-500" />
-                                                    <strong>{format(new Date(event.event_date), 'EEEE, MMMM do yyyy @ h:mm a')}</strong>
+                                                    <strong>{formatDateTimeLocalized(event.event_date, locale)}</strong>
                                                 </div>
                                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                                     <MapPin className="w-4 h-4 text-red-500" />

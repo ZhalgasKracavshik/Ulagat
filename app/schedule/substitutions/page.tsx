@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { format } from "date-fns";
+import { formatDayMonthLocalized } from "@/lib/format-date";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -155,7 +155,7 @@ export default async function SubstitutionsPage() {
                                     {upcoming.map((sub) => (
                                         <TableRow key={sub.id}>
                                             <TableCell className="whitespace-nowrap font-medium">
-                                                {format(new Date(sub.date + 'T00:00:00'), 'MMM d')}
+                                                {formatDayMonthLocalized(sub.date, locale)}
                                             </TableCell>
                                             <TableCell className="font-bold">{sub.grade}{sub.class_letter}</TableCell>
                                             <TableCell>{sub.period}</TableCell>

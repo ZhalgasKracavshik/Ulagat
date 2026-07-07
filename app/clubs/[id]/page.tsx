@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { format } from "date-fns";
+import { formatDateLocalized } from "@/lib/format-date";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -266,7 +266,7 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
                                     <div className="flex items-center justify-between gap-2">
                                         <h4 className="font-bold text-foreground text-sm">{announcement.title}</h4>
                                         <span className="text-[11px] text-muted-foreground shrink-0">
-                                            {format(new Date(announcement.created_at), 'MMM d, yyyy')}
+                                            {formatDateLocalized(announcement.created_at, locale)}
                                         </span>
                                     </div>
                                     <p className="text-sm text-muted-foreground whitespace-pre-line">{announcement.body}</p>
@@ -294,13 +294,13 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
                                 <p className="text-xs font-bold uppercase tracking-wider text-violet-500">{t('clubDetail.today')}</p>
                             )}
                             {todayMeetings.map((meeting) => (
-                                <MeetingRow key={meeting.id} meeting={meeting} highlight t={t} />
+                                <MeetingRow key={meeting.id} meeting={meeting} highlight t={t} locale={locale} />
                             ))}
                             {pastMeetings.length > 0 && (
                                 <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground pt-1">{t('clubDetail.past')}</p>
                             )}
                             {pastMeetings.map((meeting) => (
-                                <MeetingRow key={meeting.id} meeting={meeting} t={t} />
+                                <MeetingRow key={meeting.id} meeting={meeting} t={t} locale={locale} />
                             ))}
                         </>
                     ) : (
@@ -312,11 +312,11 @@ export default async function ClubPage({ params }: { params: Promise<{ id: strin
     );
 }
 
-function MeetingRow({ meeting, highlight = false, t }: { meeting: ClubMeeting; highlight?: boolean; t: ClubT }) {
+function MeetingRow({ meeting, highlight = false, t, locale }: { meeting: ClubMeeting; highlight?: boolean; t: ClubT; locale: string }) {
     return (
         <div className={`flex items-center gap-4 p-3 rounded-lg border ${highlight ? 'border-violet-200 dark:border-violet-800 bg-violet-50/50 dark:bg-violet-950/30' : 'border-border bg-muted'}`}>
             <div className="font-bold text-foreground text-sm tabular-nums shrink-0">
-                {format(new Date(meeting.date + 'T00:00:00'), 'MMM d, yyyy')}
+                {formatDateLocalized(meeting.date, locale)}
             </div>
             <div className="flex-grow min-w-0 text-sm text-muted-foreground truncate">
                 {meeting.notes || t('clubDetail.clubMeeting')}

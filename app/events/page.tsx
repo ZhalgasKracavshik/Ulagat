@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Trophy, Users, Tag } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 import Link from "next/link";
-import { format } from "date-fns";
+import { formatDateLocalized } from "@/lib/format-date";
 import { CountdownWidget } from "@/components/events/CountdownWidget";
 import { EVENT_CREATOR_ROLES, EVENT_TAGS, isEventTag, nextEntIso, nextHoliday } from "@/lib/events";
 import { almatyTodayIso } from "@/lib/schedule/almaty-time";
@@ -176,7 +176,7 @@ export default async function EventsPage({ searchParams }: { searchParams: Promi
                                         </div>
                                     )}
                                     <div className="absolute top-2 left-2 bg-card/90 px-3 py-1 rounded-full text-xs font-bold shadow-sm">
-                                        {format(new Date(event.event_date), 'MMM d, yyyy')}
+                                        {formatDateLocalized(event.event_date, locale)}
                                     </div>
                                 </div>
                                 <CardHeader>

@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, MapPin, Trophy, ArrowLeft, Share2, Users } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { format } from "date-fns";
+import { formatDateTimeLocalized } from "@/lib/format-date";
 import { EventRegistrationButton } from "@/components/events/EventRegistrationButton";
 import { almatyTodayIso } from "@/lib/schedule/almaty-time";
 import {
@@ -116,7 +116,7 @@ export default async function EventDetailsPage({ params }: PageProps) {
                         <div className="flex flex-wrap gap-4 text-white/90">
                             <div className="flex items-center gap-1.5">
                                 <Calendar className="w-4 h-4" />
-                                <span>{format(new Date(event.event_date), 'MMMM d, yyyy @ h:mm a')}</span>
+                                <span>{formatDateTimeLocalized(event.event_date, locale)}</span>
                             </div>
                             <div className="flex items-center gap-1.5">
                                 <MapPin className="w-4 h-4" />

@@ -28,3 +28,24 @@ export function formatDateLocalized(iso: string, locale: string): string {
         timeZone: ALMATY_TZ,
     }).format(new Date(iso));
 }
+
+/** Date + time, e.g. "7 июл. 2026 г., 14:30" — for events/claims with a time. */
+export function formatDateTimeLocalized(iso: string, locale: string): string {
+    return new Intl.DateTimeFormat(tag(locale), {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: ALMATY_TZ,
+    }).format(new Date(iso));
+}
+
+/** Day + month only, e.g. "7 июл." — for compact chips/rows. */
+export function formatDayMonthLocalized(iso: string, locale: string): string {
+    return new Intl.DateTimeFormat(tag(locale), {
+        day: "numeric",
+        month: "short",
+        timeZone: ALMATY_TZ,
+    }).format(new Date(iso));
+}

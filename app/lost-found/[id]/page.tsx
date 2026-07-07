@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { format } from "date-fns";
+import { formatDateLocalized, formatDateTimeLocalized } from "@/lib/format-date";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -148,7 +148,7 @@ export default async function LostItemPage({ params }: { params: Promise<{ id: s
                         </div>
                         <div className="flex items-center gap-2 text-muted-foreground">
                             <Clock className="w-4 h-4 text-teal-500 shrink-0" />
-                            <span>{t('lostFoundDetail.posted', { date: format(new Date(item.created_at), 'MMM d, yyyy') })}</span>
+                            <span>{t('lostFoundDetail.posted', { date: formatDateLocalized(item.created_at, locale) })}</span>
                         </div>
                         <div className="flex items-center gap-2 text-muted-foreground">
                             <UserIcon className="w-4 h-4 text-teal-500 shrink-0" />
@@ -229,7 +229,7 @@ export default async function LostItemPage({ params }: { params: Promise<{ id: s
                                                         </Badge>
                                                     )}
                                                     <span className="text-[11px] text-muted-foreground">
-                                                        {format(new Date(claim.created_at), 'MMM d, yyyy · HH:mm')}
+                                                        {formatDateTimeLocalized(claim.created_at, locale)}
                                                     </span>
                                                 </div>
                                                 {claim.note && (
