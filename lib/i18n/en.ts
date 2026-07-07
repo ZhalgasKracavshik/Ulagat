@@ -352,6 +352,8 @@ export const en: Dictionary = {
         catAssembly: "Assembly",
         catImportant: "Important",
         catGeneral: "General",
+        allCategories: "All",
+        emptyCategory: "No announcements in this category yet.",
     },
     events: {
         title: "School Olympiads & Events",

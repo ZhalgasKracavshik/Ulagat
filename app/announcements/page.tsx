@@ -18,15 +18,33 @@ import {
     isLocale,
     resolveKey,
 } from "@/lib/i18n";
-import type { Announcement } from "@/types";
+import type { Announcement, AnnouncementCategory } from "@/types";
 
 export const dynamic = 'force-dynamic';
 
-export default async function AnnouncementsPage() {
+const CATEGORY_CHIPS: { key: AnnouncementCategory; labelKey: string; icon: string }[] = [
+    { key: 'medical', labelKey: 'announcements.catMedical', icon: '🏥' },
+    { key: 'assembly', labelKey: 'announcements.catAssembly', icon: '📢' },
+    { key: 'important', labelKey: 'announcements.catImportant', icon: '❗' },
+    { key: 'general', labelKey: 'announcements.catGeneral', icon: '📝' },
+];
+const VALID_CATEGORIES: AnnouncementCategory[] = ['medical', 'assembly', 'important', 'general'];
+
+export default async function AnnouncementsPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) redirect('/login');
+
+    const params = await searchParams;
+    const rawCategory = typeof params?.category === 'string' ? params.category : '';
+    const categoryFilter = VALID_CATEGORIES.includes(rawCategory as AnnouncementCategory)
+        ? (rawCategory as AnnouncementCategory)
+        : null;
 
     // Server component: resolve locale from cookie and translate via dictionary.
     const cookieStore = await cookies();
@@ -80,6 +98,10 @@ export default async function AnnouncementsPage() {
         query = query.or(gradeFilter);
     }
 
+    if (categoryFilter) {
+        query = query.eq('category', categoryFilter);
+    }
+
     const { data: rows } = await query;
     const announcements = (rows ?? []) as Announcement[];
 
@@ -108,10 +130,31 @@ export default async function AnnouncementsPage() {
                     )}
                 </div>
 
+                {/* Category filter chips */}
+                <div className="flex flex-wrap items-center gap-2">
+                    <Link href="/announcements">
+                        <Button variant={!categoryFilter ? 'secondary' : 'ghost'} size="sm" className="rounded-full px-4">
+                            {t('announcements.allCategories')}
+                        </Button>
+                    </Link>
+                    {CATEGORY_CHIPS.map((c) => (
+                        <Link key={c.key} href={`/announcements?category=${c.key}`}>
+                            <Button
+                                variant={categoryFilter === c.key ? 'secondary' : 'ghost'}
+                                size="sm"
+                                className="rounded-full gap-1 px-3"
+                            >
+                                <span aria-hidden="true">{c.icon}</span>
+                                {t(c.labelKey)}
+                            </Button>
+                        </Link>
+                    ))}
+                </div>
+
                 {announcements.length === 0 ? (
                     <EmptyState
                         icon={Megaphone}
-                        title={t('announcements.empty')}
+                        title={categoryFilter ? t('announcements.emptyCategory') : t('announcements.empty')}
                         tint="bg-indigo-50 dark:bg-indigo-950/40"
                         iconColor="text-indigo-400"
                     />

@@ -339,6 +339,8 @@ export const kk: Dictionary = {
         catAssembly: "Сап түзеу",
         catImportant: "Маңызды",
         catGeneral: "Жалпы",
+        allCategories: "Барлығы",
+        emptyCategory: "Бұл санатта әзірге хабарландыру жоқ.",
     },
     events: {
         title: "Мектеп олимпиадалары мен іс-шаралары",

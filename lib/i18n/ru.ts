@@ -339,6 +339,8 @@ export const ru: Dictionary = {
         catAssembly: "Линейка",
         catImportant: "Важное",
         catGeneral: "Общее",
+        allCategories: "Все",
+        emptyCategory: "В этой категории пока нет объявлений.",
     },
     events: {
         title: "Школьные олимпиады и мероприятия",
