@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { format } from "date-fns";
+import { formatDateLocalized } from "@/lib/format-date";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Megaphone, Pin, PlusCircle, Users } from "lucide-react";
@@ -189,9 +189,9 @@ export default async function AnnouncementsPage({
                                     </p>
 
                                     <div className="flex items-center justify-between pt-1 text-xs text-muted-foreground">
-                                        <span>{format(new Date(announcement.created_at), 'MMM d, yyyy')}</span>
+                                        <span>{formatDateLocalized(announcement.created_at, locale)}</span>
                                         {announcement.expires_at && (
-                                            <span>{t('announcements.visibleUntil', { date: format(new Date(announcement.expires_at), 'MMM d, yyyy') })}</span>
+                                            <span>{t('announcements.visibleUntil', { date: formatDateLocalized(announcement.expires_at, locale) })}</span>
                                         )}
                                     </div>
                                 </CardContent>
