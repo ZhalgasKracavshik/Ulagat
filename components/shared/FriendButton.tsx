@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { UserPlus, UserCheck, Clock, UserMinus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useT } from "@/hooks/useT";
 
 interface FriendButtonProps {
     targetUserId: string;
@@ -13,6 +14,7 @@ interface FriendButtonProps {
 }
 
 export function FriendButton({ targetUserId, currentUserId, initialStatus, friendshipId }: FriendButtonProps) {
+    const { t } = useT();
     const router = useRouter();
     const [status, setStatus] = useState(initialStatus);
     const [loading, setLoading] = useState(false);
@@ -51,7 +53,7 @@ export function FriendButton({ targetUserId, currentUserId, initialStatus, frien
             <div className="flex gap-2">
                 <Button variant="outline" size="sm" className="gap-1 text-green-600 border-green-200 bg-green-50 dark:bg-green-950/40" disabled>
                     <UserCheck className="w-4 h-4" />
-                    Friends
+                    {t("friendButton.friends")}
                 </Button>
                 <Button
                     variant="ghost"
@@ -59,6 +61,7 @@ export function FriendButton({ targetUserId, currentUserId, initialStatus, frien
                     className="text-red-500 hover:text-red-700"
                     onClick={() => handleAction("remove")}
                     disabled={loading}
+                    aria-label={t("friendButton.remove")}
                 >
                     <UserMinus className="w-4 h-4" />
                 </Button>
@@ -70,7 +73,7 @@ export function FriendButton({ targetUserId, currentUserId, initialStatus, frien
         return (
             <Button variant="outline" size="sm" className="gap-1 text-amber-600" disabled>
                 <Clock className="w-4 h-4" />
-                Request Sent
+                {t("friendButton.requestSent")}
             </Button>
         );
     }
@@ -85,7 +88,7 @@ export function FriendButton({ targetUserId, currentUserId, initialStatus, frien
                     disabled={loading}
                 >
                     <UserCheck className="w-4 h-4" />
-                    Accept
+                    {t("friendButton.accept")}
                 </Button>
                 <Button
                     variant="outline"
@@ -94,7 +97,7 @@ export function FriendButton({ targetUserId, currentUserId, initialStatus, frien
                     onClick={() => handleAction("remove")}
                     disabled={loading}
                 >
-                    Decline
+                    {t("friendButton.decline")}
                 </Button>
             </div>
         );
@@ -110,7 +113,7 @@ export function FriendButton({ targetUserId, currentUserId, initialStatus, frien
             disabled={loading}
         >
             <UserPlus className="w-4 h-4" />
-            {loading ? "Sending..." : "Add Friend"}
+            {loading ? t("friendButton.sending") : t("friendButton.addFriend")}
         </Button>
     );
 }

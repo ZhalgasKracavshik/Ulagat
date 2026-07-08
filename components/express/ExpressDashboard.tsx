@@ -14,8 +14,10 @@ import {
     Moon,
 } from "lucide-react";
 import { CurrentLessonWidget } from "@/components/schedule/CurrentLessonWidget";
+import { CategoryBadge } from "@/components/announcements/CategoryBadge";
 import { effectiveLesson, type DayCell } from "@/components/schedule/types";
 import { getPeriodTime } from "@/lib/schedule/bells";
+import { useT } from "@/hooks/useT";
 import type { Announcement } from "@/types";
 
 export type ExpressData = {
@@ -31,21 +33,23 @@ export type ExpressData = {
 };
 
 function SubstitutionPill({ cell }: { cell: DayCell }) {
+    const { t } = useT();
     if (!cell.substitution) return null;
-    const labels: Record<string, string> = {
-        substitution: "Substitution",
-        cancellation: "Cancelled",
-        room_change: "Room change",
+    const labelKey: Record<string, string> = {
+        substitution: "home.subSub",
+        cancellation: "home.subCancelled",
+        room_change: "home.subRoom",
     };
     return (
         <Badge className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-200 border-0 text-[10px] gap-1">
             <Repeat className="w-3 h-3" />
-            {labels[cell.substitution.type] ?? "Change"}
+            {t(labelKey[cell.substitution.type] ?? "home.subSub")}
         </Badge>
     );
 }
 
 export function ExpressDashboard({ data }: { data: ExpressData }) {
+    const { t } = useT();
     const { firstName, classLabel, todayCells, hasSchoolToday, announcements } = data;
 
     // Only show slots that actually have a lesson (or a substitution overlay).
@@ -60,10 +64,12 @@ export function ExpressDashboard({ data }: { data: ExpressData }) {
             {/* Greeting */}
             <div className="space-y-1">
                 <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
-                    Good morning, {firstName}
+                    {t("express.goodMorning", { name: firstName })}
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                    {classLabel ? `Class ${classLabel} · Today at a glance` : "Today at a glance"}
+                    {classLabel
+                        ? `${t("home.classLabel", { label: classLabel })} · ${t("express.todayGlance")}`
+                        : t("express.todayGlance")}
                 </p>
             </div>
 
@@ -76,7 +82,7 @@ export function ExpressDashboard({ data }: { data: ExpressData }) {
                     <div className="flex items-center gap-2 rounded-xl bg-orange-50 dark:bg-orange-950/40 border border-orange-200 px-4 py-3 text-orange-800 active:scale-[0.99] transition-transform">
                         <Repeat className="w-5 h-5 shrink-0" />
                         <span className="text-sm font-semibold">
-                            {substitutionCount} change{substitutionCount > 1 ? "s" : ""} to today&apos;s schedule
+                            {t(substitutionCount > 1 ? "home.changesTodayPlural" : "home.changesToday", { count: substitutionCount })}
                         </span>
                         <ArrowRight className="w-4 h-4 ml-auto shrink-0" />
                     </div>
@@ -88,21 +94,34 @@ export function ExpressDashboard({ data }: { data: ExpressData }) {
                 <div className="flex items-center justify-between">
                     <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground flex items-center gap-2">
                         <CalendarDays className="w-4 h-4 text-sky-500" />
-                        Today
+                        {t("common.today")}
                     </h2>
                     <Link
                         href="/schedule"
                         className="text-xs font-medium text-sky-600 flex items-center gap-1"
                     >
-                        Full week <ArrowRight className="w-3 h-3" />
+                        {t("express.fullWeek")} <ArrowRight className="w-3 h-3" />
                     </Link>
                 </div>
 
-                {!hasSchoolToday || activeCells.length === 0 ? (
+                {!classLabel ? (
+                    /* No class set — onboarding prompt instead of a misleading "no lessons" */
+                    <Card className="border-dashed border-sky-200 dark:border-sky-900 bg-sky-50/50 dark:bg-sky-950/30">
+                        <CardContent className="py-6 flex flex-col items-center gap-3 text-center">
+                            <p className="text-sm text-muted-foreground">{t("home.setClassPrompt")}</p>
+                            <Link
+                                href="/settings"
+                                className="inline-flex items-center gap-1.5 rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-700"
+                            >
+                                {t("home.setClassCta")} <ArrowRight className="h-4 w-4" />
+                            </Link>
+                        </CardContent>
+                    </Card>
+                ) : !hasSchoolToday || activeCells.length === 0 ? (
                     <Card className="border-dashed">
                         <CardContent className="py-8 flex flex-col items-center gap-2 text-muted-foreground">
                             <Moon className="w-7 h-7" />
-                            <span className="text-sm font-medium">No lessons today</span>
+                            <span className="text-sm font-medium">{t("home.noLessonsToday")}</span>
                         </CardContent>
                     </Card>
                 ) : (
@@ -126,12 +145,12 @@ export function ExpressDashboard({ data }: { data: ExpressData }) {
                                         <div className="flex-1 min-w-0">
                                             {eff.cancelled ? (
                                                 <span className="font-bold text-red-600 line-through">
-                                                    {eff.subject ?? "Lesson"} cancelled
+                                                    {eff.subject ?? t("schedule.lessonCancelled")}
                                                 </span>
                                             ) : (
                                                 <>
                                                     <p className="font-bold text-foreground truncate">
-                                                        {eff.subject ?? "Free period"}
+                                                        {eff.subject ?? t("home.freePeriod")}
                                                     </p>
                                                     <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
                                                         {eff.room && (
@@ -162,13 +181,13 @@ export function ExpressDashboard({ data }: { data: ExpressData }) {
                 <div className="flex items-center justify-between">
                     <h2 className="text-sm font-bold uppercase tracking-wide text-muted-foreground flex items-center gap-2">
                         <Megaphone className="w-4 h-4 text-indigo-500" />
-                        Announcements
+                        {t("home.announcements")}
                     </h2>
                     <Link
                         href="/announcements"
                         className="text-xs font-medium text-indigo-600 flex items-center gap-1"
                     >
-                        All <ArrowRight className="w-3 h-3" />
+                        {t("home.viewAll")} <ArrowRight className="w-3 h-3" />
                     </Link>
                 </div>
 
@@ -185,9 +204,9 @@ export function ExpressDashboard({ data }: { data: ExpressData }) {
                                             <p className="font-semibold text-foreground text-sm leading-snug line-clamp-2">
                                                 {a.title}
                                             </p>
-                                            <p className="text-xs text-muted-foreground mt-0.5 capitalize">
-                                                {a.category}
-                                            </p>
+                                            <div className="mt-1">
+                                                <CategoryBadge category={a.category} />
+                                            </div>
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -197,14 +216,14 @@ export function ExpressDashboard({ data }: { data: ExpressData }) {
                 ) : (
                     <Card className="border-dashed">
                         <CardContent className="py-6 text-center text-sm text-muted-foreground">
-                            Nothing new.
+                            {t("express.nothingNew")}
                         </CardContent>
                     </Card>
                 )}
             </section>
 
             <p className="text-center text-[11px] text-muted-foreground pt-1">
-                Switch to Full mode (moon icon) for everything else.
+                {t("express.switchHint")}
             </p>
         </div>
     );

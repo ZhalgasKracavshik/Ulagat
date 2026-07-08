@@ -155,8 +155,10 @@ export default async function AnnouncementsPage({
                     <EmptyState
                         icon={Megaphone}
                         title={categoryFilter ? t('announcements.emptyCategory') : t('announcements.empty')}
+                        description={categoryFilter ? undefined : t('announcements.emptyHint')}
                         tint="bg-indigo-50 dark:bg-indigo-950/40"
                         iconColor="text-indigo-400"
+                        action={isStaff && !categoryFilter ? { href: '/announcements/new', label: t('announcements.newAnnouncement') } : undefined}
                     />
                 ) : (
                     <div className="space-y-4">

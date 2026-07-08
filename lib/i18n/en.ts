@@ -355,6 +355,7 @@ export const en: Dictionary = {
         catGeneral: "General",
         allCategories: "All",
         emptyCategory: "No announcements in this category yet.",
+        emptyHint: "Official school announcements will appear here — medical checks, assemblies and important news.",
     },
     events: {
         title: "School Olympiads & Events",
@@ -1529,6 +1530,22 @@ export const en: Dictionary = {
         challengeBody: "Enter the code from your authenticator app to open the admin area.",
         verifyCta: "Continue",
         backHome: "Back to home",
+    },
+    friendButton: {
+        friends: "Friends",
+        requestSent: "Request sent",
+        accept: "Accept",
+        decline: "Decline",
+        addFriend: "Add friend",
+        sending: "Sending...",
+        remove: "Remove friend",
+    },
+    express: {
+        goodMorning: "Good morning, {name}",
+        todayGlance: "Today at a glance",
+        fullWeek: "Full week",
+        nothingNew: "Nothing new.",
+        switchHint: "Switch to Full mode (moon icon) for everything else.",
     },
     push: {
         title: "Push notifications",

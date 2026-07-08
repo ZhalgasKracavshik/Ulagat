@@ -327,6 +327,21 @@ function AccountSection() {
                     <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                 </Link>
 
+                <Link
+                    href="/forgot-password"
+                    className="flex items-center justify-between gap-4 rounded-lg px-1 py-3 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                    <span className="min-w-0">
+                        <span className="block text-sm font-medium text-foreground">
+                            {t("settings.account.changePassword")}
+                        </span>
+                        <span className="block text-xs text-muted-foreground">
+                            {t("settings.account.changePasswordHint")}
+                        </span>
+                    </span>
+                    <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                </Link>
+
                 <div className="border-t pt-3">
                     <SignOutButton />
                 </div>

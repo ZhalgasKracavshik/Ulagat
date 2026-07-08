@@ -342,6 +342,7 @@ export const ru: Dictionary = {
         catGeneral: "Общее",
         allCategories: "Все",
         emptyCategory: "В этой категории пока нет объявлений.",
+        emptyHint: "Здесь появятся официальные объявления администрации школы — медосмотры, линейки и важные новости.",
     },
     events: {
         title: "Школьные олимпиады и мероприятия",
@@ -1495,6 +1496,22 @@ export const ru: Dictionary = {
         challengeBody: "Для доступа в админ-зону введите код из приложения-аутентификатора.",
         verifyCta: "Продолжить",
         backHome: "Вернуться на главную",
+    },
+    friendButton: {
+        friends: "Друзья",
+        requestSent: "Заявка отправлена",
+        accept: "Принять",
+        decline: "Отклонить",
+        addFriend: "Добавить в друзья",
+        sending: "Отправка...",
+        remove: "Удалить из друзей",
+    },
+    express: {
+        goodMorning: "Доброе утро, {name}",
+        todayGlance: "Обзор дня",
+        fullWeek: "Вся неделя",
+        nothingNew: "Пока ничего нового.",
+        switchHint: "Полный режим (иконка луны) — для всего остального.",
     },
     push: {
         title: "Push-уведомления",

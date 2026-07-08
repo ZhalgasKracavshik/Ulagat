@@ -342,6 +342,7 @@ export const kk: Dictionary = {
         catGeneral: "Жалпы",
         allCategories: "Барлығы",
         emptyCategory: "Бұл санатта әзірге хабарландыру жоқ.",
+        emptyHint: "Мұнда мектеп әкімшілігінің ресми хабарландырулары шығады — медтексерулер, жиындар және маңызды жаңалықтар.",
     },
     events: {
         title: "Мектеп олимпиадалары мен іс-шаралары",
@@ -1495,6 +1496,22 @@ export const kk: Dictionary = {
         challengeBody: "Әкімші аймағына кіру үшін аутентификатор қосымшасындағы кодты енгізіңіз.",
         verifyCta: "Жалғастыру",
         backHome: "Басты бетке оралу",
+    },
+    friendButton: {
+        friends: "Достар",
+        requestSent: "Өтінім жіберілді",
+        accept: "Қабылдау",
+        decline: "Бас тарту",
+        addFriend: "Дос қосу",
+        sending: "Жіберілуде...",
+        remove: "Достардан алып тастау",
+    },
+    express: {
+        goodMorning: "Қайырлы таң, {name}",
+        todayGlance: "Күн шолуы",
+        fullWeek: "Толық апта",
+        nothingNew: "Әзірге жаңалық жоқ.",
+        switchHint: "Толық режим (ай белгішесі) — қалғанының бәрі үшін.",
     },
     push: {
         title: "Push-хабарламалар",
