@@ -53,6 +53,11 @@ export const kk: Dictionary = {
         doneLabel: "Дайын",
     },
     nav: {
+        modeExpressTitle: "Таңғы режим — толық режимге басыңыз",
+        ariaPrimary: "Негізгі навигация",
+        modeFullTitle: "Толық режим — таңғы режимге басыңыз",
+        switchToFull: "Толық режимге ауысу",
+        switchToExpress: "Таңғы режимге ауысу",
         home: "Басты бет",
         schedule: "Сабақ кестесі",
         announcements: "Хабарландырулар",
@@ -204,6 +209,7 @@ export const kk: Dictionary = {
         reputationPoints: "бедел ұпайы",
         verifiedLedger: "Тізілім тексерілді",
         invalidLedger: "Тізілім бұзылған",
+        invalidLedgerTitle: "Бедел журналы бұрмаланған",
         class: "Сынып",
     },
     home: {
@@ -850,6 +856,7 @@ export const kk: Dictionary = {
         mentorship: "Тәлімгерлік",
     },
     servicesList: {
+        anonymousOwner: "Аноним",
         title: "Хабарландыру тақтасы",
         subtitle: "Ulagat қауымдастығынан курстар, репетиторлық, жобаға көмек, тәжірибе және тәлімгерлік.",
         postListing: "Орналастыру",

@@ -59,6 +59,11 @@ export const en: Dictionary = {
         doneLabel: "Done",
     },
     nav: {
+        modeExpressTitle: "Express mode — tap for Full",
+        ariaPrimary: "Primary navigation",
+        modeFullTitle: "Full mode — tap for Express",
+        switchToFull: "Switch to Full mode",
+        switchToExpress: "Switch to Express mode",
         home: "Home",
         schedule: "Schedule",
         announcements: "Announcements",
@@ -211,6 +216,7 @@ export const en: Dictionary = {
         reputationPoints: "reputation points",
         verifiedLedger: "Verified ledger",
         invalidLedger: "Invalid ledger",
+        invalidLedgerTitle: "Reputation ledger has been tampered with",
         class: "Class",
     },
     home: {
@@ -880,6 +886,7 @@ export const en: Dictionary = {
         mentorship: "Mentorship",
     },
     servicesList: {
+        anonymousOwner: "Anonymous",
         title: "Bulletin Board",
         subtitle: "Courses, tutoring, project help, internships and mentorship from the Ulagat community.",
         postListing: "Post Listing",

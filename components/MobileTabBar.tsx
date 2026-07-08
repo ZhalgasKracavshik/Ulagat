@@ -173,7 +173,7 @@ export function MobileTabBar({
         <>
             <nav
                 className="md:hidden fixed bottom-0 inset-x-0 z-50 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 pb-[env(safe-area-inset-bottom)]"
-                aria-label="Primary"
+                aria-label={t("nav.ariaPrimary")}
             >
                 <div className="flex items-stretch justify-around h-16">
                     {tabs.map((tab) => {

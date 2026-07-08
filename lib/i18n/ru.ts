@@ -53,6 +53,11 @@ export const ru: Dictionary = {
         doneLabel: "Готово",
     },
     nav: {
+        modeExpressTitle: "Утренний режим — нажмите для полного",
+        ariaPrimary: "Основная навигация",
+        modeFullTitle: "Полный режим — нажмите для утреннего",
+        switchToFull: "Переключить на полный режим",
+        switchToExpress: "Переключить на утренний режим",
         home: "Главная",
         schedule: "Расписание",
         announcements: "Объявления",
@@ -204,6 +209,7 @@ export const ru: Dictionary = {
         reputationPoints: "баллов репутации",
         verifiedLedger: "Реестр проверен",
         invalidLedger: "Реестр повреждён",
+        invalidLedgerTitle: "Журнал репутации был подделан",
         class: "Класс",
     },
     home: {
@@ -850,6 +856,7 @@ export const ru: Dictionary = {
         mentorship: "Менторство",
     },
     servicesList: {
+        anonymousOwner: "Аноним",
         title: "Доска объявлений",
         subtitle: "Курсы, репетиторство, помощь с проектами, стажировки и менторство от сообщества Ulagat.",
         postListing: "Опубликовать",

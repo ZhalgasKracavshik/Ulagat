@@ -219,16 +219,8 @@ export function Navbar({
                                     size="icon"
                                     className="hidden md:inline-flex h-9 w-9"
                                     onClick={toggle}
-                                    title={
-                                        phase === "express"
-                                            ? "Express mode (morning) — tap for Full mode"
-                                            : "Full mode — tap for Express (morning) mode"
-                                    }
-                                    aria-label={
-                                        phase === "express"
-                                            ? "Switch to Full mode"
-                                            : "Switch to Express mode"
-                                    }
+                                    title={phase === "express" ? t("nav.modeExpressTitle") : t("nav.modeFullTitle")}
+                                    aria-label={phase === "express" ? t("nav.switchToFull") : t("nav.switchToExpress")}
                                 >
                                     {phase === "express" ? (
                                         <Sun className="h-5 w-5 text-amber-500" />

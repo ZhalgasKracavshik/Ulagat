@@ -6,16 +6,21 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MessageCircle, Star } from "lucide-react";
 import { StartChatButton } from "../messages/StartChatButton";
-import { serviceCategoryLabel } from "@/lib/services";
+import { serviceCategoryKey } from "@/lib/services-i18n";
+import { DEFAULT_LOCALE, getDictionary, resolveKey, type Locale } from "@/lib/i18n";
 
 interface ServiceCardProps {
     // A service row joined with its owner profile (as fetched on the
     // services list / profile pages).
     service: Service & { profiles?: Partial<Profile> | null };
+    /** Viewer locale (resolved by the parent page); defaults to ru. */
+    locale?: Locale;
 }
 
-export function ServiceCard({ service }: ServiceCardProps) {
+export function ServiceCard({ service, locale = DEFAULT_LOCALE }: ServiceCardProps) {
     const owner: Partial<Profile> = service.profiles || {};
+    const dict = getDictionary(locale);
+    const t = (key: string) => resolveKey(dict, key);
 
     return (
         <Card className="overflow-hidden bg-card hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-primary/10 group flex flex-col h-full">
@@ -32,14 +37,14 @@ export function ServiceCard({ service }: ServiceCardProps) {
                     </div>
                 )}
                 <Badge className="absolute top-2 right-2 bg-card/90 text-foreground hover:bg-card font-bold shadow-sm">
-                    {service.price > 0 ? `${service.price} ₸` : 'Free'}
+                    {service.price > 0 ? `${service.price} ₸` : t('home.free')}
                 </Badge>
             </div>
 
             <CardHeader className="p-4 pb-2">
                 <div className="flex justify-between items-start mb-2">
                     <Badge variant="secondary" className="text-xs font-normal">
-                        {serviceCategoryLabel(service.category)}
+                        {service.category ? t(serviceCategoryKey(service.category)) : ""}
                     </Badge>
                     <div className="flex items-center text-yellow-500 text-xs font-bold gap-1">
                         <Star className="w-3 h-3 fill-yellow-500" />
@@ -64,7 +69,7 @@ export function ServiceCard({ service }: ServiceCardProps) {
                         <AvatarFallback>{owner.full_name?.[0] || '?'}</AvatarFallback>
                     </Avatar>
                     <span className="text-xs font-medium text-foreground group-hover/author:text-primary transition-colors truncate max-w-[100px]">
-                        {owner.full_name || 'Anonymous'}
+                        {owner.full_name || t('servicesList.anonymousOwner')}
                     </span>
                 </Link>
 

@@ -138,8 +138,8 @@ export function Sidebar({
                             type="button"
                             onClick={toggle}
                             className="ml-auto inline-flex h-8 w-8 items-center justify-center rounded-md text-foreground/70 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                            title={phase === "express" ? "Express mode — tap for Full" : "Full mode — tap for Express"}
-                            aria-label={phase === "express" ? "Switch to Full mode" : "Switch to Express mode"}
+                            title={phase === "express" ? t("nav.modeExpressTitle") : t("nav.modeFullTitle")}
+                            aria-label={phase === "express" ? t("nav.switchToFull") : t("nav.switchToExpress")}
                         >
                             {phase === "express" ? <Sun className="h-5 w-5 text-amber-500" /> : <Moon className="h-5 w-5 text-indigo-500" />}
                         </button>

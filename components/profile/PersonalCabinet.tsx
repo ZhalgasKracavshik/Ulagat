@@ -185,7 +185,7 @@ export function PersonalCabinet({
                                 ) : (
                                     <Badge
                                         className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-200 hover:bg-red-100 border-red-200 gap-1"
-                                        title="Reputation ledger has been tampered with"
+                                        title={t("cabinet.invalidLedgerTitle")}
                                     >
                                         <ShieldCheck className="w-3 h-3" />
                                         {t("cabinet.invalidLedger")}

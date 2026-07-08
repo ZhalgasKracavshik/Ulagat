@@ -397,7 +397,7 @@ export default async function ProfilePage({ params }: PageProps) {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {services && services.length > 0 ? (
                                 (services as ProfileServiceRow[]).map((service) => (
-                                    <ServiceCard key={service.id} service={service} />
+                                    <ServiceCard key={service.id} service={service} locale={locale} />
                                 ))
                             ) : (
                                 <div className="col-span-full py-12 text-center bg-card rounded-xl border border-dashed border-border">

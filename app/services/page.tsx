@@ -134,7 +134,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {services && services.length > 0 ? (
                     (services as ServiceWithOwner[]).map((service) => (
-                        <ServiceCard key={service.id} service={service} />
+                        <ServiceCard key={service.id} service={service} locale={locale} />
                     ))
                 ) : (
                     <div className="col-span-full">
