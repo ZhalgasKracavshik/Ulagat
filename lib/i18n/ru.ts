@@ -120,6 +120,7 @@ export const ru: Dictionary = {
         add: "Добавить",
         deleteTitle: "Удалить?",
         deleteIrreversible: "Это действие нельзя отменить.",
+        actionFailed: "Не удалось выполнить действие",
         // Названия ролей с заглавной буквы для отображения пользователям.
         roles: {
             student: "Ученик",
@@ -370,6 +371,8 @@ export const ru: Dictionary = {
         noParticipants: "Участников пока нет — зарегистрируйтесь первым!",
         loginToRegister: "Войдите, чтобы зарегистрироваться",
         shareEvent: "Поделиться",
+        confirmDelete: "Удалить мероприятие? Все регистрации участников будут удалены. Действие необратимо.",
+        linkCopied: "Ссылка скопирована",
         organizer: "Организатор",
         expires: "Истекает: {date}",
         unknownUser: "Неизвестный пользователь",
@@ -508,6 +511,7 @@ export const ru: Dictionary = {
         points: "Баллы",
         grade: "Класс {grade}",
         you: "Вы",
+        anonymousName: "Анонимный",
         yourPosition: "Ваша позиция",
         yourRank: "Вы на {rank} месте из {total}",
         unknown: "Неизвестно",
@@ -948,6 +952,7 @@ export const ru: Dictionary = {
         levelHint: "Баллы начисляются после того, как член парламента или модератор подтвердит достижение.",
         certificatePhoto: "Сертификат / фото (необязательно)",
         uploading: "Загрузка...",
+        uploadFailed: "Не удалось загрузить достижение. Попробуйте ещё раз.",
         save: "Сохранить достижение",
         tierSchool: "Школьный",
         tierCity: "Городской",

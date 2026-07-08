@@ -128,6 +128,7 @@ export const en: Dictionary = {
         add: "Add",
         deleteTitle: "Delete?",
         deleteIrreversible: "This action cannot be undone.",
+        actionFailed: "Action failed",
         // Capitalized role labels, used wherever a role is displayed to users.
         roles: {
             student: "Student",
@@ -385,6 +386,8 @@ export const en: Dictionary = {
         noParticipants: "No participants yet — be the first to register!",
         loginToRegister: "Login to Register",
         shareEvent: "Share Event",
+        confirmDelete: "Delete this event? All participant registrations will be removed. This cannot be undone.",
+        linkCopied: "Link copied",
         organizer: "Organizer",
         expires: "Expires: {date}",
         unknownUser: "Unknown user",
@@ -531,6 +534,7 @@ export const en: Dictionary = {
         points: "Points",
         grade: "Grade {grade}",
         you: "You",
+        anonymousName: "Anonymous",
         yourPosition: "Your position",
         yourRank: "You are #{rank} of {total}",
         unknown: "Unknown",
@@ -979,6 +983,7 @@ export const en: Dictionary = {
         levelHint: "Points are awarded after a parliament member or moderator verifies the achievement.",
         certificatePhoto: "Certificate / Photo (optional)",
         uploading: "Uploading...",
+        uploadFailed: "Could not upload the achievement. Please try again.",
         save: "Save Achievement",
         tierSchool: "School",
         tierCity: "City",

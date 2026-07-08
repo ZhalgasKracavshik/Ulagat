@@ -9,7 +9,6 @@ import {
     GraduationCap,
     Target,
     Pencil,
-    Trash2,
     CalendarClock,
     Sparkles,
     Building2,
@@ -35,7 +34,7 @@ import {
 import type { CareerTracker, CareerTarget, EntScores } from "@/types";
 import { AddTargetDialog } from "./AddTargetDialog";
 import { UniversityExplorer } from "./UniversityExplorer";
-import { deleteCareerTarget } from "./actions";
+import { DeleteCareerTargetButton } from "@/components/career/DeleteCareerTargetButton";
 
 export const dynamic = "force-dynamic";
 
@@ -453,20 +452,7 @@ export default async function CareerPage({
                                             </p>
                                         )}
                                     </div>
-                                    {!readOnly && (
-                                        <form action={deleteCareerTarget}>
-                                            <input type="hidden" name="target_id" value={target.id} />
-                                            <Button
-                                                type="submit"
-                                                variant="ghost"
-                                                size="icon"
-                                                className="text-muted-foreground hover:text-red-600 shrink-0"
-                                                aria-label={t("career.removeTarget")}
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </Button>
-                                        </form>
-                                    )}
+                                    {!readOnly && <DeleteCareerTargetButton targetId={target.id} />}
                                 </div>
                             );
                         })

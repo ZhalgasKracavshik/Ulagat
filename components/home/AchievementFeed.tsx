@@ -28,7 +28,7 @@ export function AchievementFeed({ items }: { items: FeedAchievement[] }) {
             <ul className="space-y-2">
                 {items.map((a) => {
                     const anon = a.author_anonymous;
-                    const name = anon ? anonymousPseudonym(a.user_id) : a.author_name;
+                    const name = anon ? anonymousPseudonym(a.user_id, t("leaderboard.anonymousName")) : a.author_name;
                     return (
                         <li
                             key={a.id}

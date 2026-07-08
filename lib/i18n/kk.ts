@@ -120,6 +120,7 @@ export const kk: Dictionary = {
         add: "Қосу",
         deleteTitle: "Жою керек пе?",
         deleteIrreversible: "Бұл әрекетті қайтару мүмкін емес.",
+        actionFailed: "Әрекетті орындау мүмкін болмады",
         // Пайдаланушыларға көрсетілетін рөл атаулары (бас әріппен).
         roles: {
             student: "Оқушы",
@@ -370,6 +371,8 @@ export const kk: Dictionary = {
         noParticipants: "Қатысушылар әзірге жоқ — бірінші болып тіркеліңіз!",
         loginToRegister: "Тіркелу үшін кіріңіз",
         shareEvent: "Бөлісу",
+        confirmDelete: "Іс-шараны жою керек пе? Барлық тіркелулер жойылады. Әрекетті қайтару мүмкін емес.",
+        linkCopied: "Сілтеме көшірілді",
         organizer: "Ұйымдастырушы",
         expires: "Мерзімі бітеді: {date}",
         unknownUser: "Белгісіз пайдаланушы",
@@ -508,6 +511,7 @@ export const kk: Dictionary = {
         points: "Ұпайлар",
         grade: "{grade} сынып",
         you: "Сіз",
+        anonymousName: "Жасырын",
         yourPosition: "Сіздің орныңыз",
         yourRank: "Сіз {total} ішінен {rank} орындасыз",
         unknown: "Белгісіз",
@@ -948,6 +952,7 @@ export const kk: Dictionary = {
         levelHint: "Ұпайлар парламент мүшесі немесе модератор жетістікті растағаннан кейін беріледі.",
         certificatePhoto: "Сертификат / фото (міндетті емес)",
         uploading: "Жүктелуде...",
+        uploadFailed: "Жетістікті жүктеу мүмкін болмады. Қайталап көріңіз.",
         save: "Жетістікті сақтау",
         tierSchool: "Мектеп",
         tierCity: "Қала",

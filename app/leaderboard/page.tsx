@@ -139,7 +139,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
                         const isAnonymous = Boolean(user.leaderboard_anonymous);
                         const isMe = currentUserId !== null && user.id === currentUserId;
                         const displayName = isAnonymous
-                            ? anonymousPseudonym(user.id)
+                            ? anonymousPseudonym(user.id, t('leaderboard.anonymousName'))
                             : user.full_name || t('leaderboard.unknown');
 
                         const identity = (

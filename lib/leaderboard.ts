@@ -25,12 +25,15 @@ export const ANONYMOUS_ANIMALS = [
 
 /**
  * Deterministic pseudonym for a user id — the same user always maps to the
- * same animal, but the mapping cannot be trivially reversed to a name.
+ * same animal, but the mapping cannot be trivially reversed to a name. The
+ * prefix is passed in localized (e.g. "Анонимный" / "Anonymous") so ru/kk
+ * users don't see an English word mid-page; defaults to English for callers
+ * without locale context.
  */
-export function anonymousPseudonym(userId: string): string {
+export function anonymousPseudonym(userId: string, prefix = "Anonymous"): string {
     let hash = 0;
     for (let i = 0; i < userId.length; i++) {
         hash = (hash * 31 + userId.charCodeAt(i)) >>> 0;
     }
-    return `Anonymous ${ANONYMOUS_ANIMALS[hash % ANONYMOUS_ANIMALS.length]}`;
+    return `${prefix} ${ANONYMOUS_ANIMALS[hash % ANONYMOUS_ANIMALS.length]}`;
 }

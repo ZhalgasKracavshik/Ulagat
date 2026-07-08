@@ -65,6 +65,7 @@ export function AchievementsSection({ achievements, isOwner, reactionsById }: Ac
     const { t } = useT();
     const [showForm, setShowForm] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
     const fileRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
@@ -80,6 +81,7 @@ export function AchievementsSection({ achievements, isOwner, reactionsById }: Ac
 
     async function handleSubmit(formData: FormData) {
         setLoading(true);
+        setError(null);
         try {
             const res = await fetch("/api/achievements", {
                 method: "POST",
@@ -89,9 +91,14 @@ export function AchievementsSection({ achievements, isOwner, reactionsById }: Ac
                 setShowForm(false);
                 setPreview(null);
                 router.refresh();
+            } else {
+                // Surface the failure instead of silently doing nothing.
+                const data = await res.json().catch(() => null);
+                setError(data?.error || t("achievementsSection.uploadFailed"));
             }
         } catch (err) {
             console.error(err);
+            setError(t("achievementsSection.uploadFailed"));
         } finally {
             setLoading(false);
         }
@@ -192,6 +199,9 @@ export function AchievementsSection({ achievements, isOwner, reactionsById }: Ac
                                 )}
                             </div>
 
+                            {error && (
+                                <p className="text-sm text-red-600" role="alert">{error}</p>
+                            )}
                             <Button type="submit" size="sm" disabled={loading} className="w-full bg-amber-600 hover:bg-amber-700">
                                 {loading ? t('achievementsSection.uploading') : t('achievementsSection.save')}
                             </Button>

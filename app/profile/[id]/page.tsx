@@ -15,6 +15,7 @@ import { PersonalCabinet } from "@/components/profile/PersonalCabinet";
 import { verifyChain } from "@/lib/reputation";
 import { aggregateReactions } from "@/lib/achievements/feed";
 import { AttendanceSection } from "@/components/profile/AttendanceSection";
+import { formatDateLocalized } from "@/lib/format-date";
 import type { AchievementReactions, SkudEvent } from "@/types";
 import { resolvePlan } from "@/lib/subscription-plan";
 import { cookies } from "next/headers";
@@ -425,7 +426,7 @@ export default async function ProfilePage({ params }: PageProps) {
                                             <p className="text-sm text-muted-foreground line-clamp-2">{event.description}</p>
                                             <div className="mt-4 flex flex-wrap gap-2">
                                                 <Badge variant="secondary">{event.location}</Badge>
-                                                <Badge variant="outline">{new Date(event.event_date).toLocaleDateString()}</Badge>
+                                                <Badge variant="outline">{formatDateLocalized(event.event_date, locale)}</Badge>
                                             </div>
                                         </CardContent>
                                     </Card>

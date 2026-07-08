@@ -5,11 +5,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, MapPin, Trophy, ArrowLeft, Share2, Users } from "lucide-react";
+import { Calendar, MapPin, Trophy, ArrowLeft, Users } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { formatDateTimeLocalized } from "@/lib/format-date";
 import { EventRegistrationButton } from "@/components/events/EventRegistrationButton";
+import { ShareEventButton } from "@/components/events/ShareEventButton";
+import { DeleteEventButton } from "@/components/events/DeleteEventButton";
 import { almatyTodayIso } from "@/lib/schedule/almaty-time";
 import {
     DEFAULT_LOCALE,
@@ -138,15 +140,7 @@ export default async function EventDetailsPage({ params }: PageProps) {
                                     {t('events.expires', { date: new Date(event.expires_at).toLocaleDateString() })}
                                 </div>
                             )}
-                            <form action={async () => {
-                                "use server";
-                                const { deleteEvent } = await import("../actions");
-                                await deleteEvent(id);
-                            }}>
-                                <Button variant="destructive" size="sm" className="shadow-lg">
-                                    {t('events.deleteEvent')}
-                                </Button>
-                            </form>
+                            <DeleteEventButton id={id} />
                         </div>
                     )}
                 </div>
@@ -224,9 +218,7 @@ export default async function EventDetailsPage({ params }: PageProps) {
                                     </Button>
                                 </Link>
                             )}
-                            <Button variant="outline" className="w-full">
-                                <Share2 className="w-4 h-4 mr-2" /> {t('events.shareEvent')}
-                            </Button>
+                            <ShareEventButton title={event.title} />
                         </CardContent>
                     </Card>
 

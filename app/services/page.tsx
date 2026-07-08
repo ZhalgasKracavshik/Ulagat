@@ -19,6 +19,7 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
     const supabase = await createClient();
     const params = await searchParams;
     const categoryFilter = typeof params?.category === 'string' ? params.category : null;
+    const searchQuery = typeof params?.q === 'string' ? params.q.trim() : '';
     const submitted = Boolean(params?.submitted || params?.payment_success);
 
     const cookieStore = await cookies();
@@ -47,6 +48,12 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
         // For now, let's assume 'category' column exists or use description search if not.
         // Wait, I recall schema.sql had 'category' TEXT NOT NULL.
         query = query.eq('category', categoryFilter);
+    }
+
+    // Title search. supabase-js parameterizes the pattern, so this is injection
+    // safe; % / _ in the input act as wildcards, which is fine for search.
+    if (searchQuery) {
+        query = query.ilike('title', `%${searchQuery}%`);
     }
 
     const { data: services } = await query;
@@ -104,14 +111,23 @@ export default async function ServicesPage({ searchParams }: { searchParams: Pro
                     ))}
                 </div>
 
-                <div className="flex items-center gap-2 w-full md:w-auto bg-muted rounded-full px-3 py-1">
-                    <Search className="w-4 h-4 text-muted-foreground" />
+                <form
+                    action="/services"
+                    method="get"
+                    className="flex items-center gap-2 w-full md:w-auto bg-muted rounded-full px-3 py-1"
+                >
+                    {categoryFilter && <input type="hidden" name="category" value={categoryFilter} />}
+                    <button type="submit" aria-label={t('servicesList.searchPlaceholder')} className="shrink-0">
+                        <Search className="w-4 h-4 text-muted-foreground" />
+                    </button>
                     <Input
                         type="text"
+                        name="q"
+                        defaultValue={searchQuery}
                         placeholder={t('servicesList.searchPlaceholder')}
                         className="border-0 bg-transparent focus-visible:ring-0 h-8 w-full md:w-[200px]"
                     />
-                </div>
+                </form>
             </div>
 
             {/* Grid */}

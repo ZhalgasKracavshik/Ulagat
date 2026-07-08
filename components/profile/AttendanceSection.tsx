@@ -5,28 +5,31 @@ import { useT } from "@/hooks/useT";
 import type { SkudEvent } from "@/types";
 
 const ALMATY_TZ = "Asia/Almaty";
+const LOCALE_TAG: Record<string, string> = { ru: "ru-RU", kk: "kk-KZ", en: "en-US" };
 
+// Stable day bucket key — locale-independent (never shown to the user).
 function dayKey(iso: string): string {
     return new Intl.DateTimeFormat("en-CA", {
         timeZone: ALMATY_TZ, year: "numeric", month: "2-digit", day: "2-digit",
     }).format(new Date(iso));
 }
 
-function timeLabel(iso: string): string {
-    return new Intl.DateTimeFormat("ru-RU", {
+function timeLabel(iso: string, tag: string): string {
+    return new Intl.DateTimeFormat(tag, {
         timeZone: ALMATY_TZ, hour: "2-digit", minute: "2-digit",
     }).format(new Date(iso));
 }
 
-function dayLabel(key: string): string {
-    return new Intl.DateTimeFormat("ru-RU", {
+function dayLabel(key: string, tag: string): string {
+    return new Intl.DateTimeFormat(tag, {
         timeZone: ALMATY_TZ, weekday: "short", day: "numeric", month: "long",
     }).format(new Date(`${key}T12:00:00+05:00`));
 }
 
 /** Parents-only view of the child's turnstile history (last 14 days). */
 export function AttendanceSection({ events }: { events: SkudEvent[] }) {
-    const { t } = useT();
+    const { t, locale } = useT();
+    const tag = LOCALE_TAG[locale] ?? "ru-RU";
 
     if (events.length === 0) {
         return (
@@ -50,7 +53,7 @@ export function AttendanceSection({ events }: { events: SkudEvent[] }) {
             {[...byDay.entries()].map(([day, list]) => (
                 <div key={day} className="rounded-xl border border-border bg-card p-4">
                     <h4 className="mb-2 text-sm font-semibold capitalize text-foreground">
-                        {dayLabel(day)}
+                        {dayLabel(day, tag)}
                     </h4>
                     <ul className="space-y-1.5">
                         {list
@@ -64,7 +67,7 @@ export function AttendanceSection({ events }: { events: SkudEvent[] }) {
                                         <LogOut className="h-4 w-4 text-orange-500" />
                                     )}
                                     <span className="font-medium tabular-nums">
-                                        {timeLabel(e.recorded_at)}
+                                        {timeLabel(e.recorded_at, tag)}
                                     </span>
                                     <span className="text-muted-foreground">
                                         {e.direction === "in" ? t("skud.in") : t("skud.out")}
