@@ -2,11 +2,12 @@
 "use client";
 
 import { ReputationBlock } from "@/types";
-import { formatDistanceToNow } from "date-fns"; // Check if date-fns is installed. If not, I'll use native formatting.
 import { Box, Hash, Clock, Award } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
+import { formatDateTimeLocalized } from "@/lib/format-date";
+import { useT } from "@/hooks/useT";
 
 interface BlockCardProps {
     block: ReputationBlock;
@@ -14,6 +15,7 @@ interface BlockCardProps {
 }
 
 export function BlockCard({ block, index }: BlockCardProps) {
+    const { locale } = useT();
     // Simple hash shortener
     const shortHash = (hash: string) => `${hash.slice(0, 8)}...${hash.slice(-8)}`;
 
@@ -73,7 +75,7 @@ export function BlockCard({ block, index }: BlockCardProps) {
 
                     <div className="flex items-center text-xs text-muted-foreground mt-2">
                         <Clock className="w-3 h-3 mr-1" />
-                        {new Date(block.created_at).toLocaleString()}
+                        {formatDateTimeLocalized(block.created_at, locale)}
                     </div>
                 </CardContent>
             </Card>

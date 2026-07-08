@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Plus, Users2 } from "lucide-react";
 import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
+import { formatRelativeLocalized } from "@/lib/format-date";
 import {
     DEFAULT_LOCALE,
     LOCALE_COOKIE,
@@ -150,7 +150,7 @@ export default async function MessagesPage() {
                                                 <div className="flex justify-between items-start">
                                                     <h3 className="font-bold text-foreground truncate">{participant?.full_name || t('messages.unknownUser')}</h3>
                                                     <span className="text-[11px] text-muted-foreground whitespace-nowrap ml-2">
-                                                        {formatDistanceToNow(new Date(conv.updated_at), { addSuffix: true })}
+                                                        {formatRelativeLocalized(conv.updated_at, locale)}
                                                     </span>
                                                 </div>
                                                 <p className="text-sm text-muted-foreground truncate">
