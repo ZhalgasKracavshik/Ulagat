@@ -578,6 +578,7 @@ export const en: Dictionary = {
         loginPrompt: "to view messages.",
         login: "Log in",
         typeMessage: "Type a message…",
+        send: "Send",
         activeNow: "Active now",
         conversationNotFound: "Conversation not found",
         groupNotFound: "Group not found.",
@@ -1015,6 +1016,7 @@ export const en: Dictionary = {
         vk: "VK",
         other: "Other",
         add: "Add Social Link",
+        removeLink: "Remove link",
         empty: 'No social links yet. Click "Add Social Link" to get started.',
     },
     avatarUpload: {

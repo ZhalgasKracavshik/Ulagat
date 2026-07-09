@@ -555,6 +555,7 @@ export const kk: Dictionary = {
         loginPrompt: "хабарларды көру үшін.",
         login: "Кіріңіз",
         typeMessage: "Хабарлама жазыңыз…",
+        send: "Жіберу",
         activeNow: "Желіде",
         conversationNotFound: "Әңгіме табылмады",
         groupNotFound: "Топ табылмады.",
@@ -984,6 +985,7 @@ export const kk: Dictionary = {
         vk: "VK",
         other: "Басқа",
         add: "Сілтеме қосу",
+        removeLink: "Сілтемені жою",
         empty: 'Әлеуметтік желі сілтемелері әзірге жоқ. Бастау үшін «Сілтеме қосу» түймесін басыңыз.',
     },
     avatarUpload: {

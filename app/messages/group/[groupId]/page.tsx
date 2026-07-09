@@ -134,7 +134,7 @@ export default async function GroupChatPage({ params }: PageProps) {
                     autoComplete="off"
                     required
                 />
-                <Button type="submit" size="icon" className="bg-indigo-600 hover:bg-indigo-700">
+                <Button type="submit" size="icon" className="bg-indigo-600 hover:bg-indigo-700" aria-label={t('messages.send')}>
                     <Send className="w-4 h-4" />
                 </Button>
             </form>

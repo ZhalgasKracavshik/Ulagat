@@ -142,7 +142,7 @@ export function AchievementsSection({ achievements, isOwner, reactionsById }: Ac
                 <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-950/50">
                     <CardHeader className="pb-2 flex flex-row items-center justify-between">
                         <CardTitle className="text-sm">{t('achievementsSection.newAchievement')}</CardTitle>
-                        <Button variant="ghost" size="icon" onClick={() => { setShowForm(false); setPreview(null); }}>
+                        <Button variant="ghost" size="icon" onClick={() => { setShowForm(false); setPreview(null); }} aria-label={t('common.cancel')}>
                             <X className="w-4 h-4" />
                         </Button>
                     </CardHeader>

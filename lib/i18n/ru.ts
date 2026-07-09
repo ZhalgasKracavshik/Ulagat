@@ -555,6 +555,7 @@ export const ru: Dictionary = {
         loginPrompt: "чтобы просматривать сообщения.",
         login: "Войдите",
         typeMessage: "Введите сообщение…",
+        send: "Отправить",
         activeNow: "В сети",
         conversationNotFound: "Разговор не найден",
         groupNotFound: "Группа не найдена.",
@@ -984,6 +985,7 @@ export const ru: Dictionary = {
         vk: "VK",
         other: "Другое",
         add: "Добавить ссылку",
+        removeLink: "Удалить ссылку",
         empty: 'Ссылок на соцсети пока нет. Нажмите «Добавить ссылку», чтобы начать.',
     },
     avatarUpload: {

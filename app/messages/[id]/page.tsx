@@ -110,7 +110,7 @@ export default async function ChatPage({ params }: PageProps) {
                     autoComplete="off"
                     required
                 />
-                <Button type="submit" size="icon">
+                <Button type="submit" size="icon" aria-label={t('messages.send')}>
                     <Send className="w-4 h-4" />
                 </Button>
             </form>

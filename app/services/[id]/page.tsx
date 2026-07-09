@@ -10,6 +10,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ReviewSection } from "@/components/services/ReviewSection";
 import { ContactTutorButton } from "@/components/shared/ContactTutorButton";
+import { DeleteServiceButton } from "@/components/services/DeleteServiceButton";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, getDictionary, isLocale, resolveKey } from "@/lib/i18n";
 
 interface PageProps {
@@ -86,15 +87,9 @@ export default async function ServiceDetailsPage({ params }: PageProps) {
                                 {service.price > 0 ? `${service.price} ₸` : t('serviceDetail.free')}
                             </div>
                             {(user?.id === service.owner_id || ['admin', 'moderator'].includes(profile?.role)) && (
-                                <form action={async () => {
-                                    "use server";
-                                    const { deleteService } = await import("../actions");
-                                    await deleteService(id);
-                                }} className="mt-2">
-                                    <Button variant="ghost" size="sm" className="text-destructive hover:bg-red-50 hover:text-red-700">
-                                        {t('serviceDetail.deleteService')}
-                                    </Button>
-                                </form>
+                                <div className="mt-2">
+                                    <DeleteServiceButton id={id} />
+                                </div>
                             )}
                         </div>
                     </div>

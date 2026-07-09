@@ -237,6 +237,7 @@ export function UsersManagementTable({ users, currentUserId }: UsersManagementTa
                                                 className="h-7 w-7"
                                                 onClick={() => handleSkudSave(user.id)}
                                                 disabled={loadingSkud[user.id]}
+                                                aria-label={t('common.save')}
                                             >
                                                 {loadingSkud[user.id] ? (
                                                     <Loader2 className="w-3 h-3 animate-spin" />
@@ -249,6 +250,7 @@ export function UsersManagementTable({ users, currentUserId }: UsersManagementTa
                                                 variant="ghost"
                                                 className="h-7 w-7"
                                                 onClick={() => handleSkudCancel(user.id)}
+                                                aria-label={t('common.cancel')}
                                             >
                                                 <X className="w-3 h-3 text-red-500" />
                                             </Button>
