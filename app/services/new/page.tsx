@@ -2,6 +2,7 @@
 import { createService } from "../actions";
 import { ImageUpload } from "@/components/shared/ImageUpload";
 import { Button } from "@/components/ui/button";
+import { InteractiveButton } from "@/components/shared/InteractiveButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -131,9 +132,9 @@ export default async function NewServicePage() {
                                 <p className="text-xs text-muted-foreground text-right italic">{t('serviceNew.descriptionHint')}</p>
                             </div>
 
-                            <Button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-lg h-14 rounded-xl shadow-lg transition-all active:scale-[0.98] mt-4">
+                            <InteractiveButton type="submit" loadingText={t('serviceNew.submitting')} className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-lg h-14 rounded-xl shadow-lg transition-all active:scale-[0.98] mt-4">
                                 {t('serviceNew.submit')}
-                            </Button>
+                            </InteractiveButton>
                         </form>
                     </CardContent>
                 </Card>

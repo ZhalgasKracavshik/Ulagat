@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { createClub } from "@/app/clubs/actions";
 import { ImageUpload } from "@/components/shared/ImageUpload";
-import { Button } from "@/components/ui/button";
+import { InteractiveButton } from "@/components/shared/InteractiveButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -109,9 +109,9 @@ export function ClubCreateForm({
                 </div>
             </div>
 
-            <Button type="submit" className="mt-2 h-14 w-full rounded-xl bg-violet-600 text-lg font-bold text-white shadow-lg transition-all hover:bg-violet-700 active:scale-[0.98]">
+            <InteractiveButton type="submit" loadingText={t("clubNew.creating")} className="mt-2 h-14 w-full rounded-xl bg-violet-600 text-lg font-bold text-white shadow-lg transition-all hover:bg-violet-700 active:scale-[0.98]">
                 {t("clubNew.createClub")}
-            </Button>
+            </InteractiveButton>
 
             {/* Category bottom sheet */}
             <Sheet open={categoryOpen} onOpenChange={setCategoryOpen}>

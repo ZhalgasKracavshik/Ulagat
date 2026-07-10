@@ -440,6 +440,7 @@ export const kk: Dictionary = {
         subtitle:
             "Бірдеңе жоғалттыңыз ба? Таптыңыз ба? Осында жариялап, заттарды иесіне қайтарыңыз.",
         postItem: "Жариялау",
+        posting: "Жариялануда…",
         searchPlaceholder: "Атауы бойынша іздеу…",
         search: "Іздеу",
         statusLabel: "Күйі",
@@ -663,6 +664,7 @@ export const kk: Dictionary = {
         descriptionPlaceholder: "Үйірмеңіз немен айналысады? Қашан кездесесіздер? Кімге қосылған дұрыс?",
         logoLabel: "Үйірме логотипі (міндетті емес)",
         createClub: "Үйірме құру",
+        creating: "Құрылуда…",
     },
     clubLeaderboard: {
         title: "Үйірмелер рейтингі",
@@ -818,6 +820,7 @@ export const kk: Dictionary = {
         descriptionLabel: "Сипаттама және ережелер",
         descriptionPlaceholder: "Іс-шараны, ережелерді және жүлделерді сипаттаңыз...",
         publish: "Іс-шараны жариялау",
+        publishing: "Жариялануда…",
     },
     announcementNew: {
         accessDeniedBody: "Хабарландыруларды тек модераторлар мен әкімшілер жариялай алады.",
@@ -848,6 +851,7 @@ export const kk: Dictionary = {
         descriptionPlaceholder: "Үй тапсырмасы мен емтиханға дайындалуға көмектесемін. Дс–Ср 15:00-ден кейін бос боламын.",
         descriptionHint: "Кестені, тәжірибені және не кіретінін көрсетіңіз.",
         submit: "Тексеруге жіберу",
+        submitting: "Жіберілуде…",
     },
     serviceCat: {
         tutoring: "Репетиторлық",

@@ -663,6 +663,7 @@ export const ru: Dictionary = {
         descriptionPlaceholder: "Чем занимается ваш кружок? Когда вы встречаетесь? Кому стоит вступить?",
         logoLabel: "Логотип кружка (необязательно)",
         createClub: "Создать кружок",
+        creating: "Создание…",
     },
     clubLeaderboard: {
         title: "Рейтинг кружков",
@@ -709,6 +710,7 @@ export const ru: Dictionary = {
         descriptionPlaceholder: "Любые отличительные детали — цвет, бренд, наклейки, содержимое…",
         photoLabel: "Фото (необязательно)",
         postItem: "Опубликовать",
+        posting: "Публикация…",
     },
     lostFoundClaim: {
         thisIsMine: "Это моё!",
@@ -818,6 +820,7 @@ export const ru: Dictionary = {
         descriptionLabel: "Описание и правила",
         descriptionPlaceholder: "Опишите мероприятие, правила и призы...",
         publish: "Опубликовать мероприятие",
+        publishing: "Публикация…",
     },
     announcementNew: {
         accessDeniedBody: "Публиковать объявления могут только модераторы и администраторы.",
@@ -848,6 +851,7 @@ export const ru: Dictionary = {
         descriptionPlaceholder: "Помогу с домашними заданиями и подготовкой к экзаменам. Доступен пн–ср после 15:00.",
         descriptionHint: "Укажите расписание, опыт и что входит в услугу.",
         submit: "Отправить на проверку",
+        submitting: "Отправка…",
     },
     serviceCat: {
         tutoring: "Репетиторство",

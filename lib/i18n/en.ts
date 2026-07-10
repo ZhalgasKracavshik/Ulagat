@@ -459,6 +459,7 @@ export const en: Dictionary = {
         subtitle:
             "Lost something? Found something? Post it here and reunite items with their owners.",
         postItem: "Post Item",
+        posting: "Posting…",
         searchPlaceholder: "Search by title…",
         search: "Search",
         statusLabel: "Status",
@@ -690,6 +691,7 @@ export const en: Dictionary = {
         descriptionPlaceholder: "What does your club do? When do you meet? Who should join?",
         logoLabel: "Club Logo (optional)",
         createClub: "Create Club",
+        creating: "Creating…",
     },
     clubLeaderboard: {
         title: "Club Leaderboard",
@@ -848,6 +850,7 @@ export const en: Dictionary = {
         descriptionLabel: "Description & Rules",
         descriptionPlaceholder: "Describe the event, rules, and prizes...",
         publish: "Publish Event",
+        publishing: "Publishing…",
     },
     announcementNew: {
         accessDeniedBody: "Only moderators and admins can publish announcements.",
@@ -878,6 +881,7 @@ export const en: Dictionary = {
         descriptionPlaceholder: "I can help with homework and exam prep. Available Mon-Wed after 3 PM.",
         descriptionHint: "Include schedule, experience, and what's included.",
         submit: "Submit for Review",
+        submitting: "Submitting…",
     },
     serviceCat: {
         tutoring: "Tutoring",

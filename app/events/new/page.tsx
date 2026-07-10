@@ -2,6 +2,7 @@
 import { createEvent } from "../actions";
 import { ImageUpload } from "@/components/shared/ImageUpload";
 import { Button } from "@/components/ui/button";
+import { InteractiveButton } from "@/components/shared/InteractiveButton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -148,9 +149,9 @@ export default async function NewEventPage() {
                                 />
                             </div>
 
-                            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg h-14 rounded-xl shadow-lg transition-all active:scale-[0.98] mt-4">
+                            <InteractiveButton type="submit" loadingText={t('eventNew.publishing')} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg h-14 rounded-xl shadow-lg transition-all active:scale-[0.98] mt-4">
                                 {t('eventNew.publish')}
-                            </Button>
+                            </InteractiveButton>
                         </form>
                     </CardContent>
                 </Card>
